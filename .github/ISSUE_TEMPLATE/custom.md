@@ -1,7 +1,7 @@
 ---
 name: Custom issue template
 about: 공통 이슈 템플릿
-title: '[OV-]'
+title: '[ET-]'
 labels: ''
 assignees: ''
 

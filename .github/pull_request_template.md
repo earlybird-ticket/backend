@@ -1,3 +1,12 @@
+---
+name: PR template
+about: PR 템플릿
+title: "[ET-]"
+labels: enhancement
+assignees: ''
+
+---
+
 ## 변경 타입
 
 - [ ] 신규 기능 추가/수정
