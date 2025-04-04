@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.earlybirdticket.common.configuration.JpaConfig,\
+com.earlybirdticket.common.configuration.QueryDslConfig
