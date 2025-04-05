@@ -1,0 +1,14 @@
+server:
+  port: ${EUREKA_PORT}
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: eureka
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:18080}/eureka
+    fetch-registry: false
+    register-with-eureka: false
