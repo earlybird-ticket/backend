@@ -1,0 +1,30 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: auth-service
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 5000
+            logger-level: basic
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:18080}/eureka
+
+
+server:
+  port: ${AUTH_SERVER_PORT:18082}
+
+
+jwt:
+  secret: ${AUTH_JWT_SECRET}
+  access:
+    exp: ${AUTH_JWT_ACCESS_EXP}
+  refresh:
+    exp: ${AUTH_JWT_REFRESH_EXP}
