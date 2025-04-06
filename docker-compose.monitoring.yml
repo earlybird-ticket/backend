@@ -1,0 +1,38 @@
+# docker-compose -f docker-compose.monitoring.yml up -d
+services:
+  earlybird-prometheus:
+    image: prom/prometheus
+    container_name: earlybird-prometheus
+    networks:
+      - earlybird_network
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: always
+
+  earlybird-grafana:
+    image: grafana/grafana
+    container_name: earlybird-grafana
+    networks:
+      - earlybird_network
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    depends_on:
+      - prometheus
+    restart: always
+
+  earlybird-zipkin:
+    image: openzipkin/zipkin
+    container_name: earlybird-zipkin
+    networks:
+      - earlybird_network
+    ports:
+      - "${ZIPKIN_PORT}:9411"
+    restart: always  # 선택사항: 실패 시 자동 재시작
+
+volumes:
+  prometheus_data:
+networks:
+  earlybird_network:
+    driver: bridge
