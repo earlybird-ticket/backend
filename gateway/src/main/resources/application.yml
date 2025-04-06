@@ -1,0 +1,67 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 60s
+        pool:
+          max-connections: 5000
+          acquire-timeout: 6000
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: auth-service # ✅
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - RewritePath=/api/v1/auth/(?<segment>.*), /api/v1/external/auth/$\{segment}
+
+eureka:
+  instance:
+    metadataMap:
+      prometheus.scrape: "true"
+      prometheus.path: "/actuator/prometheus"
+      prometheus.port: "${server.port}"
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:18080}/eureka
+
+server:
+  port: ${GATEWAY_SERVER_PORT}
+  netty:
+    connection-timeout: 5s
+  jetty:
+    max-connections: 500
+  tomcat:
+    threads:
+      max: 500
+      min-spare: 500
+    max-connections: 1000
+    accept-count: 500
+
+jwt:
+  secret: ${AUTH_JWT_SECRET}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh,health,beans,busrefresh,info,metrics,prometheus
+  zipkin:
+    tracing:
+      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
+  tracing:
+    sampling:
+      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
+
+logging:
+  level:
+    org:
+      springframework:
+        security: info # 필요에 따라 제거하셔도 됩니다!
