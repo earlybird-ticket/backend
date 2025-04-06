@@ -2,3 +2,5 @@ rootProject.name = 'earlybird-ticket'
 
 include 'common'
 include 'venue'
+include 'payment'
+include 'auth'
