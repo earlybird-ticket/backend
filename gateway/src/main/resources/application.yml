@@ -1,4 +1,8 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true # WebFluxSecurityConfiguration 빈이 Common과 겹쳐 Override
+    web-application-type: reactive # Spring MVC 사용하지 않도록 변경
+
   config:
     import: optional:file:.env[.properties]
   application:
