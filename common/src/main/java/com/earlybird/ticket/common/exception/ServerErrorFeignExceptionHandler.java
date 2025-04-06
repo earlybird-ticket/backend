@@ -1,7 +1,7 @@
 package com.earlybird.ticket.common.exception;
 
 import com.earlybird.ticket.common.entity.CommonDto;
-import com.earlybird.ticket.common.entity.constant.ErrorCode;
+import com.earlybird.ticket.common.entity.constant.Code;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +17,12 @@ public class ServerErrorFeignExceptionHandler implements FeignExceptionHandlerSt
 
     @Override
     public ResponseEntity<CommonDto<Void>> handleException(FeignException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                CommonDto.<Void>builder()
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .code(ErrorCode.FEIGN_INTERNAL_SERVER_ERROR.value())
-                        .message("서버 오류가 발생했습니다: " + e.getMessage())
-                        .data(null)
-                        .build()
-        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                             .body(CommonDto.<Void>builder()
+                                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                            .code(Code.FEIGN_INTERNAL_SERVER_ERROR.value())
+                                            .message("서버 오류가 발생했습니다: " + e.getMessage())
+                                            .data(null)
+                                            .build());
     }
 }
