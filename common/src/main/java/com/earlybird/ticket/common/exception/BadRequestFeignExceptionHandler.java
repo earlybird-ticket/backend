@@ -1,7 +1,7 @@
 package com.earlybird.ticket.common.exception;
 
 import com.earlybird.ticket.common.entity.CommonDto;
-import com.earlybird.ticket.common.entity.constant.ErrorCode;
+import com.earlybird.ticket.common.entity.constant.Code;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +17,12 @@ public class BadRequestFeignExceptionHandler implements FeignExceptionHandlerStr
 
     @Override
     public ResponseEntity<CommonDto<Void>> handleException(FeignException e) {
-        return ResponseEntity.badRequest().body(
-                CommonDto.<Void>builder()
-                        .status(HttpStatus.BAD_REQUEST)
-                        .code(ErrorCode.FEIGN_BAD_REQUEST.value())
-                        .message("잘못된 요청입니다: " + e.getMessage())
-                        .data(null)
-                        .build()
-        );
+        return ResponseEntity.badRequest()
+                             .body(CommonDto.<Void>builder()
+                                            .status(HttpStatus.BAD_REQUEST)
+                                            .code(Code.FEIGN_BAD_REQUEST.value())
+                                            .message("잘못된 요청입니다: " + e.getMessage())
+                                            .data(null)
+                                            .build());
     }
 }
