@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class KafkaVenueEventListener {
+public class VenueKafkaEventListener {
     private final EventDispatcher eventDispatcher;
 
     @KafkaListener(topics = {
