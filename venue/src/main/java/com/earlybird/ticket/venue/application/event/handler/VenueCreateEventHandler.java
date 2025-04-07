@@ -1,0 +1,26 @@
+package com.earlybird.ticket.venue.application.event.handler;
+
+import com.earlybird.ticket.venue.application.event.Event;
+import com.earlybird.ticket.venue.application.event.EventType;
+import com.earlybird.ticket.venue.application.event.dto.request.VenueCreatePayload;
+import com.earlybird.ticket.venue.application.service.VenueService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class VenueCreateEventHandler implements EventHandler<VenueCreatePayload> {
+
+    private final VenueService venueService;
+
+    @Override
+    public void handle(Event<VenueCreatePayload> event) {
+        //consumer 로직 작성
+        //venueService.create();
+    }
+
+    @Override
+    public boolean support(Event<VenueCreatePayload> event) {
+        return event.getEventType().equals(EventType.VENUE_CREATE);
+    }
+}
