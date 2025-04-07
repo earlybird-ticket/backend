@@ -1,0 +1,134 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true # WebFluxSecurityConfiguration 빈이 Common과 겹쳐 Override
+    web-application-type: reactive # Spring MVC 사용하지 않도록 변경
+
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 60s
+        pool:
+          max-connections: 5000
+          acquire-timeout: 6000
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: auth-service # ✅
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - RewritePath=/api/v1/auth/(?<segment>.*), /api/v1/external/auth/$\{segment}
+
+        - id: admin-service # ✅
+          uri: lb://admin-service
+          predicates:
+            - Path=/api/v1/admin/**
+          filters:
+            - RewritePath=/api/v1/admin/(?<segment>.*), /api/v1/external/admin/$\{segment}
+
+        - id: user-service # ✅
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - RewritePath=/api/v1/users/(?<segment>.*), /api/v1/external/users/$\{segment}
+
+        - id: reservation-service # ✅
+          uri: lb://reservation-service
+          predicates:
+            - Path=/api/v1/reservations/**
+          filters:
+            - RewritePath=/api/v1/reservations/(?<segment>.*), /api/v1/external/reservations/$\{segment}
+
+        - id: concert-service # ✅
+          uri: lb://concert-service
+          predicates:
+            - Path=/api/v1/concerts/**
+          filters:
+            - RewritePath=/api/v1/concerts/(?<segment>.*), /api/v1/external/concerts/$\{segment}
+
+        - id: concert-sequence-service # ✅
+          uri: lb://concert-service
+          predicates:
+            - Path=/api/v1/concertsequence/**
+          filters:
+            - RewritePath=/api/v1/concertsequence/(?<segment>.*), /api/v1/external/concertsequence/$\{segment}
+
+        - id: coupon-service # ✅
+          uri: lb://coupon-service
+          predicates:
+            - Path=/api/v1/coupons/**
+          filters:
+            - RewritePath=/api/v1/coupons/(?<segment>.*), /api/v1/external/coupons/$\{segment}
+
+        - id: payment-service # ✅
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/v1/payments/**
+          filters:
+            - RewritePath=/api/v1/payments/(?<segment>.*), /api/v1/external/payments/$\{segment}
+
+        - id: venue-service # ✅
+          uri: lb://venue-service
+          predicates:
+            - Path=/api/v1/venues/**
+          filters:
+            - RewritePath=/api/v1/venues/(?<segment>.*), /api/v1/external/venues/$\{segment}
+
+        - id: seat-service # ✅
+          uri: lb://venue-service
+          predicates:
+            - Path=/api/v1/seats/**
+          filters:
+            - RewritePath=/api/v1/seats/(?<segment>.*), /api/v1/external/seats/$\{segment}
+
+eureka:
+  instance:
+    metadataMap:
+      prometheus.scrape: "true"
+      prometheus.path: "/actuator/prometheus"
+      prometheus.port: "${server.port}"
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:18080}/eureka
+
+server:
+  port: ${GATEWAY_SERVER_PORT}
+  netty:
+    connection-timeout: 5s
+  jetty:
+    max-connections: 500
+  tomcat:
+    threads:
+      max: 500
+      min-spare: 500
+    max-connections: 1000
+    accept-count: 500
+
+jwt:
+  secret: ${AUTH_JWT_SECRET}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh,health,beans,busrefresh,info,metrics,prometheus
+  zipkin:
+    tracing:
+      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
+  tracing:
+    sampling:
+      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
+
+logging:
+  level:
+    org:
+      springframework:
+        security: info # 필요에 따라 제거하셔도 됩니다!

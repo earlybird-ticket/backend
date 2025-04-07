@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum ErrorCode {
+public enum Code {
     ACCESS_TOKEN_EXPIRED("A01"),
     ACCESS_TOKEN_INVALID("A02"),
     ACCESS_TOKEN_NOT_FOUND("A03"),
@@ -23,11 +23,15 @@ public enum ErrorCode {
     FEIGN_NOT_FOUND("F02"),
     FEIGN_CONFLICT("F03"),
     FEIGN_UNAUTHORIZED("F04"),
-    FEIGN_INTERNAL_SERVER_ERROR("F05");
+    FEIGN_INTERNAL_SERVER_ERROR("F05"),
+
+    OK("E01"),
+    CREATED("E02"),
+    ACCEPTED("E03");
 
     private final String message;
 
-    public ErrorCode value() {
+    public Code value() {
         return this;
     }
 }
