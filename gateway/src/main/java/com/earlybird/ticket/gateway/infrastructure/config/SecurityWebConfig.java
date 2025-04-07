@@ -23,6 +23,10 @@ public class SecurityWebConfig {
                 NoOpServerSecurityContextRepository.getInstance()
             );
 
+        // TODO: JWT 관련 Maanger, Converter 연결
+
+
+        // TODO: 추후 권한별 분기 추가
         http.authorizeExchange(exchanges -> exchanges
 //                    .pathMatchers("api/v1/auth/**").permitAll()
                 .anyExchange().permitAll()
