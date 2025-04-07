@@ -13,13 +13,13 @@ import org.springframework.http.HttpStatus;
 public class CommonDto<T> {
 
     private HttpStatus status;
-    private Code code;
+    private String code;
     private String message;
     private T data;
 
     @Builder
     public CommonDto(HttpStatus status,
-                     Code code,
+                     String code,
                      String message,
                      T data) {
         this.status = status;
@@ -33,7 +33,7 @@ public class CommonDto<T> {
                                            String message) {
         return CommonDto.<T>builder()
                         .status(HttpStatus.CREATED)
-                        .code(Code.CREATED)
+                        .code(Code.CREATED.getCode())
                         .message(message)
                         .data(data)
                         .build();
@@ -43,7 +43,7 @@ public class CommonDto<T> {
                                       String message) {
         return CommonDto.<T>builder()
                         .status(HttpStatus.OK)
-                        .code(Code.OK)
+                        .code(Code.OK.getCode())
                         .message(message)
                         .data(data)
                         .build();
@@ -54,7 +54,7 @@ public class CommonDto<T> {
                                             String message) {
         return CommonDto.<T>builder()
                         .status(HttpStatus.ACCEPTED)
-                        .code(Code.ACCEPTED)
+                        .code(Code.ACCEPTED.getCode())
                         .message(message)
                         .data(data)
                         .build();
@@ -63,8 +63,8 @@ public class CommonDto<T> {
     public static <T> CommonDto<T> fail(Code code,
                                         String message) {
         return CommonDto.<T>builder()
-                        .status(HttpStatus.BAD_REQUEST)
-                        .code(code)
+                        .status(code.getHttpStatus())
+                        .code(code.getCode())
                         .message(message)
                         .build();
     }
