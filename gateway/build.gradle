@@ -28,6 +28,7 @@ ext {
 }
 
 dependencies {
+    implementation project(':common')
     // JWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
