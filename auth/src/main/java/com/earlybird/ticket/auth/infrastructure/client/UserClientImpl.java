@@ -3,6 +3,9 @@ package com.earlybird.ticket.auth.infrastructure.client;
 import com.earlybird.ticket.auth.application.UserClient;
 import com.earlybird.ticket.auth.application.dto.commander.CreateSellerCommand;
 import com.earlybird.ticket.auth.application.dto.commander.CreateUserCommand;
+import com.earlybird.ticket.auth.application.dto.commander.JoinUserCommand;
+import com.earlybird.ticket.auth.application.dto.commander.UserInfoCommand;
+import com.earlybird.ticket.auth.infrastructure.dto.payload.UserInfoClientResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,5 +23,12 @@ public class UserClientImpl implements UserClient {
     @Override
     public void createSeller(CreateSellerCommand createSellerCommand) {
         userFeignClient.createSeller(createSellerCommand);
+    }
+
+    @Override
+    public UserInfoCommand getUserInfo(JoinUserCommand joinUserCommand) {
+
+        return UserInfoClientResponse.toUserInfoCommandDto(userFeignClient.getUserInfo(joinUserCommand)
+                                                                          .getData());
     }
 }
