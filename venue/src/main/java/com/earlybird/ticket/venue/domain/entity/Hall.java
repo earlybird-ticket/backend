@@ -19,4 +19,15 @@ public class Hall extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(name = "name", length = 50, nullable = false)
+    private String name;
+
+    @Column(name = "floor", columnDefinition = "TINYINT", nullable = false)
+    private Integer floor;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "venue_id", nullable = false)
+    private Venue venue;
+
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -18,4 +19,19 @@ public class Venue {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(name = "name", length = 50, nullable = false)
+    private String name;
+
+    @Column(name = "location", nullable = false)
+    private String location;
+
+    @Column(name = "area", length = 50, nullable = false)
+    private String area;
+
+    @Column(name = "total_number_of_seats")
+    private Integer totalNumberOfSeats;
+
+    @OneToMany(mappedBy = "venue", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    private Set<Hall> halls;
 }
