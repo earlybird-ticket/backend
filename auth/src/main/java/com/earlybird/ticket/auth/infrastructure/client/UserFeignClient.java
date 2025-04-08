@@ -5,8 +5,10 @@ import com.earlybird.ticket.auth.application.dto.commander.CreateUserCommand;
 import com.earlybird.ticket.auth.application.dto.commander.JoinUserCommand;
 import com.earlybird.ticket.auth.infrastructure.dto.payload.UserInfoClientResponse;
 import com.earlybird.ticket.common.entity.CommonDto;
+import com.earlybird.ticket.common.entity.PassportDto;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,4 +24,7 @@ public interface UserFeignClient {
 
     @GetMapping
     CommonDto<UserInfoClientResponse> getUserInfo(JoinUserCommand joinUserCommand);
+
+    @DeleteMapping
+    void withdraw(PassportDto passportDto);
 }

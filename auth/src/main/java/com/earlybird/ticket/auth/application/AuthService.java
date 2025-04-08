@@ -10,4 +10,6 @@ public interface AuthService {
     void createSeller(CreateSellerCommand createUserCommand);
 
     String join(JoinUserCommand joinUserCommand);
+
+    void withdraw(String passport);
 }

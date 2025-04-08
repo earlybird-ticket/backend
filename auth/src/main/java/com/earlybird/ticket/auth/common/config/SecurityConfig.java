@@ -20,7 +20,8 @@ public class SecurityConfig {
         http.logout(AbstractHttpConfigurer::disable);
         http.cors(AbstractHttpConfigurer::disable);
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        http.authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/external/**")
+        http.authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/external/**",
+                                                                "api/v1/internal/**")
                                                .permitAll()
                                                .anyRequest()
                                                .authenticated());

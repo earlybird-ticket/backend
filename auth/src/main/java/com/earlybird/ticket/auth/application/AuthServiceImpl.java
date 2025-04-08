@@ -5,8 +5,11 @@ import com.earlybird.ticket.auth.application.dto.commander.CreateUserCommand;
 import com.earlybird.ticket.auth.application.dto.commander.JoinUserCommand;
 import com.earlybird.ticket.auth.application.dto.commander.UserInfoCommand;
 import com.earlybird.ticket.auth.common.exception.AccountMismatchException;
+import com.earlybird.ticket.auth.common.exception.ReservationExistException;
 import com.earlybird.ticket.auth.common.exception.UserNotFoundException;
+import com.earlybird.ticket.common.entity.PassportDto;
 import com.earlybird.ticket.common.entity.constant.Role;
+import com.earlybird.ticket.common.util.PassportUtil;
 import feign.FeignException;
 import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +25,9 @@ import org.springframework.validation.annotation.Validated;
 public class AuthServiceImpl implements AuthService {
 
     private final UserClient userClient;
+    private final ReservationClient reservationClient;
     private final TokenProvider tokenProvider;
+    private final PassportUtil passportUtil;
 
     private static boolean validatePassword(JoinUserCommand joinUserCommand,
                                             PasswordEncoder passwordEncoder,
@@ -58,8 +63,6 @@ public class AuthServiceImpl implements AuthService {
                                       .role(Role.USER)
                                       .password(passwordEncoder.encode("1234"))
                                       .build();
-        } catch (FeignException.NotFound e) {
-            throw new UserNotFoundException();
         } catch (RetryableException e) {
             throw new UserNotFoundException();
         } catch (FeignException e) {
@@ -84,6 +87,23 @@ public class AuthServiceImpl implements AuthService {
         }
         throw new AccountMismatchException();
 
+    }
+
+    @Override
+    public void withdraw(String passport) {
+        PassportDto passportDto = passportUtil.getPassportDto(passport);
+
+        //예매내용이 있는지 확인
+        //1. 있다면 예외 발생
+        if (reservationClient.isExistUserReservation(passportDto)) {
+            throw new ReservationExistException();
+        }
+        try {
+            //2. 없다면 탈퇴 처리
+            userClient.withdraw(passportDto);
+        } catch (RetryableException e) {
+            throw new UserNotFoundException();
+        }
     }
 
 

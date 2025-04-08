@@ -6,6 +6,7 @@ import com.earlybird.ticket.auth.application.dto.commander.CreateUserCommand;
 import com.earlybird.ticket.auth.application.dto.commander.JoinUserCommand;
 import com.earlybird.ticket.auth.application.dto.commander.UserInfoCommand;
 import com.earlybird.ticket.auth.infrastructure.dto.payload.UserInfoClientResponse;
+import com.earlybird.ticket.common.entity.PassportDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,5 +31,10 @@ public class UserClientImpl implements UserClient {
 
         return UserInfoClientResponse.toUserInfoCommandDto(userFeignClient.getUserInfo(joinUserCommand)
                                                                           .getData());
+    }
+
+    @Override
+    public void withdraw(PassportDto passportDto) {
+        userFeignClient.withdraw(passportDto);
     }
 }
