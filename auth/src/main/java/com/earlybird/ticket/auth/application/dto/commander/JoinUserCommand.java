@@ -14,5 +14,10 @@ public record JoinUserCommand(@NotNull(message = "email is Necessary") String em
         this.password = password;
     }
 
+    public GetUserIdPasswordRoleCommand toGetUserEmailPasswordRoleCommand() {
+        return GetUserIdPasswordRoleCommand.builder()
+            .email(email)
+            .build();
+    }
 
 }

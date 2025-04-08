@@ -3,7 +3,7 @@ package com.earlybird.ticket.auth.infrastructure.client;
 import com.earlybird.ticket.auth.application.UserClient;
 import com.earlybird.ticket.auth.application.dto.commander.CreateSellerCommand;
 import com.earlybird.ticket.auth.application.dto.commander.CreateUserCommand;
-import com.earlybird.ticket.auth.application.dto.commander.JoinUserCommand;
+import com.earlybird.ticket.auth.application.dto.commander.GetUserIdPasswordRoleCommand;
 import com.earlybird.ticket.auth.application.dto.commander.UserInfoCommand;
 import com.earlybird.ticket.auth.infrastructure.dto.payload.UserInfoClientResponse;
 import com.earlybird.ticket.common.entity.PassportDto;
@@ -27,10 +27,13 @@ public class UserClientImpl implements UserClient {
     }
 
     @Override
-    public UserInfoCommand getUserInfo(JoinUserCommand joinUserCommand) {
+    public UserInfoCommand getUserInfo(
+        GetUserIdPasswordRoleCommand getUserIdPasswordRoleCommand
+    ) {
 
-        return UserInfoClientResponse.toUserInfoCommandDto(userFeignClient.getUserInfo(joinUserCommand)
-                                                                          .getData());
+        return UserInfoClientResponse.toUserInfoCommandDto(
+            userFeignClient.getUserInfo(getUserIdPasswordRoleCommand)
+                .getData());
     }
 
     @Override
