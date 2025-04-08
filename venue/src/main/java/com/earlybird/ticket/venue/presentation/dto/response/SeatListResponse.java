@@ -1,6 +1,6 @@
 package com.earlybird.ticket.venue.presentation.dto.response;
 
-import com.earlybird.ticket.venue.application.dto.response.GetSeatListQuery;
+import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import lombok.Builder;
 
 import java.math.BigDecimal;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Builder
-public record GetSeatListResponse(
+public record SeatListResponse(
         UUID concertId,
         UUID concertSequenceId,
         String section,
@@ -27,14 +27,14 @@ public record GetSeatListResponse(
 
     }
 
-    public static GetSeatListResponse from(GetSeatListQuery getSeatListQuery) {
-        return GetSeatListResponse.builder()
-                .concertId(getSeatListQuery.concertId())
-                .concertSequenceId(getSeatListQuery.concertSequenceId())
-                .section(getSeatListQuery.section())
-                .grade(getSeatListQuery.grade())
-                .floor(getSeatListQuery.floor())
-                .seatList(getSeatListQuery.seatList()
+    public static SeatListResponse from(SeatListQuery seatListQuery) {
+        return SeatListResponse.builder()
+                .concertId(seatListQuery.concertId())
+                .concertSequenceId(seatListQuery.concertSequenceId())
+                .section(seatListQuery.section())
+                .grade(seatListQuery.grade())
+                .floor(seatListQuery.floor())
+                .seatList(seatListQuery.seatList()
                         .stream()
                         .map(seat -> SeatResponse.builder()
                                 .seatId(seat.seatId())

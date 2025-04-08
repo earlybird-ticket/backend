@@ -6,21 +6,22 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-@Builder
-public record GetSectionListQuery(
+public record SeatListQuery(
         UUID concertId,
         UUID concertSequenceId,
-        List<SectionQuery> sectionList
+        String section,
+        String grade,
+        int floor,
+        List<SeatQuery> seatList
 ) {
     @Builder
-    public record SectionQuery(
-            String section,
-            int remainingNumberOfSeats,
-            int floor,
-            String grade,
+    public record SeatQuery(
+            UUID seatId,
+            int row,
+            int col,
+            String seatStatus,
             BigDecimal price
     ) {
 
     }
 }
-

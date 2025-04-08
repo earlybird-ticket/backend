@@ -1,6 +1,6 @@
 package com.earlybird.ticket.venue.presentation.dto.response;
 
-import com.earlybird.ticket.venue.application.dto.response.GetSectionListQuery;
+import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import lombok.Builder;
 
 import java.math.BigDecimal;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Builder
-public record GetSectionListResponse(
+public record SectionListResponse(
         UUID concertId,
         UUID concertSequenceId,
         List<SectionResponse> sectionList
@@ -24,11 +24,11 @@ public record GetSectionListResponse(
 
     }
 
-    public static GetSectionListResponse from(GetSectionListQuery getSectionListQuery) {
-        return GetSectionListResponse.builder()
-                .concertId(getSectionListQuery.concertId())
-                .concertSequenceId(getSectionListQuery.concertSequenceId())
-                .sectionList(getSectionListQuery.sectionList()
+    public static SectionListResponse from(SectionListQuery sectionListQuery) {
+        return SectionListResponse.builder()
+                .concertId(sectionListQuery.concertId())
+                .concertSequenceId(sectionListQuery.concertSequenceId())
+                .sectionList(sectionListQuery.sectionList()
                         .stream()
                         .map(section -> SectionResponse.builder()
                                 .section(section.section())
