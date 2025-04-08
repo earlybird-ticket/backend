@@ -5,11 +5,8 @@ import lombok.Builder;
 import java.util.List;
 import java.util.UUID;
 
+@Builder
 public record ProcessSeatCheckCommand(
         List<UUID> seatIdList
 ) {
-    @Builder
-    public ProcessSeatCheckCommand(List<UUID> seatIdList) {
-        this.seatIdList = seatIdList;
-    }
 }
