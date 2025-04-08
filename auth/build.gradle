@@ -29,7 +29,7 @@ ext {
 
 dependencies {
     // ✅ Common Moudle
-    implementation project(':common');
+    implementation project(':common')
 
     // ✅ security
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -55,7 +55,7 @@ dependencies {
     // ✅ EUREKA CLIENT
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
-    // ✅ OPENFEING
+    // ✅ OPENFEIGN
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 
     // ✅ LOMBOK
