@@ -1,5 +1,6 @@
 package com.earlybird.ticket.venue.application.dto.response;
 
+import com.earlybird.ticket.venue.domain.dto.SectionListResult;
 import lombok.Builder;
 
 import java.math.BigDecimal;
@@ -21,6 +22,26 @@ public record SectionListQuery(
             BigDecimal price
     ) {
 
+    }
+
+    public static SectionListQuery from(SectionListResult sectionListResult) {
+        return SectionListQuery.builder()
+                .concertId(sectionListResult.concertId())
+                .concertSequenceId(sectionListResult.concertSequenceId())
+                .sectionList(sectionListResult.sectionList().stream()
+                        .map(sectionQueryDsl ->
+                                SectionQuery.builder()
+                                        .section(sectionQueryDsl.section())
+                                        .remainingNumberOfSeats(sectionQueryDsl.remainingNumberOfSeats())
+                                        .floor(sectionQueryDsl.floor())
+                                        .grade(sectionQueryDsl.grade())
+                                        .price(sectionQueryDsl.price())
+                                        .build()
+
+                        )
+                        .toList()
+                )
+                .build();
     }
 }
 
