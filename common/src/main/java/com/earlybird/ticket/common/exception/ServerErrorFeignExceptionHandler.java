@@ -20,7 +20,7 @@ public class ServerErrorFeignExceptionHandler implements FeignExceptionHandlerSt
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                              .body(CommonDto.<Void>builder()
                                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                            .code(Code.FEIGN_INTERNAL_SERVER_ERROR.value())
+                                            .code(Code.FEIGN_INTERNAL_SERVER_ERROR.getCode())
                                             .message("서버 오류가 발생했습니다: " + e.getMessage())
                                             .data(null)
                                             .build());

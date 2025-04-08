@@ -20,7 +20,7 @@ public class BadRequestFeignExceptionHandler implements FeignExceptionHandlerStr
         return ResponseEntity.badRequest()
                              .body(CommonDto.<Void>builder()
                                             .status(HttpStatus.BAD_REQUEST)
-                                            .code(Code.FEIGN_BAD_REQUEST.value())
+                                            .code(Code.FEIGN_BAD_REQUEST.getCode())
                                             .message("잘못된 요청입니다: " + e.getMessage())
                                             .data(null)
                                             .build());
