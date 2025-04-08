@@ -25,10 +25,43 @@ repositories {
 
 ext {
     set('springCloudVersion', "2024.0.1")
+    set('querydslVersion', "5.0.0")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 dependencies {
     implementation project(':common')
+
+    //serialization
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation 'com.bedatadriven:jackson-datatype-jts:2.4'
+    // QueryDSL
+    implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
+    annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+    // health check and monitoring
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+    implementation 'io.github.openfeign:feign-micrometer'
+    implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
+    // kafka
+    implementation 'org.springframework.kafka:spring-kafka'
+
+    // redisson
+    implementation 'org.redisson:redisson:3.22.0'
+
+    //  redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -41,12 +74,26 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-dependencyManagement {
-    imports {
-        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-    }
-}
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+
+// Querydsl 설정부
+def generated = "${buildDir}/generated" // product 모듈 내부의 build/generated로 설정
+
+// querydsl QClass 파일 생성 위치를 지정
+tasks.withType(JavaCompile).configureEach {
+    options.getGeneratedSourceOutputDirectory().set(file(generated))
+}
+
+// java source set 에 querydsl QClass 위치 추가
+sourceSets {
+    main.java.srcDirs += [generated]
+}
+
+// gradle clean 시에 QClass 디렉토리 삭제
+clean {
+    delete file(generated)
 }

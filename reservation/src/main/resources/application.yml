@@ -1,6 +1,58 @@
 spring:
   application:
     name: reservation-service
+  config:
+    import: optional:file:.env[.properties]
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  datasource:
+    hikari:
+      maximum-pool-size: 1000  # 기본은 10이라 너무 작음
+      minimum-idle: 10
+      idle-timeout: 30000
+      connection-timeout: 30000
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_RESERVATION_PORT:5432}/${POSTGRES_DB}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+  kafka:
+    bootstrap-servers: localhost:29092 #포트 및 호스트 수정 필요
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
 
 server:
-  port: 18087
+  port: 18088
+
+
+management:
+  endpoints:
+    jmx:
+      exposure:
+        include: prometheus
+    web:
+      exposure:
+        include: refresh,health,beans,busrefresh,info,metrics,prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        all: true
+  zipkin:
+    tracing:
+      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
+  tracing:
+    sampling:
+      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:18088}/eureka
