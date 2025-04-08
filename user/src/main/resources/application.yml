@@ -4,7 +4,8 @@ spring:
 
   application:
     name: user-service
-
+  jackson:
+    property-naming-strategy: SNAKE_CASE
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_USER_PORT:5432}/${POSTGRES_DB:postgres}

@@ -16,4 +16,9 @@ public class UserRepositoryImpl implements UserRepository {
     public Optional<User> findUserByUserEmail(String userEmail) {
         return userJpaRepository.findByEmail(userEmail);
     }
+
+    @Override
+    public void save(User user) {
+        userJpaRepository.save(user);
+    }
 }
