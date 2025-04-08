@@ -5,10 +5,12 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @Entity
+@Getter
 @DiscriminatorValue("SELLER")
 @Table(name = "p_seller")
 @SuperBuilder(builderMethodName = "sellerBuilder")
