@@ -32,7 +32,7 @@ public class CommonDto<T> {
     public static <T> CommonDto<T> created(@Nullable T data,
                                            String message) {
         return CommonDto.<T>builder()
-                        .status(HttpStatus.CREATED)
+                        .status(Code.CREATED.getHttpStatus())
                         .code(Code.CREATED.getCode())
                         .message(message)
                         .data(data)
@@ -42,7 +42,7 @@ public class CommonDto<T> {
     public static <T> CommonDto<T> ok(@Nullable T data,
                                       String message) {
         return CommonDto.<T>builder()
-                        .status(HttpStatus.OK)
+                        .status(Code.OK.getHttpStatus())
                         .code(Code.OK.getCode())
                         .message(message)
                         .data(data)
@@ -53,7 +53,7 @@ public class CommonDto<T> {
     public static <T> CommonDto<T> accepted(@Nullable T data,
                                             String message) {
         return CommonDto.<T>builder()
-                        .status(HttpStatus.ACCEPTED)
+                        .status(Code.ACCEPTED.getHttpStatus())
                         .code(Code.ACCEPTED.getCode())
                         .message(message)
                         .data(data)

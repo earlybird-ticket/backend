@@ -20,7 +20,7 @@ public class NotFoundFeignExceptionHandler implements FeignExceptionHandlerStrat
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                              .body(CommonDto.<Void>builder()
                                             .status(HttpStatus.NOT_FOUND)
-                                            .code(Code.FEIGN_NOT_FOUND.value())
+                                            .code(Code.FEIGN_NOT_FOUND.getCode())
                                             .message("해당 데이터를 찾을 수 없습니다: " + e.getMessage())
                                             .data(null)
                                             .build());
