@@ -1,13 +1,9 @@
 package com.earlybird.ticket.user.presentation.dto.request;
 
-import com.earlybird.ticket.user.application.dto.command.ProcessUserEmailValidateCommand;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Email;
 
 public record FindUserEmailRequest(
-    @NotNull(message = "이메일은 비어있을 수 없습니다.") String email
+    @Email(message = "Email can't be empty") String email
 ) {
 
-    public ProcessUserEmailValidateCommand toProcessUserEmailValidateCommand() {
-        return new ProcessUserEmailValidateCommand(email);
-    }
 }

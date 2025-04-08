@@ -6,11 +6,11 @@ import com.earlybird.ticket.user.application.dto.command.CreateUserCustomerComma
 import com.earlybird.ticket.user.application.dto.command.CreateUserSellerCommand;
 import com.earlybird.ticket.user.application.dto.command.ProcessUserEmailValidateCommand;
 import com.earlybird.ticket.user.application.dto.query.FindUserQuery;
+import com.earlybird.ticket.user.application.dto.query.GetUserIdPasswordRoleQuery;
 import com.earlybird.ticket.user.application.exception.UserEmailDuplicatedException;
 import com.earlybird.ticket.user.application.exception.UserNotFoundException;
 import com.earlybird.ticket.user.domain.entity.User;
 import com.earlybird.ticket.user.domain.repository.UserRepository;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,5 +51,13 @@ public class UserServiceImpl implements UserService {
             .orElseThrow(UserNotFoundException::new);
 
         return FindUserQuery.of(user);
+    }
+
+    @Override
+    public GetUserIdPasswordRoleQuery findUserByEmail(String email) {
+        User user = userRepository.findUserByUserEmail(email)
+            .orElseThrow(UserNotFoundException::new);
+
+        return GetUserIdPasswordRoleQuery.of(user);
     }
 }

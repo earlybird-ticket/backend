@@ -4,6 +4,7 @@ import com.earlybird.ticket.user.application.dto.command.CreateUserCustomerComma
 import com.earlybird.ticket.user.application.dto.command.CreateUserSellerCommand;
 import com.earlybird.ticket.user.application.dto.command.ProcessUserEmailValidateCommand;
 import com.earlybird.ticket.user.application.dto.query.FindUserQuery;
+import com.earlybird.ticket.user.application.dto.query.GetUserIdPasswordRoleQuery;
 
 public interface UserService {
 
@@ -13,5 +14,7 @@ public interface UserService {
 
     void createUserSeller(CreateUserSellerCommand sellerCommand);
 
-    FindUserQuery findUser( String passport);
+    FindUserQuery findUser(String passport);
+
+    GetUserIdPasswordRoleQuery findUserByEmail(String email);
 }

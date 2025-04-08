@@ -1,7 +1,6 @@
 package com.earlybird.ticket.user.presentation.dto.request;
 
 import com.earlybird.ticket.common.entity.constant.Role;
-import com.earlybird.ticket.user.application.dto.command.CreateUserCustomerCommand;
 import com.earlybird.ticket.user.application.dto.command.CreateUserSellerCommand;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
