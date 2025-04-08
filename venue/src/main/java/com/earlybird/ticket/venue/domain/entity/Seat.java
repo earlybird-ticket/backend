@@ -1,5 +1,6 @@
 package com.earlybird.ticket.venue.domain.entity;
 
+import com.earlybird.ticket.common.entity.BaseEntity;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @Table(name = "p_seat")
 @SQLRestriction(("deleted_at is null"))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Seat {
+public class Seat extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
