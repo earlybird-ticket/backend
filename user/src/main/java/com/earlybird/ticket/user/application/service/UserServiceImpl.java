@@ -75,9 +75,11 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void updateUserCustomerPassword(
+        String passport,
         UpdateUserCustomerPasswordCommand updateCustomerPasswordCommand
     ) {
-        User user = userRepository.findUserByUserId(updateCustomerPasswordCommand.userId())
+        PassportDto passportDto = passportUtil.getPassportDto(passport);
+        User user = userRepository.findUserByUserId(passportDto.getUserId())
             .orElseThrow(UserNotFoundException::new);
 
         user.updatePassword(updateCustomerPasswordCommand.password());

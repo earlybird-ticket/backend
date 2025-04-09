@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -52,9 +53,14 @@ public class InternalUserController {
 
     @PatchMapping("/change-password")
     public ResponseEntity<CommonDto<Void>> changeUserCustomerPassword(
+        @RequestHeader(value = "X-User-Passport") String passport,
         @Valid @RequestBody UpdateUserCustomerPasswordRequest passwordRequest
     ) {
-        userService.updateUserCustomerPassword(passwordRequest.toUpdateCustomerPasswordCommand());
+        userService.updateUserCustomerPassword(
+            passport,
+            passwordRequest.toUpdateCustomerPasswordCommand()
+        );
+
         return ResponseEntity.ok(CommonDto.ok(null, "비밀번호 변경 성공"));
     }
 }
