@@ -3,10 +3,14 @@ package com.earlybird.ticket.venue.infrastructure.repository;
 import static com.earlybird.ticket.venue.domain.entity.QSeat.seat;
 import static com.earlybird.ticket.venue.domain.entity.QSeatInstant.seatInstant;
 
+import com.earlybird.ticket.venue.domain.dto.SeatListResult;
+import com.earlybird.ticket.venue.domain.dto.SeatListResult.SeatResult;
+import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.domain.entity.constant.Status;
 import com.earlybird.ticket.venue.domain.dto.SectionListResult;
 import com.earlybird.ticket.venue.domain.dto.SectionListResult.SectionResult;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -67,5 +71,54 @@ public class SeatQueryRepositoryImpl implements SeatQueryRepository {
                 .concertSequenceId(concertSequenceId)
                 .sectionList(sectionQueryDslList)
                 .build();
+    }
+
+    @Override
+    public SeatListResult findSeatList(UUID concertSequenceId, Section section) {
+
+        List<SeatResult> seatResultList =
+                queryFactory
+                        .select(Projections.constructor(
+                                SeatResult.class,
+                                seatInstant.id,
+                                seat.row,
+                                seat.col,
+                                seatInstant.status,
+                                seatInstant.price
+
+                        ))
+                        .from(seat)
+                        .leftJoin(seat).on(seat.eq(seatInstant.seat))
+                        .where(
+                                seatInstant.concertSequenceId.eq(concertSequenceId),
+                                seat.section.eq(section),
+                                seatInstant.deletedAt.isNull(),
+                                seat.deletedAt.isNull()
+                        )
+                        .fetch();
+
+        SeatListResult seatListResult =
+                queryFactory
+                        .select(Projections.constructor(
+                                SeatListResult.class,
+                                seatInstant.concertId,
+                                seatInstant.concertSequenceId,
+                                seat.section,
+                                seatInstant.grade,
+                                seat.floor,
+                                Expressions.constant(null)
+
+                        ))
+                        .from(seat)
+                        .leftJoin(seat).on(seat.eq(seatInstant.seat))
+                        .where(
+                                seatInstant.concertSequenceId.eq(concertSequenceId),
+                                seat.section.eq(section),
+                                seatInstant.deletedAt.isNull(),
+                                seat.deletedAt.isNull()
+                        )
+                        .fetchOne();
+
+        return SeatListResult.copyWithSeatList(seatListResult, seatResultList);
     }
 }
