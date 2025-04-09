@@ -1,7 +1,10 @@
 package com.earlybird.ticket.reservation.presentation;
 
 import com.earlybird.ticket.common.entity.CommonDto;
-import com.earlybird.ticket.reservation.application.ReservationService;
+import com.earlybird.ticket.reservation.application.service.ReservationService;
+import com.earlybird.ticket.reservation.presentation.dto.request.CreateReservationRequest;
+import com.earlybird.ticket.reservation.presentation.dto.response.FindReservationQuery;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +18,10 @@ public class ReservationExternalController {
     private final ReservationService reservationService;
 
     @PostMapping
-    public ResponseEntity<CommonDto<Void>> createReservation(@RequestHeader("X-User-Passport") String passport
-                                                             //+dto
-    ) {
-        //1. CreateReservationCommand로 변환
+    public ResponseEntity<CommonDto<Void>> createReservation(@RequestHeader("X-User-Passport") String passport,
+                                                             @RequestBody @Valid CreateReservationRequest createReservationRequest) {
 
-        //2. reservationService.createResrvation(createReservationCommand)로 전달
+        reservationService.createResrvation(CreateReservationRequest.toCreateReservationCommand(createReservationRequest));
 
         return ResponseEntity.status(HttpStatus.CREATED)
                              .body(CommonDto.created(null,
@@ -30,9 +31,8 @@ public class ReservationExternalController {
     @PutMapping("/{reservationId}")
     public ResponseEntity<CommonDto<Void>> cancelReservation(@PathVariable String reservationId,
                                                              @RequestHeader("X-User-Passport") String passport) {
-        //1. CancelReservationCommand로 변환
-
-        //2. reservationService.cancelResrvation(cancelReservationCommand로)로 전달
+        reservationService.cancelReservation(reservationId,
+                                             passport);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                              .body(CommonDto.accepted(null,
@@ -43,7 +43,8 @@ public class ReservationExternalController {
     public ResponseEntity<CommonDto<Void>> findReservations(@PathVariable String reservationId,
                                                             @RequestHeader("X-User-Passport") String passport) {
 
-        //1. reservationService.findResrvation(reservationId,passport)로 전달
+        FindReservationQuery findReservationQuery = reservationService.findReservation(reservationId,
+                                                                                       passport);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                              .body(CommonDto.ok(null,

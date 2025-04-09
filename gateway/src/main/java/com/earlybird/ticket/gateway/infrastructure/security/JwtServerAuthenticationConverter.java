@@ -23,7 +23,7 @@ public class JwtServerAuthenticationConverter implements ServerAuthenticationCon
                 ex.getRequest().getHeaders().getFirst(AUTHORIZATION_HEADER)))
             .filter(Objects::nonNull)
             // 헤더에서 토큰 추출 후 임시로 Authenticatin 생성 및 ReactiveAuthenticationManager로 넘김
-            .doFirst(() -> log.info("임시 인증 토큰 생성"))
+            .doOnSuccess(s -> log.info("임시 인증 토큰 생성 = {}", s))
             .map(auth -> new UsernamePasswordAuthenticationToken(auth, null));
     }
 }
