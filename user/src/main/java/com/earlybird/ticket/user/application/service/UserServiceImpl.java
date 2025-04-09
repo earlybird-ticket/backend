@@ -6,6 +6,7 @@ import com.earlybird.ticket.user.application.dto.command.CreateUserCustomerComma
 import com.earlybird.ticket.user.application.dto.command.CreateUserSellerCommand;
 import com.earlybird.ticket.user.application.dto.command.ProcessUserEmailValidateCommand;
 import com.earlybird.ticket.user.application.dto.command.UpdateUserCustomerCommand;
+import com.earlybird.ticket.user.application.dto.command.UpdateUserCustomerPasswordCommand;
 import com.earlybird.ticket.user.application.dto.query.FindUserQuery;
 import com.earlybird.ticket.user.application.dto.query.GetUserIdPasswordRoleQuery;
 import com.earlybird.ticket.user.application.exception.UserEmailDuplicatedException;
@@ -69,5 +70,18 @@ public class UserServiceImpl implements UserService {
             .orElseThrow(UserNotFoundException::new);
 
         user.updateCustomerWithoutPassword(updateUserCustomerCommand.toUser());
+    }
+
+    @Override
+    @Transactional
+    public void updateUserCustomerPassword(
+        String passport,
+        UpdateUserCustomerPasswordCommand updateCustomerPasswordCommand
+    ) {
+        PassportDto passportDto = passportUtil.getPassportDto(passport);
+        User user = userRepository.findUserByUserId(passportDto.getUserId())
+            .orElseThrow(UserNotFoundException::new);
+
+        user.updatePassword(updateCustomerPasswordCommand.password());
     }
 }
