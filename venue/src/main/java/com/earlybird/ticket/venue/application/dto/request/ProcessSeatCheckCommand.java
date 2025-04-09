@@ -7,6 +7,6 @@ import java.util.UUID;
 
 @Builder
 public record ProcessSeatCheckCommand(
-        List<UUID> seatIdList
+        List<UUID> seatInstanceIdList
 ) {
 }

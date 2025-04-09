@@ -15,8 +15,8 @@ public class VenueCreateEventHandler implements EventHandler<VenueCreatePayload>
 
     @Override
     public void handle(Event<VenueCreatePayload> event) {
-        //consumer 로직 작성
-        //venueService.create();
+        //VenueCreatePayload payload = event.getPayload();
+        //venueService.create(payload);
     }
 
     @Override

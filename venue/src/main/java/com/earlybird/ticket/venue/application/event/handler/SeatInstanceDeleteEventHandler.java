@@ -1,21 +1,21 @@
 package com.earlybird.ticket.venue.application.event.handler;
 
 import com.earlybird.ticket.venue.application.event.Event;
-import com.earlybird.ticket.venue.application.event.dto.request.VenueCreatePayload;
+import com.earlybird.ticket.venue.application.event.dto.request.SeatInstanceDeletePayload;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class SeatInstanceDeleteEventHandler implements EventHandler<VenueCreatePayload> {
+public class SeatInstanceDeleteEventHandler implements EventHandler<SeatInstanceDeletePayload> {
     @Override
-    public void handle(Event<VenueCreatePayload> event) {
+    public void handle(Event<SeatInstanceDeletePayload> event) {
         //consumer 로직 작성
         //seatService.deleteSeatInstance();
     }
 
     @Override
-    public boolean support(Event<VenueCreatePayload> event) {
+    public boolean support(Event<SeatInstanceDeletePayload> event) {
         return false;
     }
 }

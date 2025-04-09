@@ -38,7 +38,7 @@ public class Seat extends BaseEntity {
     @Column(name = "col", nullable = false)
     private Integer col;
 
-    @Column(name = "floor", columnDefinition = "TINYINT")
+    @Column(name = "floor", columnDefinition = "SMALLINT")
     private Integer floor;
 
     @OneToMany(mappedBy = "seat", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)

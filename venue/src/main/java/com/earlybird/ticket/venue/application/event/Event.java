@@ -2,13 +2,13 @@ package com.earlybird.ticket.venue.application.event;
 
 import com.earlybird.ticket.common.entity.EventPayload;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Event<T extends EventPayload> {
     private EventType eventType;
     private T payload;
@@ -17,7 +17,17 @@ public class Event<T extends EventPayload> {
     public static Event<? extends EventPayload> fromJson(String json) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(json, new TypeReference<Event<? extends EventPayload>>() {});
+            JsonNode root = mapper.readTree(json);
+
+            String typeText = root.get("eventType").asText();
+            EventType eventType = EventType.from(typeText);
+            if (eventType == null) throw new IllegalArgumentException("Unknown event type: " + typeText);
+
+            String timestamp = root.get("timestamp").asText();
+            Class<? extends EventPayload> payloadClass = eventType.getPayloadClass();
+            EventPayload payload = mapper.treeToValue(root.get("payload"), payloadClass);
+
+            return new Event<>(eventType, payload, timestamp);
         } catch (Exception e) {
             throw new RuntimeException("Invalid JSON", e);
         }

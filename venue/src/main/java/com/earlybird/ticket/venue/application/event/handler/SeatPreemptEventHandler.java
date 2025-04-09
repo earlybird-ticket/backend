@@ -1,21 +1,21 @@
 package com.earlybird.ticket.venue.application.event.handler;
 
 import com.earlybird.ticket.venue.application.event.Event;
-import com.earlybird.ticket.venue.application.event.dto.request.VenueUpdatePayload;
+import com.earlybird.ticket.venue.application.event.dto.request.SeatPreemptPayload;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class VenueUpdateEventHandler implements EventHandler<VenueUpdatePayload> {
+public class SeatPreemptEventHandler implements EventHandler<SeatPreemptPayload> {
     @Override
-    public void handle(Event<VenueUpdatePayload> event) {
+    public void handle(Event<SeatPreemptPayload> event) {
         //consumer 로직 작성
-        //venueService.update();
+        //seatService.preemptSeatInstance();
     }
 
     @Override
-    public boolean support(Event<VenueUpdatePayload> event) {
+    public boolean support(Event<SeatPreemptPayload> event) {
         return false;
     }
 }

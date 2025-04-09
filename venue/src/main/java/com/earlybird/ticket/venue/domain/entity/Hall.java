@@ -23,7 +23,7 @@ public class Hall extends BaseEntity {
     @Column(name = "name", length = 50, nullable = false)
     private String name;
 
-    @Column(name = "floor", columnDefinition = "TINYINT", nullable = false)
+    @Column(name = "floor", columnDefinition = "SMALLINT", nullable = false)
     private Integer floor;
 
     @ManyToOne(fetch = FetchType.LAZY)
