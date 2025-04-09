@@ -22,6 +22,9 @@ public interface UserService {
 
     void updateUserCustomer(UpdateUserCustomerCommand updateUserCustomerCommand);
 
+
+    void deleteUser(String passport);
+
     void updateUserCustomerPassword(
         String passport,
         UpdateUserCustomerPasswordCommand updateCustomerPasswordCommand

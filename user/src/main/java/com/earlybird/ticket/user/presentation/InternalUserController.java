@@ -10,6 +10,7 @@ import com.earlybird.ticket.user.presentation.dto.response.GetUserEmailPasswordR
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,6 +51,12 @@ public class InternalUserController {
         return ResponseEntity.ok(CommonDto.ok(userInfoResponse, "사용자 정보 조회 성공"));
     }
 
+    @DeleteMapping
+    public ResponseEntity<CommonDto<Void>> deleteUser(
+        @RequestHeader(name = "X-User-Passport") String passport
+    ) {
+        userService.deleteUser(passport);
+        return ResponseEntity.ok(CommonDto.ok(null, "사용자 삭제 완료"));
 
     @PatchMapping("/change-password")
     public ResponseEntity<CommonDto<Void>> changeUserCustomerPassword(

@@ -74,6 +74,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public void deleteUser(String passport) {
+        PassportDto passportDto = passportUtil.getPassportDto(passport);
+
+        User user = userRepository.findUserByUserId(passportDto.getUserId())
+            .orElseThrow(UserNotFoundException::new);
+
+        user.delete(passportDto.getUserId());
+    }
+
+    @Override
+    @Transactional
     public void updateUserCustomerPassword(
         String passport,
         UpdateUserCustomerPasswordCommand updateCustomerPasswordCommand
