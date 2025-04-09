@@ -25,7 +25,7 @@ public record CreateUserSellerCommand(
             .password(this.password)
             .name(this.name)
             .role(this.role)
-            .birthDate(this.birthDay)
+            .birthDay(this.birthDay)
             .address(this.address)
             .phoneNumber(this.phoneNumber)
             .build();

@@ -14,11 +14,12 @@ public record FindUserQuery(
     String email,
     String name,
     Role role,
-    LocalDate birthDate,
+    LocalDate birthDay,
     String address,
     String phoneNumber,
     @Nullable String businessNumber
 ) {
+
     // TODO: 추후 UserQuery를 class로 바꾸고 다형성 활용
     public static FindUserQuery of(User user) {
         return FindUserQuery.builder()
@@ -26,7 +27,7 @@ public record FindUserQuery(
             .email(user.getEmail())
             .name(user.getName())
             .role(user.getRole())
-            .birthDate(user.getBirthDate())
+            .birthDay(user.getBirthDay())
             .address(user.getAddress())
             .phoneNumber(user.getPhoneNumber())
             .businessNumber(user instanceof Seller ? ((Seller) user).getBusinessNumber() : null)
