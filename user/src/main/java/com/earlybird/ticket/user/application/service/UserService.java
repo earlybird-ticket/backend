@@ -20,4 +20,6 @@ public interface UserService {
     GetUserIdPasswordRoleQuery findUserByEmail(String email);
 
     void updateUserCustomer(UpdateUserCustomerCommand updateUserCustomerCommand);
+
+    void deleteUser(String passport);
 }

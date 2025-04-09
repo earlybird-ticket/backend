@@ -8,6 +8,7 @@ import com.earlybird.ticket.user.presentation.dto.response.FindUserInfoResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -49,5 +50,13 @@ public class ExternalUserController {
     ) {
         userService.updateUserCustomer(customerRequest.toUpdateUserCustomerCommand());
         return ResponseEntity.ok(CommonDto.ok(null, "사용자 정보 변경 성공"));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<CommonDto<Void>> deleteUser(
+        @RequestHeader(name = "X-User-Passport") String passport
+    ) {
+        userService.deleteUser(passport);
+        return ResponseEntity.ok(CommonDto.ok(null, "사용자 삭제 완료"));
     }
 }
