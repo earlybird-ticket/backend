@@ -66,5 +66,13 @@ public class User extends BaseEntity {
     TODO: 고도화때 등급 부활
     private Grade grade;
      */
+
+    public void updateCustomerWithoutPassword(User user) {
+        this.email = user.getEmail();
+        this.name = user.getName();
+        this.birthDay = user.getBirthDay();
+        this.address = user.getAddress();
+        this.phoneNumber = user.getPhoneNumber();
+    }
 }
 
