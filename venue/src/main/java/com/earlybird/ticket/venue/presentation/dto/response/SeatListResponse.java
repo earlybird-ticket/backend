@@ -18,7 +18,7 @@ public record SeatListResponse(
 ) {
     @Builder
     private record SeatResponse(
-        UUID seatId,
+        UUID seatInstanceId,
         int row,
         int col,
         String seatStatus,
@@ -37,10 +37,10 @@ public record SeatListResponse(
                 .seatList(seatListQuery.seatList()
                         .stream()
                         .map(seat -> SeatResponse.builder()
-                                .seatId(seat.seatId())
+                                .seatInstanceId(seat.seatInstanceId())
                                 .row(seat.row())
                                 .col(seat.col())
-                                .seatStatus(seat.seatStatus())
+                                .seatStatus(seat.status())
                                 .price(seat.price())
                                 .build())
                         .toList()
