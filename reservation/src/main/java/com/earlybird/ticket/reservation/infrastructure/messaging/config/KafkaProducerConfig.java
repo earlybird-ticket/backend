@@ -1,4 +1,4 @@
-package com.earlybird.ticket.reservation.infrastructure.kafka.config;
+package com.earlybird.ticket.reservation.infrastructure.messaging.config;
 
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ser.std.StringSerializer;
