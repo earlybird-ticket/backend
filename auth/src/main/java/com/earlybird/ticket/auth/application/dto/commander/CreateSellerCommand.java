@@ -11,7 +11,7 @@ public record CreateSellerCommand(@NotNull(message = "email is Necessary") Strin
                                   @NotNull(message = "password is Necessary") String password,
                                   @NotNull(message = "name is Necessary") String name,
                                   @NotNull(message = "role is Necessary") Role role,
-                                  @NotNull(message = "is Necessary") LocalDate birthday,
+                                  @NotNull(message = "is Necessary") LocalDate birthDay,
                                   @Nullable String address,
                                   @Nullable String phone_number,
                                   @NotNull(message = "is Necessary") String business_number) {
@@ -21,7 +21,7 @@ public record CreateSellerCommand(@NotNull(message = "email is Necessary") Strin
                                @NotNull(message = "password is Necessary") String password,
                                @NotNull(message = "name is Necessary") String name,
                                @NotNull(message = "role is Necessary") Role role,
-                               @NotNull(message = "is Necessary") LocalDate birthday,
+                               @NotNull(message = "is Necessary") LocalDate birthDay,
                                @Nullable String address,
                                @Nullable String phone_number,
                                @NotNull(message = "is Necessary") String business_number) {
@@ -29,7 +29,7 @@ public record CreateSellerCommand(@NotNull(message = "email is Necessary") Strin
         this.password = password;
         this.name = name;
         this.role = Role.SELLER;
-        this.birthday = birthday;
+        this.birthDay = birthDay;
         this.address = address;
         this.phone_number = phone_number;
         this.business_number = business_number;
