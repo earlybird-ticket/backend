@@ -1,4 +1,4 @@
-package com.earlybird.ticket.reservation.infrastructure.kafka.producer;
+package com.earlybird.ticket.reservation.infrastructure.messaging.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,8 @@
 spring:
   application:
     name: reservation-service
+  jackson:
+    property-naming-strategy: SNAKE_CASE
   config:
     import: optional:file:.env[.properties]
   data:
@@ -49,6 +51,7 @@ management:
   tracing:
     sampling:
       probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
+
 
 eureka:
   client:
