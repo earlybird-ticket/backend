@@ -53,8 +53,8 @@ public class User extends BaseEntity {
     private Role role;
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "birth_date", nullable = false)
-    private LocalDate birthDate;
+    @Column(name = "birth_day", nullable = false)
+    private LocalDate birthDay;
 
     @Column(name = "address", nullable = false)
     private String address;

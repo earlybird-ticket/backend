@@ -8,7 +8,6 @@ import com.earlybird.ticket.auth.common.exception.AccountMismatchException;
 import com.earlybird.ticket.auth.common.exception.ReservationExistException;
 import com.earlybird.ticket.auth.common.exception.UserNotFoundException;
 import com.earlybird.ticket.common.entity.PassportDto;
-import com.earlybird.ticket.common.entity.constant.Role;
 import com.earlybird.ticket.common.util.PassportUtil;
 import feign.FeignException;
 import feign.RetryableException;
@@ -57,12 +56,7 @@ public class AuthServiceImpl implements AuthService {
         UserInfoCommand userInfo = null;
         try {
             //회원정보 가져옴(고유번호, 비밀번호, 권한)
-            //            userInfo = userClient.getUserInfo(joinUserCommand);
-            userInfo = UserInfoCommand.builder()
-                                      .userId(1L)
-                                      .role(Role.USER)
-                                      .password(passwordEncoder.encode("1234"))
-                                      .build();
+            userInfo = userClient.getUserInfo(joinUserCommand);
         } catch (RetryableException e) {
             throw new UserNotFoundException();
         } catch (FeignException e) {

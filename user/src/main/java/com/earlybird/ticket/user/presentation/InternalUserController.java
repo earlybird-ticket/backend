@@ -2,8 +2,10 @@ package com.earlybird.ticket.user.presentation;
 
 import com.earlybird.ticket.common.entity.CommonDto;
 import com.earlybird.ticket.user.application.service.UserService;
+import com.earlybird.ticket.user.presentation.dto.request.FindUserEmailRequest;
 import com.earlybird.ticket.user.presentation.dto.request.SignUpUserCustomerRequest;
 import com.earlybird.ticket.user.presentation.dto.request.SignUpUserSellerRequest;
+import com.earlybird.ticket.user.presentation.dto.response.GetUserEmailPasswordRoleResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,5 +35,15 @@ public class InternalUserController {
     ) {
         userService.createUserCustomer(customerRequest.createUserCustomerCommand());
         return ResponseEntity.ok(CommonDto.ok(null, "회원가입 성공"));
+    }
+
+    @PostMapping
+    public ResponseEntity<CommonDto<GetUserEmailPasswordRoleResponse>> findUserLoginInfo(
+        @Valid @RequestBody FindUserEmailRequest findUserEmailRequest
+    ) {
+        GetUserEmailPasswordRoleResponse userInfoResponse = GetUserEmailPasswordRoleResponse.of(
+            userService.findUserByEmail(findUserEmailRequest.email())
+        );
+        return ResponseEntity.ok(CommonDto.ok(userInfoResponse, "사용자 정보 조회 성공"));
     }
 }

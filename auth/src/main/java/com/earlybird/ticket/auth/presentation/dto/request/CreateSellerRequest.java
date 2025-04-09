@@ -24,7 +24,7 @@ public record CreateSellerRequest(@NotNull(message = "email is Necessary") Strin
                                @NotNull(message = "password is Necessary") String password,
                                @NotNull(message = "name is Necessary") String name,
                                Role role,
-                               @NotNull(message = "birthday is Necessary") LocalDate birthday,
+                               @NotNull(message = "birthDay is Necessary") LocalDate birthday,
                                @Nullable String address,
                                @Nullable String phone_number,
                                @NotNull(message = "businessNUmber is Necessary") String business_number) {
@@ -45,7 +45,7 @@ public record CreateSellerRequest(@NotNull(message = "email is Necessary") Strin
                                   .password(passwordEncoder.encode(createSellerRequest.password()))
                                   .name(createSellerRequest.name())
                                   .role(Role.SELLER)
-                                  .birthday(createSellerRequest.birthday())
+                                  .birthDay(createSellerRequest.birthday())
                                   .address(createSellerRequest.address())
                                   .phone_number(createSellerRequest.phone_number())
                                   .business_number(createSellerRequest.business_number())

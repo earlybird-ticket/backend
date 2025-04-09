@@ -11,7 +11,7 @@ public interface UserClient {
 
     void createSeller(CreateSellerCommand createSellerCommand);
 
-    UserInfoCommand getUserInfo(JoinUserCommand joinUserCommand);
+    UserInfoCommand getUserInfo(JoinUserCommand getUserIdPasswordRoleCommand);
 
     void withdraw(PassportDto passportDto);
 }
