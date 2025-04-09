@@ -13,7 +13,7 @@ public record FindUserInfoResponse(
     String email,
     String name,
     Role role,
-    LocalDate birthDate,
+    LocalDate birthDay,
     String address,
     String phoneNumber,
     @JsonInclude(Include.NON_NULL) String businessNumber
@@ -25,7 +25,7 @@ public record FindUserInfoResponse(
             .email(findUserQuery.email())
             .name(findUserQuery.name())
             .role(findUserQuery.role())
-            .birthDate(findUserQuery.birthDate())
+            .birthDay(findUserQuery.birthDay())
             .address(findUserQuery.address())
             .phoneNumber(findUserQuery.phoneNumber())
             .businessNumber(findUserQuery.businessNumber())
