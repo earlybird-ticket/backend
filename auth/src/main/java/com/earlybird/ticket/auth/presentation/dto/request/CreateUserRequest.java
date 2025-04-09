@@ -14,7 +14,7 @@ public record CreateUserRequest(@NotNull(message = "email is necessary") String 
                                 @NotNull(message = "password is necessary") String password,
                                 @NotNull(message = "name is necessary") String name,
                                 Role role,
-                                @NotNull(message = "email is necessary") LocalDate birthday,
+                                @NotNull(message = "birthDay is necessary") LocalDate birthDay,
                                 @Nullable String address,
                                 @Nullable String phone_number) {
 
@@ -23,14 +23,14 @@ public record CreateUserRequest(@NotNull(message = "email is necessary") String 
                              @NotNull(message = "password is necessary") String password,
                              @NotNull(message = "name is necessary") String name,
                              Role role,
-                             @NotNull(message = "email is necessary") LocalDate birthday,
+                             @NotNull(message = "birthDay is necessary") LocalDate birthDay,
                              @Nullable String address,
                              @Nullable String phone_number) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.role = role;
-        this.birthday = birthday;
+        this.birthDay = birthDay;
         this.address = address;
         this.phone_number = phone_number;
     }
@@ -42,7 +42,7 @@ public record CreateUserRequest(@NotNull(message = "email is necessary") String 
                                 .password(passwordEncoder.encode(createUserRequest.password()))
                                 .name(createUserRequest.name())
                                 .role(Role.USER)
-                                .birthday(createUserRequest.birthday())
+                                .birthDay(createUserRequest.birthDay())
                                 .address(createUserRequest.address())
                                 .phone_number(createUserRequest.phone_number())
                                 .build();

@@ -11,7 +11,7 @@ public record CreateUserCommand(@NotNull(message = "email is Necessary") String 
                                 @NotNull(message = "password is Necessary") String password,
                                 @NotNull(message = "name is Necessary") String name,
                                 @NotNull(message = "role is Necessary") Role role,
-                                @NotNull(message = "birthday is Necessary") LocalDate birthday,
+                                @NotNull(message = "birthDay is Necessary") LocalDate birthDay,
                                 @Nullable String address,
                                 @Nullable String phone_number) {
 
@@ -20,14 +20,14 @@ public record CreateUserCommand(@NotNull(message = "email is Necessary") String 
                              @NotNull(message = "password is Necessary") String password,
                              @NotNull(message = "name is Necessary") String name,
                              @NotNull(message = "role is Necessary") Role role,
-                             @NotNull(message = "birthday is Necessary") LocalDate birthday,
+                             @NotNull(message = "birthDay is Necessary") LocalDate birthDay,
                              @Nullable String address,
                              @Nullable String phone_number) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.role = role;
-        this.birthday = birthday;
+        this.birthDay = birthDay;
         this.address = address;
         this.phone_number = phone_number;
     }

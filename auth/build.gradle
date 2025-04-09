@@ -31,6 +31,10 @@ dependencies {
     // ✅ Common Moudle
     implementation project(':common')
 
+    //serialization
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation 'com.bedatadriven:jackson-datatype-jts:2.4'
+
     // ✅ security
     implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.security:spring-security-test'

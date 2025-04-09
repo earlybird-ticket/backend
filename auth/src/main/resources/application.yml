@@ -12,6 +12,9 @@ spring:
             read-timeout: 5000
             logger-level: basic
 
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
 eureka:
   client:
     service-url:
@@ -33,5 +36,3 @@ jwt:
   secret: ${AUTH_JWT_SECRET}
   access:
     exp: ${AUTH_JWT_ACCESS_EXP}
-  refresh:
-    exp: ${AUTH_JWT_REFRESH_EXP}
