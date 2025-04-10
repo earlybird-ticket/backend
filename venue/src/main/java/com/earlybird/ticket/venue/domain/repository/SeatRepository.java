@@ -15,5 +15,9 @@ public interface SeatRepository {
 
     SeatListResult findSeatList(UUID concertSequenceId, Section section);
 
-    List<Seat> findSeatWithSeatInstance(List<UUID> seatInstanceIdList);
+    List<Seat> findSeatWithSeatInstanceBySeatInstanceId(List<UUID> seatInstanceIdList);
+
+    List<Seat> saveAll(List<Seat> seatList);
+
+    List<Seat> findSeatByHallId(UUID hallId);
 }
