@@ -10,4 +10,14 @@ public record ProcessSeatCheckQuery(
         List<UUID> seatInstanceIdList,
         boolean status
 ) {
+
+    public static ProcessSeatCheckQuery from(
+            List<UUID> seatInstanceIdList,
+            boolean status
+    ) {
+        return ProcessSeatCheckQuery.builder()
+                .seatInstanceIdList(seatInstanceIdList)
+                .status(status)
+                .build();
+    }
 }
