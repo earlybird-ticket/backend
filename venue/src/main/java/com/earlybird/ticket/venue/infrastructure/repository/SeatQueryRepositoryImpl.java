@@ -1,7 +1,7 @@
 package com.earlybird.ticket.venue.infrastructure.repository;
 
 import static com.earlybird.ticket.venue.domain.entity.QSeat.seat;
-import static com.earlybird.ticket.venue.domain.entity.QSeatInstant.seatInstant;
+import static com.earlybird.ticket.venue.domain.entity.QSeatInstance.seatInstance;
 
 import com.earlybird.ticket.venue.domain.dto.SeatListResult;
 import com.earlybird.ticket.venue.domain.dto.SeatListResult.SeatResult;
@@ -34,37 +34,37 @@ public class SeatQueryRepositoryImpl implements SeatQueryRepository {
                         Projections.constructor(
                                 SectionResult.class,
                                 seat.section,
-                                seatInstant.count(),
+                                seatInstance.count(),
                                 seat.floor,
-                                seatInstant.grade,
-                                seatInstant.price
+                                seatInstance.grade,
+                                seatInstance.price
                                 )
                         )
                         .from(seat)
-                        .leftJoin(seat.seatInstants, seatInstant)
+                        .leftJoin(seat.seatInstances, seatInstance)
                         .where(
-                            seatInstant.concertSequenceId.eq(concertSequenceId),
-                            seatInstant.status.eq(Status.FREE),
-                            seatInstant.deletedAt.isNull(),
+                            seatInstance.concertSequenceId.eq(concertSequenceId),
+                            seatInstance.status.eq(Status.FREE),
+                            seatInstance.deletedAt.isNull(),
                             seat.deletedAt.isNull()
                         )
                         .groupBy(
                             seat.section,
                             seat.floor,
-                            seatInstant.grade,
-                            seatInstant.price
+                            seatInstance.grade,
+                            seatInstance.price
                         )
                         .fetch();
 
         UUID concertId =
                 queryFactory
                         .select(
-                        seatInstant.concertId
+                        seatInstance.concertId
                         )
-                        .from(seatInstant)
+                        .from(seatInstance)
                         .where(
-                                seatInstant.concertSequenceId.eq(concertSequenceId),
-                                seatInstant.deletedAt.isNull()
+                                seatInstance.concertSequenceId.eq(concertSequenceId),
+                                seatInstance.deletedAt.isNull()
                         )
                         .fetchOne();
 
@@ -82,19 +82,19 @@ public class SeatQueryRepositoryImpl implements SeatQueryRepository {
                 queryFactory
                         .select(Projections.constructor(
                                 SeatResult.class,
-                                seatInstant.id,
+                                seatInstance.id,
                                 seat.row,
                                 seat.col,
-                                seatInstant.status,
-                                seatInstant.price
+                                seatInstance.status,
+                                seatInstance.price
 
                         ))
                         .from(seat)
-                        .leftJoin(seat.seatInstants, seatInstant)
+                        .leftJoin(seat.seatInstances, seatInstance)
                         .where(
-                                seatInstant.concertSequenceId.eq(concertSequenceId),
+                                seatInstance.concertSequenceId.eq(concertSequenceId),
                                 seat.section.eq(section),
-                                seatInstant.deletedAt.isNull(),
+                                seatInstance.deletedAt.isNull(),
                                 seat.deletedAt.isNull()
                         )
                         .fetch();
@@ -103,20 +103,20 @@ public class SeatQueryRepositoryImpl implements SeatQueryRepository {
                 queryFactory
                         .select(Projections.constructor(
                                 SeatListResult.class,
-                                seatInstant.concertId,
-                                seatInstant.concertSequenceId,
+                                seatInstance.concertId,
+                                seatInstance.concertSequenceId,
                                 seat.section,
-                                seatInstant.grade,
+                                seatInstance.grade,
                                 seat.floor,
                                 Expressions.constant(new ArrayList<>())
 
                         ))
                         .from(seat)
-                        .leftJoin(seat.seatInstants, seatInstant)
+                        .leftJoin(seat.seatInstances, seatInstance)
                         .where(
-                                seatInstant.concertSequenceId.eq(concertSequenceId),
+                                seatInstance.concertSequenceId.eq(concertSequenceId),
                                 seat.section.eq(section),
-                                seatInstant.deletedAt.isNull(),
+                                seatInstance.deletedAt.isNull(),
                                 seat.deletedAt.isNull()
                         )
                         .fetchOne();
@@ -129,10 +129,10 @@ public class SeatQueryRepositoryImpl implements SeatQueryRepository {
         return queryFactory
                 .selectDistinct(seat)
                 .from(seat)
-                .join(seat.seatInstants, seatInstant).fetchJoin()
+                .join(seat.seatInstances, seatInstance).fetchJoin()
                 .where(
-                        seatInstant.id.in(seatInstanceIdList),
-                        seatInstant.deletedAt.isNull(),
+                        seatInstance.id.in(seatInstanceIdList),
+                        seatInstance.deletedAt.isNull(),
                         seat.deletedAt.isNull()
                         )
                 .fetch();

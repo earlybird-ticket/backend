@@ -28,7 +28,18 @@ public class SeatRepositoryImpl implements SeatRepository {
     }
 
     @Override
-    public List<Seat> findSeatWithSeatInstance(List<UUID> seatInstanceIdList) {
+    public List<Seat> findSeatWithSeatInstanceBySeatInstanceId(List<UUID> seatInstanceIdList) {
         return seatQueryRepository.findSeatWithSeatInstance(seatInstanceIdList);
+    }
+
+    @Override
+    public List<Seat> saveAll(List<Seat> seatList) {
+        return seatJpaRepository.saveAll(seatList);
+
+    }
+
+    @Override
+    public List<Seat> findSeatByHallId(UUID hallId) {
+        return seatJpaRepository.findByHallId(hallId);
     }
 }
