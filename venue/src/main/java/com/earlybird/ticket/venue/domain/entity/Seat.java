@@ -43,11 +43,11 @@ public class Seat extends BaseEntity {
     private Integer floor;
 
     @OneToMany(mappedBy = "seat", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    private Set<SeatInstant> seatInstants;
+    private Set<SeatInstance> seatInstances;
 
     public void checkFreeSeat(List<UUID> seatInstanceIdList) {
-        this.seatInstants.stream()
-                .filter(seatInstant -> seatInstanceIdList.contains(seatInstant.getId()))
-                .forEach(SeatInstant::checkFreeSeatInstance);
+        this.seatInstances.stream()
+                .filter(seatInstance -> seatInstanceIdList.contains(seatInstance.getId()))
+                .forEach(SeatInstance::checkFreeSeatInstance);
     }
 }
