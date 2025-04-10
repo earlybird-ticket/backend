@@ -1,7 +1,7 @@
-package com.earlybird.ticket.venue.application.event;
+package com.earlybird.ticket.venue.domain.entity;
 
 import com.earlybird.ticket.common.entity.EventPayload;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.earlybird.ticket.venue.common.event.EventType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.*;

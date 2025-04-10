@@ -15,14 +15,16 @@ public record SeatListResult(
         UUID concertSequenceId,
         Section section,
         Grade grade,
-        int floor,
+        Integer floor,
         List<SeatResult> seatList
 ) {
+        public static final SeatListResult EMPTY = new SeatListResult(null, null, null, null, null, null);
+
         @Builder
         public record SeatResult(
                 UUID seatInstanceId,
-                int row,
-                int col,
+                Integer row,
+                Integer col,
                 Status status,
                 BigDecimal price
         ) {
@@ -30,12 +32,14 @@ public record SeatListResult(
         }
 
         public static SeatListResult copyWithSeatList(SeatListResult original, List<SeatResult> originalSeatList) {
+                SeatListResult safeSeatListResult = original == null ? EMPTY : original;
+
                 return SeatListResult.builder().
-                        concertId(original.concertId()).
-                        concertSequenceId(original.concertSequenceId()).
-                        section(original.section()).
-                        grade(original.grade()).
-                        floor(original.floor()).
+                        concertId(safeSeatListResult.concertId).
+                        concertSequenceId(safeSeatListResult.concertSequenceId()).
+                        section(safeSeatListResult.section()).
+                        grade(safeSeatListResult.grade()).
+                        floor(safeSeatListResult.floor()).
                         seatList(originalSeatList).
                         build();
         }

@@ -1,5 +1,7 @@
 package com.earlybird.ticket.venue.domain.dto;
 
+import com.earlybird.ticket.venue.domain.entity.constant.Grade;
+import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import lombok.Builder;
 
 import java.math.BigDecimal;
@@ -14,10 +16,10 @@ public record SectionListResult(
 ) {
 @Builder
 public record SectionResult(
-        String section,
-        int remainingNumberOfSeats,
+        Section section,
+        long remainingNumberOfSeats,
         int floor,
-        String grade,
+        Grade grade,
         BigDecimal price
 ) {
 

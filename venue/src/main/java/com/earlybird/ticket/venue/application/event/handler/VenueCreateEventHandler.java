@@ -1,7 +1,7 @@
 package com.earlybird.ticket.venue.application.event.handler;
 
-import com.earlybird.ticket.venue.application.event.Event;
-import com.earlybird.ticket.venue.application.event.EventType;
+import com.earlybird.ticket.venue.domain.entity.Event;
+import com.earlybird.ticket.venue.domain.entity.constant.EventType;
 import com.earlybird.ticket.venue.application.event.dto.request.VenueCreatePayload;
 import com.earlybird.ticket.venue.application.service.VenueService;
 import lombok.RequiredArgsConstructor;

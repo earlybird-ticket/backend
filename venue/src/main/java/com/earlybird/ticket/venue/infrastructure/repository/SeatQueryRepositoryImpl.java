@@ -15,6 +15,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,7 +40,7 @@ public class SeatQueryRepositoryImpl implements SeatQueryRepository {
                                 )
                         )
                         .from(seat)
-                        .leftJoin(seat).on(seat.eq(seatInstant.seat))
+                        .leftJoin(seat.seatInstants, seatInstant)
                         .where(
                             seatInstant.concertSequenceId.eq(concertSequenceId),
                             seatInstant.status.eq(Status.FREE),
@@ -88,7 +89,7 @@ public class SeatQueryRepositoryImpl implements SeatQueryRepository {
 
                         ))
                         .from(seat)
-                        .leftJoin(seat).on(seat.eq(seatInstant.seat))
+                        .leftJoin(seat.seatInstants, seatInstant)
                         .where(
                                 seatInstant.concertSequenceId.eq(concertSequenceId),
                                 seat.section.eq(section),
@@ -106,11 +107,11 @@ public class SeatQueryRepositoryImpl implements SeatQueryRepository {
                                 seat.section,
                                 seatInstant.grade,
                                 seat.floor,
-                                Expressions.constant(null)
+                                Expressions.constant(new ArrayList<>())
 
                         ))
                         .from(seat)
-                        .leftJoin(seat).on(seat.eq(seatInstant.seat))
+                        .leftJoin(seat.seatInstants, seatInstant)
                         .where(
                                 seatInstant.concertSequenceId.eq(concertSequenceId),
                                 seat.section.eq(section),

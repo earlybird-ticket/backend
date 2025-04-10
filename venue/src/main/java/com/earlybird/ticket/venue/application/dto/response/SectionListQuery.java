@@ -16,7 +16,7 @@ public record SectionListQuery(
     @Builder
     public record SectionQuery(
             String section,
-            int remainingNumberOfSeats,
+            long remainingNumberOfSeats,
             int floor,
             String grade,
             BigDecimal price
@@ -31,10 +31,10 @@ public record SectionListQuery(
                 .sectionList(sectionListResult.sectionList().stream()
                         .map(sectionQueryDsl ->
                                 SectionQuery.builder()
-                                        .section(sectionQueryDsl.section())
+                                        .section(sectionQueryDsl.section().getValue())
                                         .remainingNumberOfSeats(sectionQueryDsl.remainingNumberOfSeats())
                                         .floor(sectionQueryDsl.floor())
-                                        .grade(sectionQueryDsl.grade())
+                                        .grade(sectionQueryDsl.grade().getValue())
                                         .price(sectionQueryDsl.price())
                                         .build()
 

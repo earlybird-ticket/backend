@@ -1,7 +1,7 @@
 package com.earlybird.ticket.venue.application.event.dispatcher;
 
 import com.earlybird.ticket.common.entity.EventPayload;
-import com.earlybird.ticket.venue.application.event.Event;
+import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.application.event.handler.EventHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

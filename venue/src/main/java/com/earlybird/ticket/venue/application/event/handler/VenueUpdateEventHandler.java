@@ -1,6 +1,6 @@
 package com.earlybird.ticket.venue.application.event.handler;
 
-import com.earlybird.ticket.venue.application.event.Event;
+import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.application.event.dto.request.VenueUpdatePayload;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

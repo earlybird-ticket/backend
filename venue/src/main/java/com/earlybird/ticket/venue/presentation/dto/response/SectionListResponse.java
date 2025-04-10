@@ -16,7 +16,7 @@ public record SectionListResponse(
     @Builder
     private record SectionResponse(
             String section,
-            int remainingNumberOfSeats,
+            long remainingNumberOfSeats,
             int floor,
             String grade,
             BigDecimal price

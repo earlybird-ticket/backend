@@ -36,7 +36,8 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public ProcessSeatCheckQuery checkSeat(ProcessSeatCheckCommand processSeatCheckCommand) {
-        //1. seatInstanceId와 일치하는 seat과 seatInstance 가져오기
+        //1. seatInstanceId와 일치하는 seatInstance 가져오기
+
         //2. 상태 확인 후 Free가 아니면 예외
         //3. Free면 Id와 status응답
         return null;
