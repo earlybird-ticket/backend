@@ -28,7 +28,7 @@ public class SeatRepositoryImpl implements SeatRepository {
     }
 
     @Override
-    public List<Seat> findSeatWithSeatInstanceBySeatInstanceId(List<UUID> seatInstanceIdList) {
+    public List<Seat> findSeatListWithSeatInstanceBySeatInstanceIdList(List<UUID> seatInstanceIdList) {
         return seatQueryRepository.findSeatWithSeatInstance(seatInstanceIdList);
     }
 
@@ -41,5 +41,10 @@ public class SeatRepositoryImpl implements SeatRepository {
     @Override
     public List<Seat> findSeatByHallId(UUID hallId) {
         return seatJpaRepository.findByHallId(hallId);
+    }
+
+    @Override
+    public Seat findSeatBySeatInstanceId(UUID seatInstanceId) {
+        return seatQueryRepository.findSeatBySeatInstanceId(seatInstanceId);
     }
 }

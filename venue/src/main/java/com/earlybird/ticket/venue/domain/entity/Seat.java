@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -102,5 +103,32 @@ public class Seat extends BaseEntity {
         );
 
         this.seatInstances.add(seatInstance);
+    }
+
+    public void updateSeatInstance(
+            UUID seatInstanceId,
+            UUID hallId,
+            UUID concertId,
+            UUID concertSequenceId,
+            String grade,
+            String status,
+            BigDecimal price,
+            Long userId
+    ) {
+        this.seatInstances.stream()
+                .filter(seatInstance -> seatInstanceId.equals(seatInstance.getId()))
+                .findFirst()
+                .ifPresent(seatInstance -> seatInstance.updateSeatInstance(
+                        hallId, concertId, concertSequenceId, grade, status, price, userId
+                ));
+    }
+
+    public void deleteSeatInstance(UUID seatInstanceId, Long userId) {
+        this.seatInstances.stream()
+                .filter(seatInstance -> seatInstanceId.equals(seatInstance.getId()))
+                .findFirst()
+                .ifPresent(seatInstance -> seatInstance.deleteSeatInstance(
+                        userId
+                ));
     }
 }

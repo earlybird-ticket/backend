@@ -44,7 +44,7 @@ public class SeatServiceImpl implements SeatService {
     public ProcessSeatCheckQuery checkSeat(ProcessSeatCheckCommand processSeatCheckCommand) {
         List<UUID> seatInstanceIdList = processSeatCheckCommand.seatInstanceIdList();
         // 1. seatInstanceId와 일치하는 seat 가져오기
-        List<Seat> seatList = seatRepository.findSeatWithSeatInstanceBySeatInstanceId(seatInstanceIdList);
+        List<Seat> seatList = seatRepository.findSeatListWithSeatInstanceBySeatInstanceIdList(seatInstanceIdList);
 
         // 2. seat이 다 존재하는 지 확인
         if(seatList.size() != seatInstanceIdList.size()) {
@@ -111,18 +111,37 @@ public class SeatServiceImpl implements SeatService {
     @Override
     @Transactional
     public void updateSeatInstance(SeatInstanceUpdatePayload seatInstanceUpdatePayload) {
-        //0. userId 가져오기
         //1. seatInstance 가져오기
+        Seat seat = seatRepository.findSeatBySeatInstanceId(seatInstanceUpdatePayload.seatInstanceId());
+
+        if(seat == null) {
+            throw new SeatNotFoundException();
+        }
+
         //2. seatInstance 업데이트
+        seat.updateSeatInstance(
+                seatInstanceUpdatePayload.seatInstanceId(),
+                seatInstanceUpdatePayload.hallId(),
+                seatInstanceUpdatePayload.concertId(),
+                seatInstanceUpdatePayload.concertSequenceId(),
+                seatInstanceUpdatePayload.grade(),
+                seatInstanceUpdatePayload.status(),
+                seatInstanceUpdatePayload.price(),
+                seatInstanceUpdatePayload.passportDto().getUserId()
+        );
         //3. 저장
     }
 
     @Override
     @Transactional
     public void deleteSeatInstance(SeatInstanceDeletePayload seatInstanceDeletePayload) {
-        //0. userId 가져오기
         //1. seatInstance 가져오기
+        Seat seat = seatRepository.findSeatBySeatInstanceId(seatInstanceDeletePayload.seatInstanceId());
         //2. seatInstance delete 업데이트
+        seat.deleteSeatInstance(
+                seatInstanceDeletePayload.seatInstanceId(),
+                seatInstanceDeletePayload.passportDto().getUserId()
+        );
         //3. 저장
     }
 
