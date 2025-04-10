@@ -3,6 +3,7 @@ package com.earlybird.ticket.admin.application;
 import com.earlybird.ticket.admin.application.dto.DeleteCouponCommand;
 import com.earlybird.ticket.admin.application.dto.DeleteVenueCommand;
 import com.earlybird.ticket.admin.application.dto.IssueCouponCommand;
+import com.earlybird.ticket.admin.application.dto.RegisterSeatCommand;
 import com.earlybird.ticket.admin.application.dto.RegisterVenueCommand;
 import com.earlybird.ticket.admin.application.dto.UpdateCouponCommand;
 import com.earlybird.ticket.admin.application.dto.UpdateVenueCommand;
@@ -34,6 +35,11 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public void registerVenue(RegisterVenueCommand registerVenueCommand) {
 
+    }
+
+    @Override
+    public void registerSeat(RegisterSeatCommand registerSeatCommand) {
+        
     }
 
     @Override
