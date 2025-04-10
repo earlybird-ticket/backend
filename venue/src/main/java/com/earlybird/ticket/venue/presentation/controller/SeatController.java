@@ -9,6 +9,7 @@ import com.earlybird.ticket.venue.presentation.dto.request.ProcessSeatCheckReque
 import com.earlybird.ticket.venue.presentation.dto.response.ProcessSeatCheckResponse;
 import com.earlybird.ticket.venue.presentation.dto.response.SeatListResponse;
 import com.earlybird.ticket.venue.presentation.dto.response.SectionListResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,7 +53,7 @@ public class SeatController {
 
     @PostMapping("/check")
     public ResponseEntity<CommonDto<ProcessSeatCheckResponse>> checkSeat(
-            @RequestBody ProcessSeatCheckRequest processSeatCheckRequest
+            @Valid @RequestBody ProcessSeatCheckRequest processSeatCheckRequest
     ) {
         ProcessSeatCheckQuery seatCheckQuery = seatService.checkSeat(processSeatCheckRequest.toCommand());
 
