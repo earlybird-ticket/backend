@@ -39,3 +39,4 @@ out/
 **/.DS_Store
 
 **/generated
+*.log
