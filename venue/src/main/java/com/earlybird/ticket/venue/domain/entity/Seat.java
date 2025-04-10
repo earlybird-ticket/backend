@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -43,4 +44,10 @@ public class Seat extends BaseEntity {
 
     @OneToMany(mappedBy = "seat", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private Set<SeatInstant> seatInstants;
+
+    public void checkFreeSeat(List<UUID> seatInstanceIdList) {
+        this.seatInstants.stream()
+                .filter(seatInstant -> seatInstanceIdList.contains(seatInstant.getId()))
+                .forEach(SeatInstant::checkFreeSeatInstance);
+    }
 }

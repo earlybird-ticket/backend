@@ -1,17 +1,17 @@
 package com.earlybird.ticket.venue.presentation.controller;
 
 import com.earlybird.ticket.common.entity.CommonDto;
+import com.earlybird.ticket.venue.application.dto.response.ProcessSeatCheckQuery;
 import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.service.SeatService;
+import com.earlybird.ticket.venue.presentation.dto.request.ProcessSeatCheckRequest;
+import com.earlybird.ticket.venue.presentation.dto.response.ProcessSeatCheckResponse;
 import com.earlybird.ticket.venue.presentation.dto.response.SeatListResponse;
 import com.earlybird.ticket.venue.presentation.dto.response.SectionListResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -46,6 +46,20 @@ public class SeatController {
                 CommonDto.ok(
                         SeatListResponse.from(seatListQuery),
                         "좌석 리스트 조회 완료"
+                )
+        );
+    }
+
+    @PostMapping("/check")
+    public ResponseEntity<CommonDto<ProcessSeatCheckResponse>> checkSeat(
+            @RequestBody ProcessSeatCheckRequest processSeatCheckRequest
+    ) {
+        ProcessSeatCheckQuery seatCheckQuery = seatService.checkSeat(processSeatCheckRequest.toCommand());
+
+        return ResponseEntity.ok().body(
+                CommonDto.ok(
+                        ProcessSeatCheckResponse.from(seatCheckQuery),
+                        "좌석 확인 완료"
                 )
         );
     }

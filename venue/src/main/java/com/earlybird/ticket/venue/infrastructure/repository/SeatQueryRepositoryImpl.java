@@ -5,6 +5,7 @@ import static com.earlybird.ticket.venue.domain.entity.QSeatInstant.seatInstant;
 
 import com.earlybird.ticket.venue.domain.dto.SeatListResult;
 import com.earlybird.ticket.venue.domain.dto.SeatListResult.SeatResult;
+import com.earlybird.ticket.venue.domain.entity.Seat;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.domain.entity.constant.Status;
 import com.earlybird.ticket.venue.domain.dto.SectionListResult;
@@ -121,5 +122,19 @@ public class SeatQueryRepositoryImpl implements SeatQueryRepository {
                         .fetchOne();
 
         return SeatListResult.copyWithSeatList(seatListResult, seatResultList);
+    }
+
+    @Override
+    public List<Seat> findSeatWithSeatInstance(List<UUID> seatInstanceIdList) {
+        return queryFactory
+                .selectDistinct(seat)
+                .from(seat)
+                .join(seat.seatInstants, seatInstant).fetchJoin()
+                .where(
+                        seatInstant.id.in(seatInstanceIdList),
+                        seatInstant.deletedAt.isNull(),
+                        seat.deletedAt.isNull()
+                        )
+                .fetch();
     }
 }

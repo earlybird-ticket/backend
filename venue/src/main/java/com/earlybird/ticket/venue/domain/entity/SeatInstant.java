@@ -1,6 +1,7 @@
 package com.earlybird.ticket.venue.domain.entity;
 
 import com.earlybird.ticket.common.entity.BaseEntity;
+import com.earlybird.ticket.venue.common.exception.SeatUnavailableException;
 import com.earlybird.ticket.venue.domain.entity.constant.Grade;
 import com.earlybird.ticket.venue.domain.entity.constant.Status;
 import jakarta.persistence.*;
@@ -8,6 +9,7 @@ import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -47,6 +49,13 @@ public class SeatInstant extends BaseEntity {
 
     @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
+
+    public void checkFreeSeatInstance() {
+
+        if(!Status.FREE.equals(this.status)) {
+            throw new SeatUnavailableException();
+        }
+    }
 
 }
 

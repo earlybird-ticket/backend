@@ -5,12 +5,15 @@ import com.earlybird.ticket.venue.application.dto.response.ProcessSeatCheckQuery
 import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.event.dto.request.*;
+import com.earlybird.ticket.venue.common.exception.SeatNotFoundException;
+import com.earlybird.ticket.venue.domain.entity.Seat;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.domain.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -36,11 +39,22 @@ public class SeatServiceImpl implements SeatService {
 
     @Override
     public ProcessSeatCheckQuery checkSeat(ProcessSeatCheckCommand processSeatCheckCommand) {
-        //1. seatInstanceId와 일치하는 seatInstance 가져오기
+        List<UUID> seatInstanceIdList = processSeatCheckCommand.seatInstanceIdList();
+        // 1. seatInstanceId와 일치하는 seat 가져오기
+        List<Seat> seatList = seatRepository.findSeatWithSeatInstance(seatInstanceIdList);
 
-        //2. 상태 확인 후 Free가 아니면 예외
+        // 2. seat이 다 존재하는 지 확인
+        if(seatList.size() != seatInstanceIdList.size()) {
+            throw new SeatNotFoundException();
+        }
+
+        // 3. SeatInstance의 상태확인
+        for(Seat seat : seatList) {
+            seat.checkFreeSeat(seatInstanceIdList);
+        }
+
         //3. Free면 Id와 status응답
-        return null;
+        return ProcessSeatCheckQuery.from(seatInstanceIdList, true);
     }
 
     @Override
