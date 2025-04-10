@@ -9,15 +9,14 @@ import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Getter
-@Table(name = "p_seat_instant")
+@Table(name = "p_seat_instance")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class SeatInstant extends BaseEntity {
+public class SeatInstance extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
