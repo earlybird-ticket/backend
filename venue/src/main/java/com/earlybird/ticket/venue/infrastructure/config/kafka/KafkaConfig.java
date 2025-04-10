@@ -26,4 +26,20 @@ public class KafkaConfig {
     public NewTopic seatToReservationForPreemption() {
         return new NewTopic("seatToReservationForPreemption", 1, (short) 3);
     }
+
+    /**
+     * 좌석 반환 / 확정에 대한 성공 / 실패 응답 Dlq
+     */
+    @Bean
+    public NewTopic seatToReservationDlq() {
+        return new NewTopic("seatToReservationDlq", 1, (short) 3);
+    }
+
+    /**
+     * 좌석 선점 성공 / 실패 응답 Dlq
+     */
+    @Bean
+    public NewTopic seatToReservationForPreemptionDlq() {
+        return new NewTopic("seatToReservationForPreemptionDlq", 1, (short) 3);
+    }
 }
