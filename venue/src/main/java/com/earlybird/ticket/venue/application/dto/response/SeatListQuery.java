@@ -13,14 +13,14 @@ public record SeatListQuery(
         UUID concertSequenceId,
         String section,
         String grade,
-        int floor,
+        Integer floor,
         List<SeatQuery> seatList
 ) {
     @Builder
     public record SeatQuery(
             UUID seatInstanceId,
-            int row,
-            int col,
+            Integer row,
+            Integer col,
             String status,
             BigDecimal price
     ) {
@@ -31,8 +31,8 @@ public record SeatListQuery(
         return SeatListQuery.builder()
                 .concertId(seatListResult.concertId())
                 .concertSequenceId(seatListResult.concertSequenceId())
-                .section(seatListResult.section().getValue())
-                .grade(seatListResult.grade().getValue())
+                .section(seatListResult.section() == null ? null : seatListResult.section().getValue())
+                .grade(seatListResult.grade() == null ? null : seatListResult.grade().getValue())
                 .floor(seatListResult.floor())
                 .seatList(seatListResult.seatList()
                         .stream()
@@ -40,7 +40,7 @@ public record SeatListQuery(
                                 .seatInstanceId(seatResult.seatInstanceId())
                                 .row(seatResult.row())
                                 .col(seatResult.col())
-                                .status(seatResult.status().getValue())
+                                .status(seatResult.status() == null ? null : seatResult.status().getValue())
                                 .price(seatResult.price())
                                 .build()
                         )

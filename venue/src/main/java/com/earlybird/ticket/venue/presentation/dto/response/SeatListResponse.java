@@ -13,14 +13,14 @@ public record SeatListResponse(
         UUID concertSequenceId,
         String section,
         String grade,
-        int floor,
+        Integer floor,
         List<SeatResponse> seatList
 ) {
     @Builder
     private record SeatResponse(
         UUID seatInstanceId,
-        int row,
-        int col,
+        Integer row,
+        Integer col,
         String seatStatus,
         BigDecimal price
     ) {
