@@ -29,7 +29,7 @@ public class Outbox {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String aggregateType;
+    private AggregateType aggregateType;
     private UUID aggregateId;
 
     @Enumerated(EnumType.STRING)
@@ -46,7 +46,8 @@ public class Outbox {
     private LocalDateTime sentAt;
 
     @Builder
-    public Outbox(String aggregateType, UUID aggregateId, EventType eventType, String payload) {
+    public Outbox(
+            AggregateType aggregateType, UUID aggregateId, EventType eventType, String payload) {
         this.aggregateType = aggregateType;
         this.aggregateId = aggregateId;
         this.eventType = eventType;
