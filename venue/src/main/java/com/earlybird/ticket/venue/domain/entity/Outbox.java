@@ -1,6 +1,6 @@
 package com.earlybird.ticket.venue.domain.entity;
 
-import com.earlybird.ticket.venue.domain.entity.constant.EventType;
+import com.earlybird.ticket.venue.common.event.EventType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

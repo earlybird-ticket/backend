@@ -22,7 +22,7 @@ public class VenueKafkaOutboxProducer {
     @Transactional
     @Scheduled(fixedDelay = 5000)
     public void publishUnsentEvents() {
-        List<Outbox> outboxes = outboxRepository.findTop100BySuccessFalseOrderByCreatedAtAsc();
+        List<Outbox> outboxes = outboxRepository.findTop100ByOrderByCreatedAtAsc();
 
         for (Outbox outbox : outboxes) {
             try {

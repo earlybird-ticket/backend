@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface OutboxJpaRepository extends JpaRepository<Outbox, Long> {
-    List<Outbox> findTop100BySuccessFalseOrderByCreatedAtAsc();
+    List<Outbox> findTop100ByOrderByCreatedAtAsc();
 }
