@@ -9,15 +9,16 @@ import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 
+@Builder
 @Entity
 @Getter
-@Table(name = "p_seat_instant")
+@Table(name = "p_seat_instance")
 @SQLRestriction("deleted_at is null")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class SeatInstant extends BaseEntity {
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
+public class SeatInstance extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -49,6 +50,32 @@ public class SeatInstant extends BaseEntity {
 
     @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
+
+    public static SeatInstance createSeatInstance(
+            Seat seat,
+            UUID venueId,
+            UUID hallId,
+            UUID concertId,
+            UUID concertSequenceId,
+            Grade grade,
+            BigDecimal price,
+            Long userId
+    ) {
+        SeatInstance seatInstance = SeatInstance.builder()
+                .seat(seat)
+                .venueId(venueId)
+                .hallId(hallId)
+                .concertId(concertId)
+                .concertSequenceId(concertSequenceId)
+                .grade(grade)
+                .status(Status.FREE)
+                .price(price)
+                .build();
+
+        seatInstance.create(userId);
+
+        return seatInstance;
+    }
 
     public void checkFreeSeatInstance() {
 

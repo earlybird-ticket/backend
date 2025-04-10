@@ -44,4 +44,14 @@ public abstract class BaseEntity {
         this.deletedAt = LocalDateTime.now();
         this.deletedBy = deletedBy;
     }
+
+    public void create(Long createdBy) {
+        this.createdAt = LocalDateTime.now();
+        this.createdBy = createdBy;
+    }
+
+    public void update(Long modifiedBy) {
+        this.updatedAt = LocalDateTime.now();
+        this.updatedBy = modifiedBy;
+    }
 }
