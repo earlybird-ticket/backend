@@ -2,10 +2,12 @@ package com.earlybird.ticket.admin.presentation;
 
 import com.earlybird.ticket.admin.application.AdminService;
 import com.earlybird.ticket.admin.presentation.dto.DeleteCouponRequest;
+import com.earlybird.ticket.admin.presentation.dto.DeleteSeatRequest;
 import com.earlybird.ticket.admin.presentation.dto.DeleteVenueRequest;
 import com.earlybird.ticket.admin.presentation.dto.RegisterCouponIssueRequest;
 import com.earlybird.ticket.admin.presentation.dto.RegisterVenueRequest;
 import com.earlybird.ticket.admin.presentation.dto.UpdateCouponRequest;
+import com.earlybird.ticket.admin.presentation.dto.UpdateSeatRequest;
 import com.earlybird.ticket.admin.presentation.dto.UpdateVenueRequest;
 import com.earlybird.ticket.common.entity.CommonDto;
 import jakarta.validation.Valid;
@@ -77,6 +79,24 @@ public class AdminController {
             @RequestBody @Valid DeleteVenueRequest request
     ) {
         adminService.withdrawVenue(request.toDeleteVenueCommand());
+        return CommonDto.ok(null, "공연장 삽입 성공");
+    }
+
+    @PutMapping("/seat")
+    public CommonDto<Void> modifySeat(
+            @RequestHeader(value = "X-User-Passport") String passport,
+            @RequestBody @Valid UpdateSeatRequest request
+    ) {
+        adminService.modifyVenue(request.toUpdateSeatCommand());
+        return CommonDto.ok(null, "공연장 수정 성공");
+    }
+
+    @DeleteMapping("/seat")
+    public CommonDto<Void> withdrawSeat(
+            @RequestHeader(value = "X-User-Passport") String passport,
+            @RequestBody @Valid DeleteSeatRequest request
+    ) {
+        adminService.withdrawVenue(request.toDeleteSeatCommand());
         return CommonDto.ok(null, "공연장 삽입 성공");
     }
 }
