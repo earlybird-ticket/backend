@@ -19,7 +19,7 @@ public class VenueKafkaEventListener {
 
     @KafkaListener(topics = {
             EventType.Topic.VENUE_TOPIC
-    }, containerFactory = "kafkaListenerContainerFactory")
+    }, containerFactory = "kafkaListenerContainerFactory", groupId = "test-group-id")
     public void listen(@Payload String message, Acknowledgment ack) {
         try{
             Event<? extends EventPayload> event = Event.fromJson(message);

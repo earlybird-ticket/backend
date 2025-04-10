@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.UUID;
 
 public record ProcessSeatCheckRequest(
-        @NotEmpty(message = "[seat_id_list : NotEmpty]") List<UUID> seatIdList
+        @NotEmpty(message = "[seat_id_list : NotEmpty]") List<UUID> seatInstanceIdList
 ) {
     public ProcessSeatCheckCommand toCommand() {
         return ProcessSeatCheckCommand.builder()
-                .seatIdList(seatIdList)
+                .seatInstanceIdList(seatInstanceIdList)
                 .build();
     }
 }

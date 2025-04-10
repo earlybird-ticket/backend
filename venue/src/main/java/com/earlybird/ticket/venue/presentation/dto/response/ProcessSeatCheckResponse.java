@@ -8,13 +8,13 @@ import java.util.UUID;
 
 @Builder
 public record ProcessSeatCheckResponse(
-        List<UUID> seatIdList,
+        List<UUID> seatInstanceIdList,
         boolean status
         ) {
 
         public static ProcessSeatCheckResponse from(ProcessSeatCheckQuery processSeatCheckQuery) {
                 return ProcessSeatCheckResponse.builder()
-                        .seatIdList(processSeatCheckQuery.seatIdList())
+                        .seatInstanceIdList(processSeatCheckQuery.seatInstanceIdList())
                         .status(processSeatCheckQuery.status())
                         .build();
         }

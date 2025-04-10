@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Builder
 public record ProcessSeatCheckQuery(
-        List<UUID> seatIdList,
+        List<UUID> seatInstanceIdList,
         boolean status
 ) {
 }

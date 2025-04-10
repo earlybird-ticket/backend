@@ -1,19 +1,11 @@
 package com.earlybird.ticket.venue.common.config;
 
-import com.earlybird.ticket.common.configuration.JpaConfig;
-import com.earlybird.ticket.common.configuration.QueryDslConfig;
-import com.earlybird.ticket.common.exception.GlobalExceptionHandler;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
-@Import({
-        JpaConfig.class,
-        QueryDslConfig.class,
-        GlobalExceptionHandler.class
-})
-@ComponentScan(basePackages = "com.earlybird.ticket.common.aop")
+@ComponentScan(basePackages = "com.earlybird.ticket.common")
 public class CommonConfig {
-
 }

@@ -26,6 +26,6 @@ public enum EventType {
     }
 
     public static class Topic {
-        public static final String VENUE_TOPIC = "Venue";
+        public static final String VENUE_TOPIC = "AdminToVenue";
     }
 }
