@@ -57,6 +57,7 @@ public class InternalUserController {
     ) {
         userService.deleteUser(passport);
         return ResponseEntity.ok(CommonDto.ok(null, "사용자 삭제 완료"));
+    }
 
     @PatchMapping("/change-password")
     public ResponseEntity<CommonDto<Void>> changeUserCustomerPassword(
