@@ -1,11 +1,13 @@
 package com.earlybird.ticket.admin.application;
 
 import com.earlybird.ticket.admin.application.dto.DeleteCouponCommand;
+import com.earlybird.ticket.admin.application.dto.DeleteSeatCommand;
 import com.earlybird.ticket.admin.application.dto.DeleteVenueCommand;
 import com.earlybird.ticket.admin.application.dto.IssueCouponCommand;
 import com.earlybird.ticket.admin.application.dto.RegisterSeatCommand;
 import com.earlybird.ticket.admin.application.dto.RegisterVenueCommand;
 import com.earlybird.ticket.admin.application.dto.UpdateCouponCommand;
+import com.earlybird.ticket.admin.application.dto.UpdateSeatCommand;
 import com.earlybird.ticket.admin.application.dto.UpdateVenueCommand;
 import com.earlybird.ticket.admin.domain.AdminRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +41,12 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void registerSeat(RegisterSeatCommand registerSeatCommand) {
-        
+
+    }
+
+    @Override
+    public void withdrawSeat(DeleteSeatCommand deleteSeatCommand) {
+
     }
 
     @Override
@@ -49,6 +56,11 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void withdrawVenue(DeleteVenueCommand deleteVenueCommand) {
+
+    }
+
+    @Override
+    public void modifiedSeat(UpdateSeatCommand updateSeatCommand) {
 
     }
 }

@@ -37,3 +37,6 @@ out/
 .vscode/
 .env
 **/.DS_Store
+
+**/generated
+*.log
