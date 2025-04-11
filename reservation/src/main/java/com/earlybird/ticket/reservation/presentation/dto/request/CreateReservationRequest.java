@@ -38,7 +38,7 @@ public record CreateReservationRequest(
         //논리적 좌석 정보
         @NotNull(message = "seatInstanceId is Necessary") UUID seatInstanceId,
         @NotNull(message = "seatRow is Necessary") Integer seatRow,
-        @NotNull(message = "seatCol is Necessary") String seatCol,
+        @NotNull(message = "seatCol is Necessary") Integer seatCol,
         @NotNull(message = "seatGrade is Necessary") SeatGrade seatGrade,
         @NotNull(message = "seatPrice is Necessary") BigDecimal seatPrice,
         @NotNull(message = "seatStatus is Necessary") SeatStatus seatStatus,
@@ -68,7 +68,7 @@ public record CreateReservationRequest(
                                     @Nullable CouponStatus couponStatus,
                                     @NotNull(message = "seatInstanceId is Necessary") UUID seatInstanceId,
                                     @NotNull(message = "seatRow is Necessary") Integer seatRow,
-                                    @NotNull(message = "seatCol is Necessary") String seatCol,
+                                    @NotNull(message = "seatCol is Necessary") Integer seatCol,
                                     @NotNull(message = "seatGrade is Necessary") SeatGrade seatGrade,
                                     @NotNull(message = "seatPrice is Necessary") BigDecimal seatPrice,
                                     @NotNull(message = "seatStatus is Necessary") SeatStatus seatStatus,
