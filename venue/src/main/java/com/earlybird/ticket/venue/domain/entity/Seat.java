@@ -5,6 +5,7 @@ import com.earlybird.ticket.venue.application.event.dto.request.SeatCreatePayloa
 import com.earlybird.ticket.venue.application.event.dto.request.SeatInstanceCreatePayload.SeatInstanceInfo;
 import com.earlybird.ticket.venue.domain.entity.constant.Grade;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
+import com.earlybird.ticket.venue.domain.entity.constant.Status;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
@@ -77,10 +78,10 @@ public class Seat extends BaseEntity {
         return seatList;
     }
 
-    public void checkFreeSeat(List<UUID> seatInstanceIdList) {
+    public void checkSeatStatus(List<UUID> seatInstanceIdList, Status status) {
         this.seatInstances.stream()
                 .filter(seatInstance -> seatInstanceIdList.contains(seatInstance.getId()))
-                .forEach(SeatInstance::checkFreeSeatInstance);
+                .forEach(seatInstance -> seatInstance.checkSeatInstanceStatus(status));
     }
 
     public void createSeatInstance(
@@ -133,11 +134,19 @@ public class Seat extends BaseEntity {
     }
 
     public void preemptSeat(List<UUID> seatInstanceIdList,Long userId) {
-        checkFreeSeat(seatInstanceIdList);
+        checkSeatStatus(seatInstanceIdList, Status.FREE);
         this.seatInstances.stream()
                 .filter(seatInstance -> seatInstanceIdList.contains(seatInstance.getId()))
                 .findFirst()
                 .ifPresent(seatInstance -> seatInstance.preemptSeatInstance(userId));
 
+    }
+
+    public void confirmSeat(List<UUID> seatInstanceIdList, Long userId) {
+        checkSeatStatus(seatInstanceIdList, Status.PREEMPTED);
+        this.seatInstances.stream()
+                .filter(seatInstance -> seatInstanceIdList.contains(seatInstance.getId()))
+                .findFirst()
+                .ifPresent(seatInstance -> seatInstance.confirmSeatInstance(userId));
     }
 }

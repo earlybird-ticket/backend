@@ -9,7 +9,6 @@ import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -78,9 +77,9 @@ public class SeatInstance extends BaseEntity {
         return seatInstance;
     }
 
-    public void checkFreeSeatInstance() {
+    public void checkSeatInstanceStatus(Status status) {
 
-        if(!Status.FREE.equals(this.status)) {
+        if(!status.equals(this.status)) {
             throw new SeatUnavailableException();
         }
     }
@@ -110,6 +109,14 @@ public class SeatInstance extends BaseEntity {
 
     public void preemptSeatInstance(Long userId) {
         this.status = Status.PREEMPTED;
+        this.update(userId);
+    }
+
+    public void confirmSeatInstance(Long userId) {
+        if(!userId.equals(this.getUpdatedBy())) {
+            throw new SeatUnavailableException();
+        }
+        this.status = Status.CONFIRMED;
         this.update(userId);
     }
 }
