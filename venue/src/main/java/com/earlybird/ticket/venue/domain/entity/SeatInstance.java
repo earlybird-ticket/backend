@@ -84,5 +84,27 @@ public class SeatInstance extends BaseEntity {
         }
     }
 
+    public void updateSeatInstance(
+            UUID hallId,
+            UUID concertId,
+            UUID concertSequenceId,
+            String grade,
+            String status,
+            BigDecimal price,
+            Long userId
+    ) {
+        this.hallId = hallId;
+        this.concertId = concertId;
+        this.concertSequenceId = concertSequenceId;
+        this.grade = Grade.getByValue(grade);
+        this.status = Status.getByValue(status);
+        this.price = price;
+
+        this.update(userId);
+    }
+
+    public void deleteSeatInstance(Long userId) {
+        this.delete(userId);
+    }
 }
 

@@ -137,4 +137,18 @@ public class SeatQueryRepositoryImpl implements SeatQueryRepository {
                         )
                 .fetch();
     }
+
+    @Override
+    public Seat findSeatBySeatInstanceId(UUID seatInstanceId) {
+        return queryFactory
+                .selectDistinct(seat)
+                .from(seat)
+                .join(seat.seatInstances, seatInstance).fetchJoin()
+                .where(
+                        seatInstance.id.eq(seatInstanceId),
+                        seatInstance.deletedAt.isNull(),
+                        seat.deletedAt.isNull()
+                )
+                .fetchOne();
+    }
 }
