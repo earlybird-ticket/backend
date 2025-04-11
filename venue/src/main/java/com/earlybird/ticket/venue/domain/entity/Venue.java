@@ -84,4 +84,19 @@ public class Venue extends BaseEntity {
     ) {
         return Hall.createHall(venue, hallName, hallFloor, userId);
     }
+
+    public void updateVenue(
+            String name,
+            String location,
+            String area,
+            Integer totalNumberOfSeats,
+            Long userId
+    ) {
+        this.name = name;
+        this.location = location;
+        this.area = area;
+        this.totalNumberOfSeats = totalNumberOfSeats;
+
+        this.update(userId);
+    }
 }

@@ -5,6 +5,8 @@ import com.earlybird.ticket.venue.domain.repository.VenueRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.UUID;
+
 @Repository
 @RequiredArgsConstructor
 public class VenueRepositoryImpl implements VenueRepository {
@@ -13,5 +15,10 @@ public class VenueRepositoryImpl implements VenueRepository {
     @Override
     public Venue save(Venue venue) {
         return venueJpaRepository.save(venue);
+    }
+
+    @Override
+    public Venue findById(UUID venueId) {
+        return venueJpaRepository.findById(venueId).orElse(null);
     }
 }

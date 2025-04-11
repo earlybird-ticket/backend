@@ -3,6 +3,7 @@ package com.earlybird.ticket.venue.application.service;
 import com.earlybird.ticket.venue.application.event.dto.request.VenueCreatePayload;
 import com.earlybird.ticket.venue.application.event.dto.request.VenueDeletePayload;
 import com.earlybird.ticket.venue.application.event.dto.request.VenueUpdatePayload;
+import com.earlybird.ticket.venue.common.exception.VenueNotFoundException;
 import com.earlybird.ticket.venue.domain.entity.Venue;
 import com.earlybird.ticket.venue.domain.repository.VenueRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,13 +34,27 @@ public class VenueServiceImpl implements VenueService {
     }
 
     @Override
+    @Transactional
     public void update(VenueUpdatePayload venueUpdatePayload) {
-        //0. passport에서 userId 가져오기
         //1. venue 가져오기
+        Venue venue = venueRepository.findById(venueUpdatePayload.venueId());
+
+        if(venue == null) {
+            throw new VenueNotFoundException();
+        }
+
         //2. venue update
+        venue.updateVenue(
+                venueUpdatePayload.venueName(),
+                venueUpdatePayload.location(),
+                venueUpdatePayload.area(),
+                venueUpdatePayload.totalNumberOfSeat(),
+                venueUpdatePayload.passportDto().getUserId()
+        );
     }
 
     @Override
+    @Transactional
     public void delete(VenueDeletePayload venueDeletePayload) {
         //0. passport에서 userId 가져오기
         //1. 공연장 + 홀 가져오기
