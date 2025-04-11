@@ -1,9 +1,8 @@
 package com.earlybird.ticket.reservation.infrastructure.messaging.config;
 
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ser.std.StringSerializer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerInterceptor;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -17,8 +16,7 @@ import java.util.Map;
 @Configuration
 public class KafkaProducerConfig {
 
-    //TODO:: Kafka host, port 맞추기
-    private static final String BOOTSTRAP_SERVERS = "localhost:29092";
+    private static final String BOOTSTRAP_SERVERS = "localhost:29091,localhost:29092,localhost:29093";
 
     @Bean
     public ProducerFactory<String, String> producerFactory() {
@@ -32,7 +30,7 @@ public class KafkaProducerConfig {
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
                   StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-                  JsonSerializer.class);
+                  StringSerializer.class);
 
         // 메시지 중복 방지 (Idempotence 활성화 true면 멱등성 활성화)
         props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,

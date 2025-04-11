@@ -1,6 +1,6 @@
 package com.earlybird.ticket.reservation.domain.entity;
 
-import com.earlybird.ticket.common.entity.constant.EventType;
+import com.earlybird.ticket.reservation.domain.entity.constant.EventType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -24,6 +24,7 @@ public class Outbox {
     private Long id;
 
     private String aggregateType;         // 예: "Order"
+
     private UUID aggregateId;           // 예: 주문 ID
 
     @Enumerated(EnumType.STRING)
@@ -60,6 +61,10 @@ public class Outbox {
 
     public void incrementRetry() {
         this.retryCount++;
+    }
+
+    public static class AggregateType {
+        public static final String RESERVATION = "RESERVATION";
     }
 
 }

@@ -1,10 +1,13 @@
 package com.earlybird.ticket.reservation.application.service;
 
 import com.earlybird.ticket.reservation.application.dto.CreateReservationCommand;
-import com.earlybird.ticket.reservation.presentation.dto.response.FindReservationQuery;
+import com.earlybird.ticket.reservation.application.dto.response.FindReservationQuery;
+
+import java.util.List;
 
 public interface ReservationService {
-    void createResrvation(CreateReservationCommand createReservationCommand);
+    void createResrvation(List<CreateReservationCommand> createReservationCommand,
+                          String passport);
 
     void cancelReservation(String reservationId,
                            String passport);

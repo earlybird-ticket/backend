@@ -1,14 +1,16 @@
 package com.earlybird.ticket.reservation.presentation;
 
 import com.earlybird.ticket.common.entity.CommonDto;
+import com.earlybird.ticket.reservation.application.dto.response.FindReservationQuery;
 import com.earlybird.ticket.reservation.application.service.ReservationService;
 import com.earlybird.ticket.reservation.presentation.dto.request.CreateReservationRequest;
-import com.earlybird.ticket.reservation.presentation.dto.response.FindReservationQuery;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,9 +21,14 @@ public class ReservationExternalController {
 
     @PostMapping
     public ResponseEntity<CommonDto<Void>> createReservation(@RequestHeader("X-User-Passport") String passport,
-                                                             @RequestBody @Valid CreateReservationRequest createReservationRequest) {
+                                                             @RequestBody @Valid List<CreateReservationRequest> createReservationRequest) {
 
-        reservationService.createResrvation(CreateReservationRequest.toCreateReservationCommand(createReservationRequest));
+        reservationService.createResrvation(createReservationRequest.stream()
+                                                                    .map(CreateReservationRequest::toCreateReservationCommand
+
+                                                                    )
+                                                                    .toList(),
+                                            passport);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                              .body(CommonDto.created(null,
