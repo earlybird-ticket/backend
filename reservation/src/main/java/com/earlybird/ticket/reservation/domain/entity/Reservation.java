@@ -5,6 +5,7 @@ import com.earlybird.ticket.reservation.domain.entity.constant.*;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_reservation")
 @SQLRestriction("deleted_at is null")
@@ -94,7 +96,7 @@ public class Reservation extends BaseEntity {
     private String hallName;
 
     @Column(name = "hall_floor")
-    private Byte hallFloor;
+    private Integer hallFloor;
 
     @Builder
     public Reservation(UUID id,
@@ -120,7 +122,7 @@ public class Reservation extends BaseEntity {
                        CouponStatus couponStatus,
                        UUID hallId,
                        String hallName,
-                       Byte hallFloor) {
+                       Integer hallFloor) {
         this.id = id;
         this.userId = userId;
         this.username = username;
@@ -146,4 +148,49 @@ public class Reservation extends BaseEntity {
         this.hallName = hallName;
         this.hallFloor = hallFloor;
     }
+
+    public static Reservation createReservation(Long userId,
+                                                String username,
+                                                UUID concertId,
+                                                String concertName,
+                                                UUID concertSequenceId,
+                                                LocalDateTime concertSequenceStartDatetime,
+                                                LocalDateTime concertSequenceEndDatetime,
+                                                ConcertStatus concertSequenceStatus,
+                                                UUID venueId,
+                                                String venueArea,
+                                                String venueLocation,
+                                                String content,
+                                                UUID couponId,
+                                                CouponType couponType,
+                                                String couponName,
+                                                CouponStatus couponStatus,
+                                                UUID hallId,
+                                                String hallName,
+                                                Integer hallFloor) {
+        return Reservation.builder()
+                          .userId(userId)
+                          .username(username)
+                          .reservationStatus(ReservationStatus.PENDING)
+                          .concertId(concertId)
+                          .concertName(concertName)
+                          .concertSequenceId(concertSequenceId)
+                          .concertSequenceStartDatetime(concertSequenceStartDatetime)
+                          .concertSequenceEndDatetime(concertSequenceEndDatetime)
+                          .concertSequenceStatus(concertSequenceStatus)
+                          .venueId(venueId)
+                          .venueArea(venueArea)
+                          .venueLocation(venueLocation)
+                          .content(content)
+                          .couponId(couponId)
+                          .couponType(couponType)
+                          .couponName(couponName)
+                          .couponStatus(couponStatus)
+                          .hallId(hallId)
+                          .hallName(hallName)
+                          .hallFloor(hallFloor)
+                          .build();
+    }
+
+
 }
