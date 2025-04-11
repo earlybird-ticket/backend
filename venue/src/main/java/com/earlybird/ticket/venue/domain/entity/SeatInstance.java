@@ -119,5 +119,13 @@ public class SeatInstance extends BaseEntity {
         this.status = Status.CONFIRMED;
         this.update(userId);
     }
+
+    public void returnSeatInstance(Long userId) {
+        if(!userId.equals(this.getUpdatedBy())) {
+            throw new SeatUnavailableException();
+        }
+        this.status = Status.FREE;
+        this.update(userId);
+    }
 }
 

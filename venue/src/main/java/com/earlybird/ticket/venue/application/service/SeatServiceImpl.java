@@ -10,6 +10,7 @@ import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.event.dto.request.*;
 import com.earlybird.ticket.venue.application.event.dto.response.SeatConfirmSuccessEvent;
 import com.earlybird.ticket.venue.application.event.dto.response.SeatPreemptSuccessEvent;
+import com.earlybird.ticket.venue.application.event.dto.response.SeatReturnSuccessEvent;
 import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.common.exception.SeatNotFoundException;
 import com.earlybird.ticket.venue.domain.entity.Event;
@@ -223,11 +224,29 @@ public class SeatServiceImpl implements SeatService {
     @Override
     @Transactional
     public void returnSeat(SeatReturnPayload seatReturnPayload) {
-        //0. userId 가져오기
+        List<UUID> seatInstanceIdList = seatReturnPayload.seatInstanceIdList();
         //1. seatInstance 가져오기
-        //2. Free로 update
-        //3. 저장
-        //4. 아웃박스 저장
+        List<Seat> seatList = seatRepository.findSeatListWithSeatInstanceInSeatInstanceIdList(seatInstanceIdList);
+
+        // 2. seat이 다 존재하는 지 확인
+        if(seatList.size() != seatInstanceIdList.size()) {
+            throw new SeatNotFoundException();
+        }
+
+        // 3. SeatInstance의 상태확인
+        // Free update
+        for(Seat seat : seatList) {
+            seat.returnSeat(seatInstanceIdList, seatReturnPayload.passportDto().getUserId());
+        }
+        //4. 저장
+        //5. 아웃 박스 저장
+        saveOutbox(
+                seatInstanceIdList,
+                SeatReturnSuccessEvent.builder()
+                        .seatInstanceIdList(seatInstanceIdList)
+                        .build(),
+                EventType.SEAT_RETURN_SUCCESS
+        );
     }
 
     private <T extends EventPayload> void saveOutbox(

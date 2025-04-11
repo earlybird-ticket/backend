@@ -149,4 +149,11 @@ public class Seat extends BaseEntity {
                 .findFirst()
                 .ifPresent(seatInstance -> seatInstance.confirmSeatInstance(userId));
     }
+
+    public void returnSeat(List<UUID> seatInstanceIdList, Long userId) {
+        this.seatInstances.stream()
+                .filter(seatInstance -> seatInstanceIdList.contains(seatInstance.getId()))
+                .findFirst()
+                .ifPresent(seatInstance -> seatInstance.returnSeatInstance(userId));
+    }
 }
