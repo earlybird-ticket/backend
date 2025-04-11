@@ -2,18 +2,18 @@ package com.earlybird.ticket.venue.domain.entity;
 
 import com.earlybird.ticket.common.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.util.UUID;
 
+@Builder
 @Entity
 @Getter
 @Table(name = "p_hall")
 @SQLRestriction(("deleted_at is null"))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Hall extends BaseEntity {
 
     @Id
@@ -29,5 +29,21 @@ public class Hall extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venue_id", nullable = false)
     private Venue venue;
+
+    public static Hall createHall(
+            Venue venue,
+            String name,
+            Integer floor,
+            Long userId
+    ) {
+        Hall hall = Hall.builder()
+                .venue(venue)
+                .name(name)
+                .floor(floor)
+                .build();
+
+        hall.create(userId);
+        return hall;
+    }
 
 }
