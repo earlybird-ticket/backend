@@ -1,13 +1,15 @@
 package com.earlybird.ticket.reservation.application.service;
 
 import com.earlybird.ticket.common.entity.PassportDto;
-import com.earlybird.ticket.common.entity.constant.Role;
 import com.earlybird.ticket.common.util.PassportUtil;
 import com.earlybird.ticket.reservation.application.dto.CreateReservationCommand;
 import com.earlybird.ticket.reservation.application.dto.response.FindReservationQuery;
 import com.earlybird.ticket.reservation.common.exception.CustomJsonProcessingException;
-import com.earlybird.ticket.reservation.domain.dto.request.SeatAssignPayload;
-import com.earlybird.ticket.reservation.domain.entity.*;
+import com.earlybird.ticket.reservation.domain.dto.request.SeatPreemptPayload;
+import com.earlybird.ticket.reservation.domain.entity.Event;
+import com.earlybird.ticket.reservation.domain.entity.Outbox;
+import com.earlybird.ticket.reservation.domain.entity.Reservation;
+import com.earlybird.ticket.reservation.domain.entity.ReservationSeat;
 import com.earlybird.ticket.reservation.domain.entity.constant.EventType;
 import com.earlybird.ticket.reservation.domain.repository.OutboxRepository;
 import com.earlybird.ticket.reservation.domain.repository.ReservationRepository;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -38,8 +41,7 @@ public class ReservationServiceImpl implements ReservationService {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         Long userId = passportDto.getUserId();
 
-        // ✅ 여러 개의 payload를 리스트로 생성
-        List<SeatAssignPayload> payloadList = new ArrayList<>();
+        List<UUID> seatInstanceList = new ArrayList<>();
         List<Reservation> reservations = new ArrayList<>();
 
         for (CreateReservationCommand command : createReservationCommands) {
@@ -54,21 +56,19 @@ public class ReservationServiceImpl implements ReservationService {
                                                                     reservation);
             reservationSeatRepository.save(reservationSeat);
 
-            // 3. 아웃박스 payload 항목 누적
-            SeatAssignPayload payload = SeatAssignPayload.builder()
-                                                         .seatInstanceId(reservationSeat.getSeatInstanceId())
-                                                         .userId(userId)
-                                                         .role(Role.from(passportDto.getUserRole()))
-                                                         .build();
-
-            payloadList.add(payload);
+            // 3. 좌석 UUID 누적
+            seatInstanceList.add(reservationSeat.getSeatInstanceId());
         }
-        SeatAssignPayloadListWrapper wrapper = new SeatAssignPayloadListWrapper(payloadList);
 
-        Event<SeatAssignPayloadListWrapper> event = new Event<>(EventType.INSTANCE_SEAT_RESERVATION,
-                                                                wrapper,
-                                                                LocalDateTime.now()
-                                                                             .toString());
+        // 4. 아웃박스 payload 생성 (seatInstanceIds를 한 번에)
+        SeatPreemptPayload payload = SeatPreemptPayload.createSeatPreemptPayload(seatInstanceList,
+                                                                                 userId,
+                                                                                 passportDto);
+
+        Event<SeatPreemptPayload> event = new Event<>(EventType.INSTANCE_SEAT_RESERVATION,
+                                                      payload,
+                                                      LocalDateTime.now()
+                                                                   .toString());
 
         String payloadJson;
         try {
@@ -77,10 +77,11 @@ public class ReservationServiceImpl implements ReservationService {
             throw new CustomJsonProcessingException();
         }
 
+        // 5. Outbox 저장
         Outbox outbox = Outbox.builder()
                               .aggregateType(Outbox.AggregateType.RESERVATION)
                               .aggregateId(reservations.get(0)
-                                                       .getId()) // 또는 UUID.randomUUID()도 가능
+                                                       .getId())
                               .eventType(EventType.INSTANCE_SEAT_RESERVATION)
                               .payload(payloadJson)
                               .build();

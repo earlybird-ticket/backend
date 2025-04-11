@@ -1,7 +1,7 @@
 package com.earlybird.ticket.reservation.domain.entity.constant;
 
 import com.earlybird.ticket.common.entity.EventPayload;
-import com.earlybird.ticket.reservation.domain.dto.request.SeatAssignPayload;
+import com.earlybird.ticket.reservation.domain.dto.request.SeatPreemptPayload;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @RequiredArgsConstructor
 public enum EventType {
-    INSTANCE_SEAT_RESERVATION(SeatAssignPayload.class,
+    INSTANCE_SEAT_RESERVATION(SeatPreemptPayload.class,
                               Topic.ReservationToSeatForPreemption);
 
     private final Class<? extends EventPayload> payloadClass;
