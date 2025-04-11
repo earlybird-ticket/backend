@@ -27,7 +27,7 @@ public class ReservationSeat extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id")
-    private Reservation reservationId;
+    private Reservation reservation;
 
     @Column(name = "seat_instance_id", nullable = false)
     private UUID seatInstanceId;
@@ -54,7 +54,7 @@ public class ReservationSeat extends BaseEntity {
 
     @Builder
     public ReservationSeat(UUID id,
-                           Reservation reservationId,
+                           Reservation reservation,
                            UUID seatInstanceId,
                            UUID concertId,
                            Integer row,
@@ -63,7 +63,7 @@ public class ReservationSeat extends BaseEntity {
                            BigDecimal price,
                            SeatStatus status) {
         this.id = id;
-        this.reservationId = reservationId;
+        this.reservation = reservation;
         this.seatInstanceId = seatInstanceId;
         this.concertId = concertId;
         this.row = row;
@@ -71,5 +71,25 @@ public class ReservationSeat extends BaseEntity {
         this.grade = grade;
         this.price = price;
         this.status = status;
+    }
+
+    public static ReservationSeat createReservationSeat(Reservation reservation,
+                                                        UUID seatInstanceId,
+                                                        UUID concertId,
+                                                        Integer row,
+                                                        Integer col,
+                                                        SeatGrade grade,
+                                                        BigDecimal price,
+                                                        SeatStatus status) {
+        return ReservationSeat.builder()
+                              .reservation(reservation)
+                              .seatInstanceId(seatInstanceId)
+                              .concertId(concertId)
+                              .row(row)
+                              .col(col)
+                              .grade(grade)
+                              .price(price)
+                              .status(status)
+                              .build();
     }
 }
