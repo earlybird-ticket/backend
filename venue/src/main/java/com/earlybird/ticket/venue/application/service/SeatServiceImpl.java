@@ -1,29 +1,42 @@
 package com.earlybird.ticket.venue.application.service;
 
+import com.earlybird.ticket.common.entity.EventPayload;
+import com.earlybird.ticket.common.util.CommonUtil;
+import com.earlybird.ticket.common.util.EventPayloadConverter;
 import com.earlybird.ticket.venue.application.dto.request.ProcessSeatCheckCommand;
 import com.earlybird.ticket.venue.application.dto.response.ProcessSeatCheckQuery;
 import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.event.dto.request.*;
+import com.earlybird.ticket.venue.application.event.dto.response.SeatPreemptSuccessEvent;
+import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.common.exception.SeatNotFoundException;
+import com.earlybird.ticket.venue.domain.entity.Event;
+import com.earlybird.ticket.venue.domain.entity.Outbox;
 import com.earlybird.ticket.venue.domain.entity.Seat;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.application.event.dto.request.SeatCreatePayload.SeatInfo;
 import com.earlybird.ticket.venue.application.event.dto.request.SeatInstanceCreatePayload.SeatInstanceInfo;
+import com.earlybird.ticket.venue.domain.repository.OutboxRepository;
 import com.earlybird.ticket.venue.domain.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static java.time.LocalTime.now;
 
 @Service
 @RequiredArgsConstructor
 public class SeatServiceImpl implements SeatService {
 
     private final SeatRepository seatRepository;
+    private final OutboxRepository outboxRepository;
+    private final EventPayloadConverter eventPayloadConverter;
 
     @Override
     public SectionListQuery findSectionList(UUID concertSequenceId) {
@@ -44,7 +57,7 @@ public class SeatServiceImpl implements SeatService {
     public ProcessSeatCheckQuery checkSeat(ProcessSeatCheckCommand processSeatCheckCommand) {
         List<UUID> seatInstanceIdList = processSeatCheckCommand.seatInstanceIdList();
         // 1. seatInstanceId와 일치하는 seat 가져오기
-        List<Seat> seatList = seatRepository.findSeatListWithSeatInstanceBySeatInstanceIdList(seatInstanceIdList);
+        List<Seat> seatList = seatRepository.findSeatListWithSeatInstanceInSeatInstanceIdList(seatInstanceIdList);
 
         // 2. seat이 다 존재하는 지 확인
         if(seatList.size() != seatInstanceIdList.size()) {
@@ -148,11 +161,44 @@ public class SeatServiceImpl implements SeatService {
     @Override
     @Transactional
     public void preemptSeat(SeatPreemptPayload seatPreemptPayload) {
-        //0. userId 가져오기
-        //1. seatInstance 가져오기
-        //2. Free 상태가 아니면 예외 발생
-        //3. Free 상태면 Preempt로 update 후 응답
+        List<UUID> seatInstanceIdList = seatPreemptPayload.seatInstanceIdList();
+
+        // 1. seatInstanceId와 일치하는 seat 가져오기
+        List<Seat> seatList = seatRepository.findSeatListWithSeatInstanceInSeatInstanceIdList(seatInstanceIdList);
+
+        // 2. seat이 다 존재하는 지 확인
+        if(seatList.size() != seatInstanceIdList.size()) {
+            throw new SeatNotFoundException();
+        }
+
+        // 3. SeatInstance의 상태확인
+        // Free 상태면 Preempt로 update 후 응답
+        for(Seat seat : seatList) {
+            seat.preemptSeat(seatInstanceIdList, seatPreemptPayload.passportDto().getUserId());
+        }
+
         //4. 저장
+        //5. 아웃 박스 저장
+        saveOutbox(seatInstanceIdList);
+
+    }
+
+    private void saveOutbox(List<UUID> seatInstanceIdList) {
+        Event<SeatPreemptSuccessEvent> event = Event.<SeatPreemptSuccessEvent>builder()
+                .eventType(EventType.SEAT_PREEMPT_SUCCESS)
+                .payload(SeatPreemptSuccessEvent.builder()
+                        .seatInstanceIdList(seatInstanceIdList)
+                        .build())
+                .timestamp(CommonUtil.LocalDateTimetoString(LocalDateTime.now()))
+                .build();
+
+        outboxRepository.save(Outbox.builder()
+                .aggregateId(seatInstanceIdList.get(0))
+                .aggregateType(Outbox.AggregateType.SEAT_INSTANCE)
+                .eventType(EventType.SEAT_PREEMPT_SUCCESS)
+                .payload(eventPayloadConverter.serializePayload((EventPayload) event))
+                .build()
+        );
     }
 
     @Override
@@ -162,6 +208,7 @@ public class SeatServiceImpl implements SeatService {
         //1. seatInstance 가져오기
         //2. Confirm으로 update
         //3. 저장
+        //5. 아웃 박스 저장
     }
 
     @Override
@@ -171,5 +218,6 @@ public class SeatServiceImpl implements SeatService {
         //1. seatInstance 가져오기
         //2. Free로 update
         //3. 저장
+        //4. 아웃박스 저장
     }
 }

@@ -131,4 +131,13 @@ public class Seat extends BaseEntity {
                         userId
                 ));
     }
+
+    public void preemptSeat(List<UUID> seatInstanceIdList,Long userId) {
+        checkFreeSeat(seatInstanceIdList);
+        this.seatInstances.stream()
+                .filter(seatInstance -> seatInstanceIdList.contains(seatInstance.getId()))
+                .findFirst()
+                .ifPresent(seatInstance -> seatInstance.preemptSeatInstance(userId));
+
+    }
 }

@@ -1,6 +1,13 @@
 package com.earlybird.ticket.venue.application.event.dto.request;
 
 import com.earlybird.ticket.common.entity.EventPayload;
+import com.earlybird.ticket.common.entity.PassportDto;
 
-public record SeatPreemptPayload() implements EventPayload {
+import java.util.List;
+import java.util.UUID;
+
+public record SeatPreemptPayload(
+        List<UUID> seatInstanceIdList,
+        PassportDto passportDto
+) implements EventPayload {
 }

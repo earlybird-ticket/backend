@@ -58,4 +58,10 @@ public class Outbox {
         this.retryCount++;
     }
 
+    public static class AggregateType {
+        public static final String VENUE = "VENUE";
+        public static final String SEAT = "SEAT";
+        public static final String SEAT_INSTANCE = "SEAT_INSTANCE";
+    }
+
 }

@@ -9,6 +9,7 @@ import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -105,6 +106,11 @@ public class SeatInstance extends BaseEntity {
 
     public void deleteSeatInstance(Long userId) {
         this.delete(userId);
+    }
+
+    public void preemptSeatInstance(Long userId) {
+        this.status = Status.PREEMPTED;
+        this.update(userId);
     }
 }
 

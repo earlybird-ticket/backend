@@ -125,7 +125,7 @@ public class SeatQueryRepositoryImpl implements SeatQueryRepository {
     }
 
     @Override
-    public List<Seat> findSeatWithSeatInstance(List<UUID> seatInstanceIdList) {
+    public List<Seat> findSeatListWithSeatInstanceInSeatInstanceIdList(List<UUID> seatInstanceIdList) {
         return queryFactory
                 .selectDistinct(seat)
                 .from(seat)
