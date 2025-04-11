@@ -77,9 +77,9 @@ public class SeatInstance extends BaseEntity {
         return seatInstance;
     }
 
-    public void checkFreeSeatInstance() {
+    public void checkSeatInstanceStatus(Status status) {
 
-        if(!Status.FREE.equals(this.status)) {
+        if(!status.equals(this.status)) {
             throw new SeatUnavailableException();
         }
     }
@@ -105,6 +105,27 @@ public class SeatInstance extends BaseEntity {
 
     public void deleteSeatInstance(Long userId) {
         this.delete(userId);
+    }
+
+    public void preemptSeatInstance(Long userId) {
+        this.status = Status.PREEMPTED;
+        this.update(userId);
+    }
+
+    public void confirmSeatInstance(Long userId) {
+        if(!userId.equals(this.getUpdatedBy())) {
+            throw new SeatUnavailableException();
+        }
+        this.status = Status.CONFIRMED;
+        this.update(userId);
+    }
+
+    public void returnSeatInstance(Long userId) {
+        if(!userId.equals(this.getUpdatedBy())) {
+            throw new SeatUnavailableException();
+        }
+        this.status = Status.FREE;
+        this.update(userId);
     }
 }
 

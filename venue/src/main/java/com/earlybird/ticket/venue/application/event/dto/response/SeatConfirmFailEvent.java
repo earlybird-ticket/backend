@@ -1,6 +1,14 @@
 package com.earlybird.ticket.venue.application.event.dto.response;
 
 import com.earlybird.ticket.common.entity.EventPayload;
+import lombok.Builder;
 
-public record SeatConfirmFailEvent() implements EventPayload {
+import java.util.List;
+import java.util.UUID;
+
+@Builder
+public record SeatConfirmFailEvent(
+        List<UUID> seatInstanceIdList,
+        String code
+) implements EventPayload {
 }
