@@ -2,6 +2,7 @@ package com.earlybird.ticket.venue.domain.entity;
 
 import com.earlybird.ticket.common.entity.EventPayload;
 import com.earlybird.ticket.venue.common.event.EventType;
+import com.earlybird.ticket.venue.common.exception.JsonDeserializationException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.*;
@@ -30,7 +31,7 @@ public class Event<T extends EventPayload> {
 
             return new Event<>(eventType, payload, timestamp);
         } catch (Exception e) {
-            throw new RuntimeException("Invalid JSON", e);
+            throw new JsonDeserializationException(e.getMessage());
         }
     }
 }

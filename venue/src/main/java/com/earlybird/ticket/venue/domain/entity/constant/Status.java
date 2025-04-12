@@ -1,7 +1,6 @@
 package com.earlybird.ticket.venue.domain.entity.constant;
 
 import com.earlybird.ticket.venue.common.exception.EnumTypeNotSupportException;
-import jakarta.ws.rs.NotSupportedException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

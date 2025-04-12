@@ -1,6 +1,7 @@
 package com.earlybird.ticket.venue.infrastructure.messaging;
 
 import com.earlybird.ticket.common.entity.EventPayload;
+import com.earlybird.ticket.venue.common.exception.JsonDeserializationException;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.application.event.dispatcher.EventDispatcher;
@@ -18,15 +19,21 @@ public class VenueKafkaEventListener {
     private final EventDispatcher eventDispatcher;
 
     @KafkaListener(topics = {
-            EventType.Topic.VENUE_TOPIC
+            EventType.Topic.ADMIN_TO_VENUE_TOPIC
     }, containerFactory = "kafkaListenerContainerFactory", groupId = "test-group-id")
-    public void listen(@Payload String message, Acknowledgment ack) {
+    public void listenAdminToVenueTopic(@Payload String message, Acknowledgment ack) {
         try{
             Event<? extends EventPayload> event = Event.fromJson(message);
             eventDispatcher.handle(event);
             ack.acknowledge();
+
+        } catch (JsonDeserializationException e) {
+            log.error("메시지 처리 실패: {}", e.getMessage());
+            ack.acknowledge();
+
         } catch (Exception e) {
             log.error("메시지 처리 실패: {}", e.getMessage());
+            ack.acknowledge();
             // 재처리 로직
         }
     }
