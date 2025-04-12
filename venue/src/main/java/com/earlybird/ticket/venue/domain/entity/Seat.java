@@ -1,8 +1,6 @@
 package com.earlybird.ticket.venue.domain.entity;
 
 import com.earlybird.ticket.common.entity.BaseEntity;
-import com.earlybird.ticket.venue.application.event.dto.request.SeatCreatePayload.SeatInfo;
-import com.earlybird.ticket.venue.application.event.dto.request.SeatInstanceCreatePayload.SeatInstanceInfo;
 import com.earlybird.ticket.venue.domain.entity.constant.Grade;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.domain.entity.constant.Status;
@@ -52,22 +50,25 @@ public class Seat extends BaseEntity {
     private Set<SeatInstance> seatInstances;
 
     public static List<Seat> create(
-            SeatInfo seatInfo,
+            Integer rowCnt,
+            Integer colCnt,
+            String section,
+            Integer floor,
             UUID venueId,
             UUID hallId,
             Long userId
     ) {
         List<Seat> seatList = new ArrayList<>();
 
-        for (int i = 1; i <= seatInfo.rowCnt(); i++) {
-            for (int j = 1; j <= seatInfo.colCnt(); j++) {
+        for (int i = 1; i <= rowCnt; i++) {
+            for (int j = 1; j <= colCnt; j++) {
                 Seat seat = Seat.builder()
                         .venueId(venueId)
                         .hallId(hallId)
-                        .section(Section.getByValue(seatInfo.section()))
+                        .section(Section.getByValue(section))
                         .row(i)
                         .col(j)
-                        .floor(seatInfo.floor())
+                        .floor(floor)
                         .build();
 
                 seat.create(userId);
@@ -85,7 +86,8 @@ public class Seat extends BaseEntity {
     }
 
     public void createSeatInstance(
-            SeatInstanceInfo info,
+            String grade,
+            BigDecimal price,
             UUID concertSequenceId,
             UUID venueId,
             UUID concertId,
@@ -98,8 +100,8 @@ public class Seat extends BaseEntity {
                 hallId,
                 concertId,
                 concertSequenceId,
-                Grade.getByValue(info.grade()),
-                info.price(),
+                Grade.getByValue(grade),
+                price,
                 userId
         );
 

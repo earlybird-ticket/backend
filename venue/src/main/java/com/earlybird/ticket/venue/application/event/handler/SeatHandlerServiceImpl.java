@@ -1,6 +1,7 @@
 package com.earlybird.ticket.venue.application.event.handler;
 
 import com.earlybird.ticket.common.entity.EventPayload;
+import com.earlybird.ticket.common.entity.constant.Code;
 import com.earlybird.ticket.common.util.CommonUtil;
 import com.earlybird.ticket.common.util.EventPayloadConverter;
 import com.earlybird.ticket.venue.application.event.dto.request.*;
@@ -41,7 +42,10 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
 
         for(SeatCreatePayload.SeatInfo seatInfo : seatCreatePayload.seatList()) {
             seatList = Seat.create(
-                    seatInfo,
+                    seatInfo.rowCnt(),
+                    seatInfo.colCnt(),
+                    seatInfo.section(),
+                    seatInfo.floor(),
                     seatCreatePayload.venueId(),
                     seatCreatePayload.venueId(),
                     seatCreatePayload.passportDto().getUserId()
@@ -65,7 +69,8 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                     //3. 좌석 섹션에 따라 좌석 정보 + Payload 정보로 seatInstance 생성
                     if (seat.getSection().equals(Section.getByValue(info.section()))) {
                         seat.createSeatInstance(
-                                info,
+                                info.grade(),
+                                info.price(),
                                 concertSequenceId,
                                 seatInstanceCreatePayload.venueId(),
                                 seatInstanceCreatePayload.concertId(),
@@ -148,6 +153,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                     SeatPreemptFailEvent.builder()
                             .passportDto(seatPreemptPayload.passportDto())
                             .seatInstanceIdList(seatInstanceIdList)
+                            .code(Code.SEAT_PREEMPT_FAIL.getCode())
                             .build(),
                     EventType.SEAT_PREEMPT_FAIL
             );
@@ -190,6 +196,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                     SeatConfirmFailEvent.builder()
                             .passportDto(seatConfirmPayload.passportDto())
                             .seatInstanceIdList(seatInstanceIdList)
+                            .code(Code.SEAT_CONFIRM_FAIL.getCode())
                             .build(),
                     EventType.SEAT_CONFIRM_FAIL
             );
@@ -229,6 +236,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                     SeatReturnFailEvent.builder()
                             .passportDto(seatReturnPayload.passportDto())
                             .seatInstanceIdList(seatInstanceIdList)
+                            .code(Code.SEAT_RETURN_FAIL.getCode())
                             .build(),
                     EventType.SEAT_RETURN_FAIL
             );
