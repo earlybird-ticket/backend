@@ -1,8 +1,8 @@
 package com.earlybird.ticket.reservation.application.handler;
 
 import com.earlybird.ticket.common.entity.PassportDto;
-import com.earlybird.ticket.reservation.application.dto.response.ReserveCouponEvent;
-import com.earlybird.ticket.reservation.application.event.EventHandler;
+import com.earlybird.ticket.reservation.application.dto.response.ReserveCouponPayload;
+import com.earlybird.ticket.reservation.application.event.PayloadHandler;
 import com.earlybird.ticket.reservation.common.exception.CustomJsonProcessingException;
 import com.earlybird.ticket.reservation.domain.dto.request.ConfirmCouponPayload;
 import com.earlybird.ticket.reservation.domain.dto.request.FailCouponPayload;
@@ -25,18 +25,18 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ReserveCouponEventHandler implements EventHandler<ReserveCouponEvent> {
+public class ReserveCouponPayloadHandler implements PayloadHandler<ReserveCouponPayload> {
 
     private final ReservationRepository reservationRepository;
     private final OutboxRepository outboxRepository;
 
     @Override
     @Transactional
-    public void handle(Event<ReserveCouponEvent> event) {
+    public void handle(Event<ReserveCouponPayload> event) {
         log.info("[CouponEventHandler] 이벤트 수신: {}",
                  event);
 
-        ReserveCouponEvent payload = event.getPayload();
+        ReserveCouponPayload payload = event.getPayload();
         if (payload == null) {
             log.error("[CouponEventHandler] payload가 null입니다.");
             return;
@@ -69,7 +69,7 @@ public class ReserveCouponEventHandler implements EventHandler<ReserveCouponEven
                                                                   .userRole(passport.getUserRole())
                                                                   .build();
 
-        List<Reservation> reservationList = reservationRepository.findByAll(payload.reservationList());
+        List<Reservation> reservationList = reservationRepository.findAllById(payload.reservationList());
         log.info("[CouponEventHandler] 조회된 Reservation 수: {}",
                  reservationList.size());
 
@@ -140,7 +140,7 @@ public class ReserveCouponEventHandler implements EventHandler<ReserveCouponEven
     }
 
     @Override
-    public boolean support(Event<ReserveCouponEvent> event) {
+    public boolean support(Event<ReserveCouponPayload> event) {
         return event.getEventType() == EventType.COUPON_CONFIRM;
     }
 }

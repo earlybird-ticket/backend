@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ReservationService {
-    void createResrvation(List<CreateReservationCommand> createReservationCommand,
-                          String passport);
+    List<String> createReservation(List<CreateReservationCommand> createReservationCommand,
+                                   String passport);
 
     void cancelReservation(UUID reservationId,
                            String passport);

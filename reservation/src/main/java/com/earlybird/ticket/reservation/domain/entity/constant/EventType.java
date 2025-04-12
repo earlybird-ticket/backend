@@ -1,9 +1,9 @@
 package com.earlybird.ticket.reservation.domain.entity.constant;
 
 import com.earlybird.ticket.common.entity.EventPayload;
-import com.earlybird.ticket.reservation.application.dto.response.ReserveCouponEvent;
-import com.earlybird.ticket.reservation.application.dto.response.SeatPreemptFailEvent;
-import com.earlybird.ticket.reservation.application.dto.response.SeatPreemptSuccessEvent;
+import com.earlybird.ticket.reservation.application.dto.response.ReserveCouponPayload;
+import com.earlybird.ticket.reservation.application.dto.response.SeatPreemptFailPayload;
+import com.earlybird.ticket.reservation.application.dto.response.SeatPreemptSuccessPayload;
 import com.earlybird.ticket.reservation.domain.dto.request.ConfirmCouponPayload;
 import com.earlybird.ticket.reservation.domain.dto.request.FailCouponPayload;
 import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatPayload;
@@ -18,8 +18,8 @@ public enum EventType {
     //produce
     SEAT_INSTANCE_CONFIRM(PreemptSeatPayload.class,
                           Topic.RESERVATION_TO_SEAT),
-    SEAT_INSTANCE_RESERVATION(PreemptSeatPayload.class,
-                              Topic.RESERVATION_TO_SEAT_FOR_PREEMPTION),
+    SEAT_INSTANCE_PREEMPTION(PreemptSeatPayload.class,
+                             Topic.RESERVATION_TO_SEAT_FOR_PREEMPTION),
     COUPON_RETURN(PreemptSeatPayload.class,
                   Topic.RESERVATION_TO_COUPON),
     PAYMENT_REQUEST(PreemptSeatPayload.class,
@@ -27,11 +27,11 @@ public enum EventType {
     SEAT_INSTANCE_RETURN(PreemptSeatPayload.class,
                          Topic.RESERVATION_TO_SEAT),
     //consume,
-    SEAT_PREEMPT_SUCCESS(SeatPreemptSuccessEvent.class,
+    SEAT_PREEMPT_SUCCESS(SeatPreemptSuccessPayload.class,
                          Topic.RESERVATION_TO_SEAT),
-    SEAT_PREEMPT_FAIL(SeatPreemptFailEvent.class,
+    SEAT_PREEMPT_FAIL(SeatPreemptFailPayload.class,
                       Topic.RESERVATION_TO_SEAT),
-    COUPON_CONFIRM(ReserveCouponEvent.class,
+    COUPON_CONFIRM(ReserveCouponPayload.class,
                    Topic.RESERVATION_TO_COUPON),
     COUPON_SUCCESS(ConfirmCouponPayload.class,
                    Topic.RESERVATION_TO_COUPON),

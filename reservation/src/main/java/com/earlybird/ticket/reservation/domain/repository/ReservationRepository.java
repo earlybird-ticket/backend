@@ -11,5 +11,5 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(UUID reservationId);
 
-    List<Reservation> findByAll(List<UUID> reservationIds);
+    List<Reservation> findAllById(List<UUID> reservationIds);
 }
