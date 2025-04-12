@@ -30,8 +30,12 @@ public class AddPassportHeaderGatewayFilter implements GlobalFilter, Ordered {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // TODO: 정규식 패턴으로 변경
-    private final String ALLOWED_UNAUTHORIZED_REQUEST = "^/api/v1/auth(/.*)?$";
+    private final Set<String> ALLOWED_UNAUTHORIZED_REQUEST = Set.of(
+        "/api/v1/auth/sign-in",
+        "/api/v1/auth/seller/sign-up",
+        "/api/v1/auth/customer/sign-up",
+        "/api/v1/auth/withdraw"
+    );
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -40,7 +44,7 @@ public class AddPassportHeaderGatewayFilter implements GlobalFilter, Ordered {
         String path = exchange.getRequest().getURI().getPath();
         log.info("path = {}", path);
 //         회원가입과 로그인 과정은 인증되지 않은 상태이므로 인가 필터 거치지 X
-        if (Pattern.matches(ALLOWED_UNAUTHORIZED_REQUEST, path)) {
+        if (ALLOWED_UNAUTHORIZED_REQUEST.contains(path)) {
             return chain.filter(exchange)
                 .doFirst(() -> log.info("no auth request path = {}", path))
                 .then(Mono.fromRunnable(() -> {
