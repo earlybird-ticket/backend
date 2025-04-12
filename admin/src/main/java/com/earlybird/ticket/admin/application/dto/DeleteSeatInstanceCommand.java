@@ -4,8 +4,8 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record DeleteVenueCommand(
-        UUID venueId
+public record DeleteSeatInstanceCommand(
+        UUID seatInstanceId
 ) {
 
 }
