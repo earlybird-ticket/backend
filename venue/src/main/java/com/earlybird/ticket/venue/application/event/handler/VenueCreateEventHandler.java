@@ -3,7 +3,6 @@ package com.earlybird.ticket.venue.application.event.handler;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.application.event.dto.request.VenueCreatePayload;
-import com.earlybird.ticket.venue.application.service.VenueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -11,12 +10,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class VenueCreateEventHandler implements EventHandler<VenueCreatePayload> {
 
-    private final VenueService venueService;
+    private final VenueHandlerService venueHandlerService;
 
     @Override
     public void handle(Event<VenueCreatePayload> event) {
-        //VenueCreatePayload payload = event.getPayload();
-        //venueService.create(payload);
+        VenueCreatePayload payload = event.getPayload();
+        venueHandlerService.create(payload);
     }
 
     @Override

@@ -17,18 +17,4 @@ public interface SeatService {
 
     ProcessSeatCheckQuery checkSeat(ProcessSeatCheckCommand processSeatCheckCommand);
 
-    void createSeat(SeatCreatePayload seatCreatePayload);
-
-    void createSeatInstance(SeatInstanceCreatePayload seatInstanceCreatePayload);
-
-    void updateSeatInstance(SeatInstanceUpdatePayload seatInstanceUpdatePayload);
-
-    void deleteSeatInstance(SeatInstanceDeletePayload seatInstanceDeletePayload);
-
-    void preemptSeat(SeatPreemptPayload seatPreemptPayload);
-
-    void confirmSeat(SeatConfirmPayload seatConfirmPayload);
-
-    void returnSeat(SeatReturnPayload seatReturnPayload);
-
 }
