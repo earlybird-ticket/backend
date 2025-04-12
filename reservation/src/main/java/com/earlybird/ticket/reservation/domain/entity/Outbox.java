@@ -65,6 +65,7 @@ public class Outbox {
 
     public static class AggregateType {
         public static final String RESERVATION = "RESERVATION";
+        public static final String COUPON = "COUPON";
     }
 
 }

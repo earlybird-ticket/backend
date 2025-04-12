@@ -1,4 +1,4 @@
-package com.earlybird.ticket.reservation.infrastructure.kafka.config;
+package com.earlybird.ticket.reservation.infrastructure.messaging.config;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.context.annotation.Bean;

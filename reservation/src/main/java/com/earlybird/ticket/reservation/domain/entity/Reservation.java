@@ -1,6 +1,7 @@
 package com.earlybird.ticket.reservation.domain.entity;
 
 import com.earlybird.ticket.common.entity.BaseEntity;
+import com.earlybird.ticket.reservation.application.dto.response.ReserveCouponEvent;
 import com.earlybird.ticket.reservation.domain.entity.constant.*;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -197,7 +198,22 @@ public class Reservation extends BaseEntity {
         this.delete(userId);
     }
 
-    public void updateStatusPending() {
+    public void updateStatusPending(Long userId) {
+        this.delete(userId);
         this.reservationStatus = ReservationStatus.CANCELLED;
+    }
+
+    public void updateCouponData(ReserveCouponEvent payload) {
+        validateCouponData(payload);
+        this.couponId = payload.couponId();
+        this.couponName = payload.couponName();
+        this.couponType = payload.couponType();
+        this.couponStatus = CouponStatus.RESERVED;
+    }
+
+    private void validateCouponData(ReserveCouponEvent payload) {
+        if (payload.couponId() == null || payload.couponName() == null || payload.couponType() == null) {
+            throw new NullPointerException("coupon data should not be null");
+        }
     }
 }
