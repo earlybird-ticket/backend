@@ -93,7 +93,7 @@ public class ReservationSeat extends BaseEntity {
     }
 
     public void updateStatusReserveSuccess() {
-        this.status = SeatStatus.RESERVED;
+        this.status = SeatStatus.PREEMPTED;
     }
 
     public void updateStatusReserveFail() {
