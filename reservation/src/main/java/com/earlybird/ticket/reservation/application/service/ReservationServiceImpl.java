@@ -5,7 +5,7 @@ import com.earlybird.ticket.common.util.PassportUtil;
 import com.earlybird.ticket.reservation.application.dto.CreateReservationCommand;
 import com.earlybird.ticket.reservation.application.dto.response.FindReservationQuery;
 import com.earlybird.ticket.reservation.common.exception.CustomJsonProcessingException;
-import com.earlybird.ticket.reservation.domain.dto.request.SeatPreemptPayload;
+import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatPayload;
 import com.earlybird.ticket.reservation.domain.entity.Event;
 import com.earlybird.ticket.reservation.domain.entity.Outbox;
 import com.earlybird.ticket.reservation.domain.entity.Reservation;
@@ -61,11 +61,11 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         // 4. 아웃박스 payload 생성 (seatInstanceIds를 한 번에)
-        SeatPreemptPayload payload = SeatPreemptPayload.createSeatPreemptPayload(seatInstanceList,
+        PreemptSeatPayload payload = PreemptSeatPayload.createSeatPreemptPayload(seatInstanceList,
                                                                                  userId,
                                                                                  passportDto);
 
-        Event<SeatPreemptPayload> event = new Event<>(EventType.INSTANCE_SEAT_RESERVATION,
+        Event<PreemptSeatPayload> event = new Event<>(EventType.SEAT_INSTANCE_RESERVATION,
                                                       payload,
                                                       LocalDateTime.now()
                                                                    .toString());
@@ -82,7 +82,7 @@ public class ReservationServiceImpl implements ReservationService {
                               .aggregateType(Outbox.AggregateType.RESERVATION)
                               .aggregateId(reservations.get(0)
                                                        .getId())
-                              .eventType(EventType.INSTANCE_SEAT_RESERVATION)
+                              .eventType(EventType.SEAT_INSTANCE_RESERVATION)
                               .payload(payloadJson)
                               .build();
 
@@ -137,8 +137,6 @@ public class ReservationServiceImpl implements ReservationService {
                                                      createReservationCommand.seatRow(),
                                                      createReservationCommand.seatCol(),
                                                      createReservationCommand.seatGrade(),
-                                                     createReservationCommand.seatPrice(),
-                                                     // ← 이건 누락되어 있다면 Command에도 price 추가 필요
-                                                     createReservationCommand.seatStatus());
+                                                     createReservationCommand.seatPrice());
     }
 }

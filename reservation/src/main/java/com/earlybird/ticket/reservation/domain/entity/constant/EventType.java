@@ -3,7 +3,7 @@ package com.earlybird.ticket.reservation.domain.entity.constant;
 import com.earlybird.ticket.common.entity.EventPayload;
 import com.earlybird.ticket.reservation.application.dto.response.SeatPreemptFailEvent;
 import com.earlybird.ticket.reservation.application.dto.response.SeatPreemptSuccessEvent;
-import com.earlybird.ticket.reservation.domain.dto.request.SeatReservePayload;
+import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatPayload;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,19 +12,19 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @RequiredArgsConstructor
 public enum EventType {
-    INSTANCE_SEAT_RESERVATION(SeatReservePayload.class,
+    SEAT_INSTANCE_RESERVATION(PreemptSeatPayload.class,
                               Topic.RESERVATION_TO_SEAT_FOR_PREEMPTION),
-    INSTANCE_SEAT_RETURN(SeatReservePayload.class,
+    SEAT_INSTANCE_RETURN(PreemptSeatPayload.class,
                          Topic.RESERVATION_TO_SEAT),
-    INSTANCE_SEAT_CONFIRM(SeatReservePayload.class,
+    SEAT_INSTANCE_CONFIRM(PreemptSeatPayload.class,
                           Topic.RESERVATION_TO_SEAT),
-    COUPON_RESERVATION(SeatReservePayload.class,
+    COUPON_RESERVATION(PreemptSeatPayload.class,
                        Topic.RESERVATION_TO_COUPON),
-    COUPON_CONFIRM(SeatReservePayload.class,
+    COUPON_CONFIRM(PreemptSeatPayload.class,
                    Topic.RESERVATION_TO_COUPON),
-    COUPON_RETURN(SeatReservePayload.class,
+    COUPON_RETURN(PreemptSeatPayload.class,
                   Topic.RESERVATION_TO_COUPON),
-    PAYMENT_REQUEST(SeatReservePayload.class,
+    PAYMENT_REQUEST(PreemptSeatPayload.class,
                     Topic.RESERVATION_TO_PAYMENT),
     SEAT_PREEMPT_SUCCESS(SeatPreemptSuccessEvent.class,
                          Topic.SEAT_RESERVE_TOPIC),
