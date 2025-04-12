@@ -1,6 +1,9 @@
 package com.earlybird.ticket.reservation.application.dto;
 
-import com.earlybird.ticket.reservation.domain.entity.constant.*;
+import com.earlybird.ticket.reservation.domain.entity.constant.ConcertStatus;
+import com.earlybird.ticket.reservation.domain.entity.constant.CouponStatus;
+import com.earlybird.ticket.reservation.domain.entity.constant.CouponType;
+import com.earlybird.ticket.reservation.domain.entity.constant.SeatGrade;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -40,7 +43,6 @@ public record CreateReservationCommand(
         @NotNull(message = "seatCol is Necessary") Integer seatCol,
         @NotNull(message = "seatGrade is Necessary") SeatGrade seatGrade,
         @NotNull(message = "seatPrice is Necessary") BigDecimal seatPrice,
-        @NotNull(message = "seatStatus is Necessary") SeatStatus seatStatus,
 
         // 홀 정보
         @NotNull(message = "hallId is Necessary") UUID hallId,
@@ -70,7 +72,6 @@ public record CreateReservationCommand(
                                     @NotNull(message = "seatCol is Necessary") Integer seatCol,
                                     @NotNull(message = "seatGrade is Necessary") SeatGrade seatGrade,
                                     @NotNull(message = "seatPrice is Necessary") BigDecimal seatPrice,
-                                    @NotNull(message = "seatStatus is Necessary") SeatStatus seatStatus,
                                     @NotNull(message = "hallId is Necessary") UUID hallId,
                                     @NotNull(message = "hallName is Necessary") String hallName,
                                     @NotNull(message = "hallFloor is Necessary") Integer hallFloor,
@@ -94,7 +95,6 @@ public record CreateReservationCommand(
         this.seatCol = seatCol;
         this.seatGrade = seatGrade;
         this.seatPrice = seatPrice;
-        this.seatStatus = seatStatus;
         this.hallId = hallId;
         this.hallName = hallName;
         this.hallFloor = hallFloor;

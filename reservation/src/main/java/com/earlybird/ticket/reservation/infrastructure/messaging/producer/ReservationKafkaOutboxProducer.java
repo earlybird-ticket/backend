@@ -27,11 +27,6 @@ public class ReservationKafkaOutboxProducer {
 
         for (Outbox outbox : pendingOutboxes) {
             try {
-                log.info("outbox topic = {}",
-                         outbox.getEventType()
-                               .getTopic());
-                log.info("outbox eventType = {}",
-                         outbox.getEventType());
                 // topic 결정
                 String topic = Objects.requireNonNull(outbox.getEventType())
                                       .getTopic();
@@ -47,6 +42,7 @@ public class ReservationKafkaOutboxProducer {
                 outbox.markSuccess();
 
             } catch (Exception e) {
+                // TODO :: retry, DLQ
                 log.error("Failed to publish outbox message: {}",
                           outbox.getId(),
                           e);
