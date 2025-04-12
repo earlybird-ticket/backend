@@ -1,4 +1,4 @@
-package com.earlybird.ticket.venue.application.service;
+package com.earlybird.ticket.venue.application.event.handler;
 
 import com.earlybird.ticket.venue.application.event.dto.request.VenueCreatePayload;
 import com.earlybird.ticket.venue.application.event.dto.request.VenueDeletePayload;
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class VenueServiceImpl implements VenueService {
+public class VenueHandlerServiceImpl implements VenueHandlerService {
 
     private final VenueRepository venueRepository;
 
