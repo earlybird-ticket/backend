@@ -19,13 +19,16 @@ import java.util.UUID;
 // 컬럼명 재정의
 @AttributeOverrides({
     @AttributeOverride(name = "createdAt", column = @Column(name = "requested_at")),
+    @AttributeOverride(name = "createdBy", column = @Column(name = "requested_by")),
     @AttributeOverride(name = "updatedAt", column = @Column(name = "approved_at")),
-    @AttributeOverride(name = "deletedAt", column = @Column(name = "canceled_at"))
+    @AttributeOverride(name = "updatedBy", column = @Column(name = "approved_by")),
+    @AttributeOverride(name = "deletedAt", column = @Column(name = "canceled_at")),
+    @AttributeOverride(name = "deletedBy", column = @Column(name = "canceled_by"))
 })
 public class Payment extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "payment_key", unique = true)

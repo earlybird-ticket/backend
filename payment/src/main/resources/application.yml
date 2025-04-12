@@ -16,7 +16,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         format_sql: true
@@ -26,16 +26,16 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://${{EUREKA_SERVER_HOST:localhost}}:${{EUREKA_SERVER_PORT:18080}}/eureka
+      defaultZone: http://${EUREKA_SERVER_HOST:localhost}:${EUREKA_SERVER_PORT:18080}/eureka
 
 server:
-  port: ${{PAYMENT_SERVER_PORT:18089}}
+  port: ${PAYMENT_SERVER_PORT:18089}
 
 toss:
   client-key: ${TOSS_CLIENT_KEY}
   client-secret: ${TOSS_CLIENT_SECRET}
-  success-url: ${TOSS_SUCCESS_URL:/api/external/payments/success}
-  fail-url: ${TOSS_FAIL_URL:/api/v1/external/payments/fail}
+  success-url: ${TOSS_SUCCESS_URL}
+  fail-url: ${TOSS_FAIL_URL}
 
 api:
   connection-timeout: 3000
