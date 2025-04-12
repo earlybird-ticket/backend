@@ -1,15 +1,13 @@
 package com.earlybird.ticket.admin.application.dto;
 
 import com.earlybird.ticket.admin.common.CouponType;
-import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record UpdateCouponCommand(
-        UUID couponId,
-        String couponName,
+public record RegisterCouponCommand(
+        CouponType couponType,
         Integer discountRate,
-        CouponType couponType
+        String couponName
 ) {
 
 }
