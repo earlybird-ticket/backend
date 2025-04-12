@@ -5,6 +5,9 @@ import com.earlybird.ticket.reservation.domain.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+import java.util.UUID;
+
 @Repository
 @RequiredArgsConstructor
 public class ReservationRepositoryImpl implements ReservationRepository {
@@ -14,5 +17,10 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public Reservation save(Reservation reservation) {
         return reservationRepository.save(reservation);
+    }
+
+    @Override
+    public Optional<Reservation> findById(UUID reservationId) {
+        return reservationRepository.findById(reservationId);
     }
 }
