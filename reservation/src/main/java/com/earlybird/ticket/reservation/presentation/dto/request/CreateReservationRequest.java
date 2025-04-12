@@ -1,7 +1,10 @@
 package com.earlybird.ticket.reservation.presentation.dto.request;
 
 import com.earlybird.ticket.reservation.application.dto.CreateReservationCommand;
-import com.earlybird.ticket.reservation.domain.entity.constant.*;
+import com.earlybird.ticket.reservation.domain.entity.constant.ConcertStatus;
+import com.earlybird.ticket.reservation.domain.entity.constant.CouponStatus;
+import com.earlybird.ticket.reservation.domain.entity.constant.CouponType;
+import com.earlybird.ticket.reservation.domain.entity.constant.SeatGrade;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -41,7 +44,6 @@ public record CreateReservationRequest(
         @NotNull(message = "seatCol is Necessary") Integer seatCol,
         @NotNull(message = "seatGrade is Necessary") SeatGrade seatGrade,
         @NotNull(message = "seatPrice is Necessary") BigDecimal seatPrice,
-        @NotNull(message = "seatStatus is Necessary") SeatStatus seatStatus,
 
         // 홀 정보
         @NotNull(message = "hallId is Necessary") UUID hallId,
@@ -71,7 +73,6 @@ public record CreateReservationRequest(
                                     @NotNull(message = "seatCol is Necessary") Integer seatCol,
                                     @NotNull(message = "seatGrade is Necessary") SeatGrade seatGrade,
                                     @NotNull(message = "seatPrice is Necessary") BigDecimal seatPrice,
-                                    @NotNull(message = "seatStatus is Necessary") SeatStatus seatStatus,
                                     @NotNull(message = "hallId is Necessary") UUID hallId,
                                     @NotNull(message = "hallName is Necessary") String hallName,
                                     @NotNull(message = "hallFloor is Necessary") Integer hallFloor,
@@ -95,7 +96,6 @@ public record CreateReservationRequest(
         this.seatCol = seatCol;
         this.seatGrade = seatGrade;
         this.seatPrice = seatPrice;
-        this.seatStatus = seatStatus;
         this.hallId = hallId;
         this.hallName = hallName;
         this.hallFloor = hallFloor;
@@ -123,7 +123,6 @@ public record CreateReservationRequest(
                                        .seatCol(command.seatCol())
                                        .seatGrade(command.seatGrade())
                                        .seatPrice(command.seatPrice())
-                                       .seatStatus(command.seatStatus())
                                        .hallId(command.hallId())
                                        .hallName(command.hallName())
                                        .hallFloor(command.hallFloor())
