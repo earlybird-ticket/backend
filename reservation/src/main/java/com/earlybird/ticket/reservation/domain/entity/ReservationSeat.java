@@ -79,8 +79,7 @@ public class ReservationSeat extends BaseEntity {
                                                         Integer row,
                                                         Integer col,
                                                         SeatGrade grade,
-                                                        BigDecimal price,
-                                                        SeatStatus status) {
+                                                        BigDecimal price) {
         return ReservationSeat.builder()
                               .reservation(reservation)
                               .seatInstanceId(seatInstanceId)
@@ -89,7 +88,15 @@ public class ReservationSeat extends BaseEntity {
                               .col(col)
                               .grade(grade)
                               .price(price)
-                              .status(status)
+                              .status(SeatStatus.RESERVED)
                               .build();
+    }
+
+    public void updateStatusReserveSuccess() {
+        this.status = SeatStatus.RESERVED;
+    }
+
+    public void updateStatusReserveFail() {
+        this.status = SeatStatus.FREE;
     }
 }

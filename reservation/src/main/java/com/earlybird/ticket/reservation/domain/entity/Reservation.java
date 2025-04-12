@@ -193,4 +193,11 @@ public class Reservation extends BaseEntity {
     }
 
 
+    public void cancelReservation(Long userId) {
+        this.delete(userId);
+    }
+
+    public void updateStatusPending() {
+        this.reservationStatus = ReservationStatus.CANCELLED;
+    }
 }
