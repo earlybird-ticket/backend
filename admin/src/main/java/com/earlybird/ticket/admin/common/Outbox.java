@@ -1,6 +1,6 @@
 package com.earlybird.ticket.admin.common;
 
-import com.earlybird.ticket.admin.application.EventType;
+import com.earlybird.ticket.admin.application.event.EventType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -29,7 +29,7 @@ public class Outbox {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private AggregateType aggregateType;
+    private String aggregateType;
     private UUID aggregateId;
 
     @Enumerated(EnumType.STRING)
@@ -47,7 +47,7 @@ public class Outbox {
 
     @Builder
     public Outbox(
-            AggregateType aggregateType, UUID aggregateId, EventType eventType, String payload) {
+            String aggregateType, UUID aggregateId, EventType eventType, String payload) {
         this.aggregateType = aggregateType;
         this.aggregateId = aggregateId;
         this.eventType = eventType;
@@ -66,4 +66,10 @@ public class Outbox {
         this.retryCount++;
     }
 
+    public static class AggregateType {
+
+        public static final String COUPON = "COUPON";
+        public static final String SEAT = "SEAT";
+
+    }
 }

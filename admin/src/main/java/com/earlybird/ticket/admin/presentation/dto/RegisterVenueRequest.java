@@ -13,13 +13,13 @@ public record RegisterVenueRequest(
 ) {
 
     public RegisterVenueCommand toRegisterVenueCommand() {
-        return new RegisterVenueCommand(
-                venueName,
-                location,
-                area,
-                totalNumberOfSeat,
-                toHallCreateCommand()
-        );
+        return RegisterVenueCommand.builder()
+                .venueName(venueName)
+                .location(location)
+                .area(area)
+                .totalNumberOfSeat(totalNumberOfSeat)
+                .hallList(toHallCreateCommand())
+                .build();
     }
 
     public List<HallCreateCommand> toHallCreateCommand() {

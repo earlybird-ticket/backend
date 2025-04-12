@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ser.std.StringSerializer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +13,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 @EnableAsync
@@ -40,16 +38,6 @@ public class KafkaProducerConfig {
         configProps.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);
         configProps.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "gzip");
         return new KafkaTemplate<>(new DefaultKafkaProducerFactory<>(configProps));
-    }
-
-    @Bean
-    public Executor publishEventExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(20);
-        executor.setMaxPoolSize(50);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("pub-event-");
-        return executor;
     }
 
     @Bean
