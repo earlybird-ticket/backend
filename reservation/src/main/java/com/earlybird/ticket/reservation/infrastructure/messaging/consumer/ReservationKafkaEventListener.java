@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 public class ReservationKafkaEventListener {
     private final EventDispatcher eventDispatcher;
 
-    @KafkaListener(topics = {EventType.Topic.RESERVATION_TO_SEAT_FOR_PREEMPTION}, containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(topics = {EventType.Topic.SEAT_RESERVE_TOPIC}, containerFactory = "kafkaListenerContainerFactory")
     public void listen(@Payload String message,
                        Acknowledgment ack) {
         try {

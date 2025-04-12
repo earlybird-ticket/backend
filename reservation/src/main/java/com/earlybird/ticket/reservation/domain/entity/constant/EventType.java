@@ -52,7 +52,7 @@ public enum EventType {
         public static final String RESERVATION_TO_SEAT = "ReservationToSeat";
         public static final String RESERVATION_TO_PAYMENT = "ReservationToPayment";
         public static final String RESERVATION_TO_COUPON = "ReservationToCoupon";
-        public static final String SEAT_RESERVE_TOPIC = "seatToReservation";
+        public static final String SEAT_RESERVE_TOPIC = "SeatToReservation";
 
     }
 }
