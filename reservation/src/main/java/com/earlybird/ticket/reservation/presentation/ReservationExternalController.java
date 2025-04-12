@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,7 +37,7 @@ public class ReservationExternalController {
     }
 
     @PutMapping("/{reservationId}")
-    public ResponseEntity<CommonDto<Void>> cancelReservation(@PathVariable String reservationId,
+    public ResponseEntity<CommonDto<Void>> cancelReservation(@PathVariable UUID reservationId,
                                                              @RequestHeader("X-User-Passport") String passport) {
         reservationService.cancelReservation(reservationId,
                                              passport);
@@ -47,7 +48,7 @@ public class ReservationExternalController {
     }
 
     @GetMapping("/{reservationId}")
-    public ResponseEntity<CommonDto<Void>> findReservations(@PathVariable String reservationId,
+    public ResponseEntity<CommonDto<Void>> findReservations(@PathVariable UUID reservationId,
                                                             @RequestHeader("X-User-Passport") String passport) {
 
         FindReservationQuery findReservationQuery = reservationService.findReservation(reservationId,
