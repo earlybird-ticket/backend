@@ -5,6 +5,6 @@ import com.earlybird.ticket.admin.application.dto.DeleteVenueCommand;
 public record DeleteVenueRequest() {
 
     public DeleteVenueCommand toDeleteVenueCommand() {
-        return new DeleteVenueCommand();
+        return DeleteVenueCommand.builder().build();
     }
 }
