@@ -8,6 +8,6 @@ public record DeleteCouponRequest(
 ) {
 
     public DeleteCouponCommand toDeleteCouponCommand() {
-        return new DeleteCouponCommand(couponId);
+        return DeleteCouponCommand.builder().couponId(couponId).build();
     }
 }
