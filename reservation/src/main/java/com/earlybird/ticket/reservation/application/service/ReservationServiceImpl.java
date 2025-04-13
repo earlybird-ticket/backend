@@ -56,10 +56,16 @@ public class ReservationServiceImpl implements ReservationService {
         // 3. 예약 좌석 생성(기본적으로 예약된상태)
         List<ReservationSeat> reservationSeatList = createReservationSeat(createReservationCommands,
                                                                           reservation);
-        reservationSeatRepository.saveAll(reservationSeatList);
+        List<ReservationSeat> reservationSeats = reservationSeatRepository.saveAll(reservationSeatList);
+        reservationSeats.forEach(seat -> {
+            seatInstanceList.add(seat.getSeatInstanceId());
+        });
 
 
         // 4. 아웃박스 payload 생성 (seatInstanceIds를 한 번에)
+        if (seatInstanceList.isEmpty()) {
+            throw new NullPointerException();
+        }
         PreemptSeatPayload payload = PreemptSeatPayload.createSeatPreemptPayload(seatInstanceList,
                                                                                  userId,
                                                                                  passportDto);
