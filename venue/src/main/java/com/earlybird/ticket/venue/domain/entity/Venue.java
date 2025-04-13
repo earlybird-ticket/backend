@@ -1,8 +1,8 @@
 package com.earlybird.ticket.venue.domain.entity;
 
 import com.earlybird.ticket.common.entity.BaseEntity;
-import com.earlybird.ticket.venue.application.event.dto.request.VenueCreatePayload.HallCreatePayload;
 import com.earlybird.ticket.venue.common.exception.VenueCreateException;
+import com.earlybird.ticket.venue.domain.entity.dto.HallCreatResult;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
@@ -45,7 +45,7 @@ public class Venue extends BaseEntity {
             String area,
             int totalNumberOfSeats,
             Long userId,
-            List<HallCreatePayload> hallList
+            List<HallCreatResult> hallList
     ) {
         validateHallList(hallList);
 
@@ -58,11 +58,11 @@ public class Venue extends BaseEntity {
 
         venue.create(userId);
 
-        for(HallCreatePayload hallCreatePayload : hallList) {
+        for(HallCreatResult hallCreateResult : hallList) {
             venue.getHalls().add(Hall.createHall(
                     venue,
-                    hallCreatePayload.hallName(),
-                    hallCreatePayload.hallFloor(),
+                    hallCreateResult.hallName(),
+                    hallCreateResult.hallFloor(),
                     userId
             ));
         }
@@ -70,7 +70,7 @@ public class Venue extends BaseEntity {
         return venue;
     }
 
-    private static void validateHallList(List<HallCreatePayload> hallList) {
+    private static void validateHallList(List<HallCreatResult> hallList) {
         if (hallList == null || hallList.isEmpty()) {
             throw new VenueCreateException();
         }

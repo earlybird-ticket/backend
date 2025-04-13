@@ -52,7 +52,16 @@ public enum Code {
     CREATED("E02",
             HttpStatus.CREATED),
     ACCEPTED("E03",
-             HttpStatus.ACCEPTED);
+             HttpStatus.ACCEPTED),
+
+    // 좌석 서비스 메세지 처리 실패 응답
+    SEAT_CONFIRM_FAIL("S01",
+            HttpStatus.CONFLICT),
+    SEAT_PREEMPT_FAIL("S02",
+            HttpStatus.CONFLICT),
+    SEAT_RETURN_FAIL("S03",
+            HttpStatus.CONFLICT),
+    ;
 
     private final String code;
     private final HttpStatus httpStatus;

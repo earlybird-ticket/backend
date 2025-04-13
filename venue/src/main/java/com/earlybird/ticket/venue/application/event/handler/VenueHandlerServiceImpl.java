@@ -27,7 +27,7 @@ public class VenueHandlerServiceImpl implements VenueHandlerService {
                     venueCreatePayload.area(),
                     venueCreatePayload.totalNumberOfSeat(),
                     venueCreatePayload.passportDto().getUserId(),
-                    venueCreatePayload.hallList()
+                    venueCreatePayload.toHallCreateResult()
         );
         //3. venue 저장
         venueRepository.save(venue);
