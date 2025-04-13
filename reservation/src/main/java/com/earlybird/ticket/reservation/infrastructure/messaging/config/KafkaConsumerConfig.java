@@ -2,6 +2,7 @@ package com.earlybird.ticket.reservation.infrastructure.messaging.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,13 +17,15 @@ import java.util.Map;
 
 @Configuration
 public class KafkaConsumerConfig {
-    private static final String BOOTSTRAP_SERVERS = "localhost:29092"; // TODO : Kafka 서버 host, Port 맞추기
+
     Map<String, Object> props = new HashMap<>();
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
 
     @ConditionalOnMissingBean
     public ConsumerFactory<String, String> consumerFactory() {
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                  BOOTSTRAP_SERVERS); // Kafka 브로커 리스트 설정
+                  bootstrapServers); // Kafka 브로커 리스트 설정
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                   StringDeserializer.class); // 메시지 키 역직렬화 방식 설정
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,

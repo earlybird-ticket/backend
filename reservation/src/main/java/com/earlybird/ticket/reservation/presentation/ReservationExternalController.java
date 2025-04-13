@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -21,18 +20,14 @@ public class ReservationExternalController {
     private final ReservationService reservationService;
 
     @PostMapping
-    public ResponseEntity<CommonDto<List<String>>> createReservation(@RequestHeader("X-User-Passport") String passport,
-                                                                     @RequestBody @Valid List<CreateReservationRequest> createReservationRequest) {
+    public ResponseEntity<CommonDto<String>> createReservation(@RequestHeader("X-User-Passport") String passport,
+                                                               @RequestBody @Valid CreateReservationRequest createReservationRequest) {
 
-        reservationService.createReservation(createReservationRequest.stream()
-                                                                     .map(CreateReservationRequest::toCreateReservationCommand
-
-                                                                     )
-                                                                     .toList(),
-                                             passport);
+        String reservationId = reservationService.createReservation(CreateReservationRequest.toCreateReservationCommand(createReservationRequest),
+                                                                    passport);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                             .body(CommonDto.created(null,
+                             .body(CommonDto.created(reservationId,
                                                      "예약 생성 성공"));
     }
 

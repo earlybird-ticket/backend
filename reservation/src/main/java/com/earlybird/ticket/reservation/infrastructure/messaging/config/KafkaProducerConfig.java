@@ -3,6 +3,7 @@ package com.earlybird.ticket.reservation.infrastructure.messaging.config;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerInterceptor;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -16,7 +17,8 @@ import java.util.Map;
 @Configuration
 public class KafkaProducerConfig {
 
-    private static final String BOOTSTRAP_SERVERS = "localhost:29091,localhost:29092,localhost:29093";
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
 
     @Bean
     public ProducerFactory<String, String> producerFactory() {
@@ -24,7 +26,7 @@ public class KafkaProducerConfig {
 
         // Kafka 서버 주소 설정
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                  BOOTSTRAP_SERVERS);
+                  bootstrapServers);
 
         // Key와 Value 직렬화 설정 (Key는 String, Value는 JSON)
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,

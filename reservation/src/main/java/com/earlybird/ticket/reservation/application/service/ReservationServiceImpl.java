@@ -38,34 +38,34 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     @Transactional
-    public List<String> createReservation(List<CreateReservationCommand> createReservationCommands,
-                                          String passport) {
+    public String createReservation(CreateReservationCommand createReservationCommands,
+                                    String passport) {
 
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         Long userId = passportDto.getUserId();
 
         List<UUID> seatInstanceList = new ArrayList<>();
-        List<Reservation> reservations = new ArrayList<>();
         // 1. 좌석 예약 유무 확인
         validateReservationCommandsSeatInstanceId(createReservationCommands);
 
-        for (CreateReservationCommand command : createReservationCommands) {
-            // 2. 예약 생성
-            Reservation reservation = createReservation(command,
-                                                        userId);
-            reservation = reservationRepository.save(reservation);
-            reservations.add(reservation);
+        // 2. 예약 생성
+        Reservation reservation = createReservation(createReservationCommands,
+                                                    userId);
+        reservation = reservationRepository.save(reservation);
 
-            // 3. 예약 좌석 생성(기본적으로 예약된상태)
-            ReservationSeat reservationSeat = createReservationSeat(command,
-                                                                    reservation);
-            reservationSeatRepository.save(reservationSeat);
+        // 3. 예약 좌석 생성(기본적으로 예약된상태)
+        List<ReservationSeat> reservationSeatList = createReservationSeat(createReservationCommands,
+                                                                          reservation);
+        List<ReservationSeat> reservationSeats = reservationSeatRepository.saveAll(reservationSeatList);
+        reservationSeats.forEach(seat -> {
+            seatInstanceList.add(seat.getSeatInstanceId());
+        });
 
-            // 4. 좌석 UUID 누적
-            seatInstanceList.add(reservationSeat.getSeatInstanceId());
-        }
 
         // 4. 아웃박스 payload 생성 (seatInstanceIds를 한 번에)
+        if (seatInstanceList.isEmpty()) {
+            throw new NullPointerException();
+        }
         PreemptSeatPayload payload = PreemptSeatPayload.createSeatPreemptPayload(seatInstanceList,
                                                                                  userId,
                                                                                  passportDto);
@@ -85,8 +85,7 @@ public class ReservationServiceImpl implements ReservationService {
         // 5. Outbox 저장
         Outbox outbox = Outbox.builder()
                               .aggregateType(Outbox.AggregateType.RESERVATION)
-                              .aggregateId(reservations.get(0)
-                                                       .getId())
+                              .aggregateId(reservation.getId())
                               .eventType(EventType.SEAT_INSTANCE_PREEMPTION)
                               .payload(payloadJson)
                               .build();
@@ -94,10 +93,8 @@ public class ReservationServiceImpl implements ReservationService {
         outboxRepository.save(outbox);
 
         //6. 예약 ID값 반환
-        return reservations.stream()
-                           .map(i -> i.getId()
-                                      .toString())
-                           .toList();
+        return reservation.getId()
+                          .toString();
     }
 
     @Override
@@ -125,18 +122,19 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
 
-    private void validateReservationCommandsSeatInstanceId(List<CreateReservationCommand> createReservationCommands) {
-        createReservationCommands.forEach(command -> {
-            //해당 좌석이 FREE가 아닌 상태가 있다면
-            boolean isSeatReservationExist = reservationSeatRepository.existsBySeatInstanceIdAndSeatStatusNotFREE(command.seatInstanceId(),
-                                                                                                                  SeatStatus.FREE);
+    private void validateReservationCommandsSeatInstanceId(CreateReservationCommand createReservationCommands) {
+        //해당 좌석이 FREE가 아닌 상태가 있다면
+        createReservationCommands.seatList()
+                                 .forEach(seatRequest -> {
+                                     boolean isSeatReservationExist = reservationSeatRepository.existsBySeatInstanceIdAndSeatStatusNotFREE(seatRequest.seatInstanceId(),
+                                                                                                                                           SeatStatus.FREE);
 
-            //예외 발생
-            if (isSeatReservationExist) {
-                throw new SeatAlreadyReservedException();
-            }
+                                     //예외 발생
+                                     if (isSeatReservationExist) {
+                                         throw new SeatAlreadyReservedException();
+                                     }
+                                 });
 
-        });
     }
 
     private Reservation createReservation(CreateReservationCommand createReservationCommand,
@@ -162,14 +160,17 @@ public class ReservationServiceImpl implements ReservationService {
                                              createReservationCommand.hallFloor());
     }
 
-    private ReservationSeat createReservationSeat(CreateReservationCommand createReservationCommand,
-                                                  Reservation reservation) {
-        return ReservationSeat.createReservationSeat(reservation,
-                                                     createReservationCommand.seatInstanceId(),
-                                                     createReservationCommand.concertId(),
-                                                     createReservationCommand.seatRow(),
-                                                     createReservationCommand.seatCol(),
-                                                     createReservationCommand.seatGrade(),
-                                                     createReservationCommand.seatPrice());
+    private List<ReservationSeat> createReservationSeat(CreateReservationCommand createReservationCommand,
+                                                        Reservation reservation) {
+        return createReservationCommand.seatList()
+                                       .stream()
+                                       .map(seatCommand -> ReservationSeat.createReservationSeat(reservation,
+                                                                                                 seatCommand.seatInstanceId(),
+                                                                                                 createReservationCommand.concertId(),
+                                                                                                 seatCommand.seatRow(),
+                                                                                                 seatCommand.seatCol(),
+                                                                                                 seatCommand.seatGrade(),
+                                                                                                 seatCommand.seatPrice()))
+                                       .toList();
     }
 }

@@ -17,4 +17,6 @@ public interface ReservationSeatRepository {
                                                        SeatStatus free);
 
     Optional<ReservationSeat> findById(UUID uuid);
+
+    List<ReservationSeat> saveAll(List<ReservationSeat> reservationSeatList);
 }

@@ -36,4 +36,9 @@ public class ReservationSeatRepositoryImpl implements ReservationSeatRepository 
     public Optional<ReservationSeat> findById(UUID uuid) {
         return reservationSeatJpaRepository.findById(uuid);
     }
+
+    @Override
+    public List<ReservationSeat> saveAll(List<ReservationSeat> reservationSeatList) {
+        return reservationSeatJpaRepository.saveAll(reservationSeatList);
+    }
 }
