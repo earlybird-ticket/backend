@@ -22,4 +22,9 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     public Optional<Payment> findByPaymentId(UUID paymentId) {
         return paymentJpaRepository.findById(paymentId);
     }
+
+    @Override
+    public Optional<Payment> findByOrderId(UUID orderId) {
+        return paymentJpaRepository.findPaymentByOrderId(orderId);
+    }
 }
