@@ -16,7 +16,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 
-public class ReserveSeatFailPayloadHandler implements EventHandler<SeatPreemptFailPayload> {
+public class ReserveSeatFailEventHandler implements EventHandler<SeatPreemptFailPayload> {
 
     private final ReservationSeatRepository reservationSeatRepository;
 

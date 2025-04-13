@@ -2,7 +2,7 @@ package com.earlybird.ticket.reservation.application.handler;
 
 import com.earlybird.ticket.common.entity.PassportDto;
 import com.earlybird.ticket.reservation.application.dto.response.ReserveCouponPayload;
-import com.earlybird.ticket.reservation.application.event.PayloadHandler;
+import com.earlybird.ticket.reservation.application.event.EventHandler;
 import com.earlybird.ticket.reservation.common.exception.CustomJsonProcessingException;
 import com.earlybird.ticket.reservation.domain.dto.request.ConfirmCouponPayload;
 import com.earlybird.ticket.reservation.domain.dto.request.FailCouponPayload;
@@ -25,7 +25,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ReserveCouponPayloadHandler implements PayloadHandler<ReserveCouponPayload> {
+public class ReserveCouponPayloadHandler implements EventHandler<ReserveCouponPayload> {
 
     private final ReservationRepository reservationRepository;
     private final OutboxRepository outboxRepository;
