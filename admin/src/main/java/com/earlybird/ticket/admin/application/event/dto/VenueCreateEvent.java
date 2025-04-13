@@ -7,7 +7,7 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-public record VenueCreatePayload(
+public record VenueCreateEvent(
         PassportDto passportDto,
         String venueName,
         String location,
@@ -16,8 +16,8 @@ public record VenueCreatePayload(
         List<HallCreatePayload> hallList
 ) implements EventPayload {
 
-    public static VenueCreatePayload toPayload(PassportDto passport, RegisterVenueCommand command) {
-        return VenueCreatePayload.builder()
+    public static VenueCreateEvent toPayload(PassportDto passport, RegisterVenueCommand command) {
+        return VenueCreateEvent.builder()
                 .passportDto(passport)
                 .venueName(command.venueName())
                 .location(command.location())

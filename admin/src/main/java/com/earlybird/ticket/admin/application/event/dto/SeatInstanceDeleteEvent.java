@@ -7,14 +7,14 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record SeatInstanceDeletePayload(
+public record SeatInstanceDeleteEvent(
         PassportDto passportDto,
         UUID seatInstanceId
 ) implements EventPayload {
 
-    public static SeatInstanceDeletePayload toPayload(
+    public static SeatInstanceDeleteEvent toPayload(
             PassportDto passportDto, DeleteSeatInstanceCommand command) {
-        return SeatInstanceDeletePayload.builder()
+        return SeatInstanceDeleteEvent.builder()
                 .passportDto(passportDto)
                 .seatInstanceId(command.seatInstanceId())
                 .build();

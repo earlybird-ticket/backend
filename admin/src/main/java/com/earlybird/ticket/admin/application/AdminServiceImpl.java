@@ -12,15 +12,15 @@ import com.earlybird.ticket.admin.application.dto.UpdateSeatInstanceCommand;
 import com.earlybird.ticket.admin.application.dto.UpdateVenueCommand;
 import com.earlybird.ticket.admin.application.event.Event;
 import com.earlybird.ticket.admin.application.event.EventType;
-import com.earlybird.ticket.admin.application.event.dto.CouponCreatePayload;
-import com.earlybird.ticket.admin.application.event.dto.CouponDeletePayload;
-import com.earlybird.ticket.admin.application.event.dto.CouponUpdatePayload;
-import com.earlybird.ticket.admin.application.event.dto.SeatCreatePayload;
-import com.earlybird.ticket.admin.application.event.dto.SeatInstanceDeletePayload;
-import com.earlybird.ticket.admin.application.event.dto.SeatInstanceUpdatePayload;
-import com.earlybird.ticket.admin.application.event.dto.VenueCreatePayload;
-import com.earlybird.ticket.admin.application.event.dto.VenueDeletePayload;
-import com.earlybird.ticket.admin.application.event.dto.VenueUpdatePayload;
+import com.earlybird.ticket.admin.application.event.dto.CouponCreateEvent;
+import com.earlybird.ticket.admin.application.event.dto.CouponDeleteEvent;
+import com.earlybird.ticket.admin.application.event.dto.CouponUpdateEvent;
+import com.earlybird.ticket.admin.application.event.dto.SeatCreateEvent;
+import com.earlybird.ticket.admin.application.event.dto.SeatInstanceDeleteEvent;
+import com.earlybird.ticket.admin.application.event.dto.SeatInstanceUpdateEvent;
+import com.earlybird.ticket.admin.application.event.dto.VenueCreateEvent;
+import com.earlybird.ticket.admin.application.event.dto.VenueDeleteEvent;
+import com.earlybird.ticket.admin.application.event.dto.VenueUpdateEvent;
 import com.earlybird.ticket.admin.common.Outbox;
 import com.earlybird.ticket.admin.common.OutboxRepository;
 import com.earlybird.ticket.common.entity.EventPayload;
@@ -57,7 +57,7 @@ public class AdminServiceImpl implements AdminService {
         );
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         saveOutbox(
-                EventType.CREATE_COUPON, CouponCreatePayload.toPayload(passportDto, command),
+                EventType.CREATE_COUPON, CouponCreateEvent.toPayload(passportDto, command),
                 Outbox.AggregateType.COUPON
         );
     }
@@ -67,7 +67,7 @@ public class AdminServiceImpl implements AdminService {
     public void modifyCoupon(String passport, UpdateCouponCommand command) {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         saveOutbox(
-                EventType.UPDATE_COUPON, CouponUpdatePayload.toPayload(passportDto, command),
+                EventType.UPDATE_COUPON, CouponUpdateEvent.toPayload(passportDto, command),
                 Outbox.AggregateType.COUPON
         );
     }
@@ -77,7 +77,7 @@ public class AdminServiceImpl implements AdminService {
     public void withdrawCoupon(String passport, DeleteCouponCommand command) {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         saveOutbox(
-                EventType.DELETE_COUPON, CouponDeletePayload.toPayload(passportDto, command),
+                EventType.DELETE_COUPON, CouponDeleteEvent.toPayload(passportDto, command),
                 Outbox.AggregateType.COUPON
         );
     }
@@ -87,7 +87,7 @@ public class AdminServiceImpl implements AdminService {
     public void registerVenue(String passport, RegisterVenueCommand command) {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         saveOutbox(
-                EventType.CREATE_VENUE, VenueCreatePayload.toPayload(passportDto, command),
+                EventType.CREATE_VENUE, VenueCreateEvent.toPayload(passportDto, command),
                 Outbox.AggregateType.VENUE
         );
     }
@@ -97,7 +97,7 @@ public class AdminServiceImpl implements AdminService {
     public void modifyVenue(String passport, UpdateVenueCommand command) {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         saveOutbox(
-                EventType.UPDATE_VENUE, VenueUpdatePayload.toPayload(passportDto, command),
+                EventType.UPDATE_VENUE, VenueUpdateEvent.toPayload(passportDto, command),
                 Outbox.AggregateType.VENUE
         );
     }
@@ -107,7 +107,7 @@ public class AdminServiceImpl implements AdminService {
     public void withdrawVenue(String passport, DeleteVenueCommand command) {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         saveOutbox(
-                EventType.DELETE_VENUE, VenueDeletePayload.toPayload(passportDto, command),
+                EventType.DELETE_VENUE, VenueDeleteEvent.toPayload(passportDto, command),
                 Outbox.AggregateType.VENUE
         );
     }
@@ -119,7 +119,7 @@ public class AdminServiceImpl implements AdminService {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         saveOutbox(
                 EventType.UPDATE_SEAT_INSTANCE,
-                SeatInstanceUpdatePayload.toPayload(passportDto, command),
+                SeatInstanceUpdateEvent.toPayload(passportDto, command),
                 Outbox.AggregateType.SEAT
         );
     }
@@ -130,7 +130,7 @@ public class AdminServiceImpl implements AdminService {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         saveOutbox(
                 EventType.CREATE_SEAT,
-                SeatCreatePayload.toPayload(passportDto, command),
+                SeatCreateEvent.toPayload(passportDto, command),
                 Outbox.AggregateType.SEAT
         );
     }
@@ -142,7 +142,7 @@ public class AdminServiceImpl implements AdminService {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         saveOutbox(
                 EventType.DELETE_SEAT_INSTANCE,
-                SeatInstanceDeletePayload.toPayload(passportDto, command),
+                SeatInstanceDeleteEvent.toPayload(passportDto, command),
                 Outbox.AggregateType.SEAT
         );
     }

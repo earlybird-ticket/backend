@@ -7,7 +7,7 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record VenueUpdatePayload(
+public record VenueUpdateEvent(
         PassportDto passportDto,
         UUID venueId,
         String venueName,
@@ -16,9 +16,9 @@ public record VenueUpdatePayload(
         int totalNumberOfSeat
 ) implements EventPayload {
 
-    public static VenueUpdatePayload toPayload(
+    public static VenueUpdateEvent toPayload(
             PassportDto passportDto, UpdateVenueCommand command) {
-        return VenueUpdatePayload.builder()
+        return VenueUpdateEvent.builder()
                 .passportDto(passportDto)
                 .venueId(command.venueId())
                 .venueName(command.venueName())

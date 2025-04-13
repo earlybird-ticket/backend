@@ -7,13 +7,13 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record CouponDeletePayload(
+public record CouponDeleteEvent(
         PassportDto passport,
         UUID couponId
 ) implements EventPayload {
 
-    public static CouponDeletePayload toPayload(PassportDto passport, DeleteCouponCommand command) {
-        return CouponDeletePayload.builder()
+    public static CouponDeleteEvent toPayload(PassportDto passport, DeleteCouponCommand command) {
+        return CouponDeleteEvent.builder()
                 .passport(passport)
                 .couponId(command.couponId())
                 .build();

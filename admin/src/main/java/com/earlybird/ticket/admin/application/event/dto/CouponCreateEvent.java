@@ -7,16 +7,16 @@ import com.earlybird.ticket.common.entity.PassportDto;
 import lombok.Builder;
 
 @Builder
-public record CouponCreatePayload(
+public record CouponCreateEvent(
         PassportDto passport,
         String couponName,
         Integer discountRate,
         CouponType couponType
 ) implements EventPayload {
 
-    public static CouponCreatePayload toPayload(
+    public static CouponCreateEvent toPayload(
             PassportDto passport, RegisterCouponCommand command) {
-        return CouponCreatePayload.builder()
+        return CouponCreateEvent.builder()
                 .passport(passport)
                 .couponName(command.couponName())
                 .discountRate(command.discountRate())

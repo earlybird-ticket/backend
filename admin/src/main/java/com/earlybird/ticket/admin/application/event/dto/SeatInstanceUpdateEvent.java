@@ -8,7 +8,7 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record SeatInstanceUpdatePayload(
+public record SeatInstanceUpdateEvent(
         PassportDto passportDto,
         UUID seatInstanceId,
         UUID hallId,
@@ -19,9 +19,9 @@ public record SeatInstanceUpdatePayload(
         BigDecimal price
 ) implements EventPayload {
 
-    public static SeatInstanceUpdatePayload toPayload(
+    public static SeatInstanceUpdateEvent toPayload(
             PassportDto passportDto, UpdateSeatInstanceCommand command) {
-        return SeatInstanceUpdatePayload.builder()
+        return SeatInstanceUpdateEvent.builder()
                 .passportDto(passportDto)
                 .seatInstanceId(command.seatInstanceId())
                 .hallId(command.hallId())

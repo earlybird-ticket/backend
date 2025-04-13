@@ -8,7 +8,7 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record CouponUpdatePayload(
+public record CouponUpdateEvent(
         PassportDto passport,
         UUID couponId,
         String couponName,
@@ -16,8 +16,8 @@ public record CouponUpdatePayload(
         CouponType couponType
 ) implements EventPayload {
 
-    public static CouponUpdatePayload toPayload(PassportDto passport, UpdateCouponCommand command) {
-        return CouponUpdatePayload.builder()
+    public static CouponUpdateEvent toPayload(PassportDto passport, UpdateCouponCommand command) {
+        return CouponUpdateEvent.builder()
                 .passport(passport)
                 .couponId(command.couponId())
                 .couponName(command.couponName())

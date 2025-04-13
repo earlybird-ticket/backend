@@ -7,14 +7,14 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record VenueDeletePayload(
+public record VenueDeleteEvent(
         PassportDto passportDto,
         UUID venueId
 ) implements EventPayload {
 
-    public static VenueDeletePayload toPayload(
+    public static VenueDeleteEvent toPayload(
             PassportDto passportDto, DeleteVenueCommand command) {
-        return VenueDeletePayload.builder()
+        return VenueDeleteEvent.builder()
                 .passportDto(passportDto)
                 .venueId(command.venueId())
                 .build();
