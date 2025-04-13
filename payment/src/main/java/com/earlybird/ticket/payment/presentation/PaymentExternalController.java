@@ -6,6 +6,7 @@ import com.earlybird.ticket.payment.application.service.dto.query.FindPaymentQue
 import com.earlybird.ticket.payment.presentation.dto.request.ConfirmPaymentRequest;
 import com.earlybird.ticket.payment.presentation.dto.request.CreatePaymentRequest;
 import com.earlybird.ticket.payment.presentation.dto.request.FindPaymentResponse;
+import com.earlybird.ticket.payment.presentation.dto.response.GetPaymentIdResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,12 +28,13 @@ public class PaymentExternalController {
     private final PaymentService paymentService;
 
     @PostMapping
-    public ResponseEntity<CommonDto<Void>> createPayment(
+    public ResponseEntity<CommonDto<GetPaymentIdResponse>> createPayment(
         @RequestBody CreatePaymentRequest paymentRequest
     ) {
         UUID paymentId = paymentService.createPayment(paymentRequest.toCreatePaymentCommand());
         //TODO: 결제 아이디 반환
-        return ResponseEntity.ok(CommonDto.ok(null, "결제 생성 성공"));
+        GetPaymentIdResponse getPaymentIdResponse = new GetPaymentIdResponse(paymentId);
+        return ResponseEntity.ok(CommonDto.ok(getPaymentIdResponse, "결제 생성 성공"));
     }
 
     @GetMapping("/{paymentId}")
