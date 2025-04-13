@@ -1,5 +1,6 @@
 package com.earlybird.ticket.reservation.infrastructure.repository.reservationSeat;
 
+import com.earlybird.ticket.reservation.domain.entity.Reservation;
 import com.earlybird.ticket.reservation.domain.entity.ReservationSeat;
 import com.earlybird.ticket.reservation.domain.entity.constant.SeatStatus;
 import com.earlybird.ticket.reservation.domain.repository.ReservationSeatRepository;
@@ -40,5 +41,10 @@ public class ReservationSeatRepositoryImpl implements ReservationSeatRepository 
     @Override
     public List<ReservationSeat> saveAll(List<ReservationSeat> reservationSeatList) {
         return reservationSeatJpaRepository.saveAll(reservationSeatList);
+    }
+
+    @Override
+    public List<ReservationSeat> findByReservation(Reservation reservation) {
+        return reservationSeatJpaRepository.findByReservation(reservation);
     }
 }

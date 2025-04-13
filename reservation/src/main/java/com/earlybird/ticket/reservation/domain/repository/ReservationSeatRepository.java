@@ -1,5 +1,6 @@
 package com.earlybird.ticket.reservation.domain.repository;
 
+import com.earlybird.ticket.reservation.domain.entity.Reservation;
 import com.earlybird.ticket.reservation.domain.entity.ReservationSeat;
 import com.earlybird.ticket.reservation.domain.entity.constant.SeatStatus;
 import jakarta.validation.constraints.NotNull;
@@ -19,4 +20,6 @@ public interface ReservationSeatRepository {
     Optional<ReservationSeat> findById(UUID uuid);
 
     List<ReservationSeat> saveAll(List<ReservationSeat> reservationSeatList);
+
+    List<ReservationSeat> findByReservation(Reservation reservation);
 }

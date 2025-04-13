@@ -1,5 +1,6 @@
 package com.earlybird.ticket.reservation.infrastructure.repository.reservationSeat;
 
+import com.earlybird.ticket.reservation.domain.entity.Reservation;
 import com.earlybird.ticket.reservation.domain.entity.ReservationSeat;
 import com.earlybird.ticket.reservation.domain.entity.constant.SeatStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,6 @@ public interface ReservationSeatJpaRepository extends JpaRepository<ReservationS
 
     boolean existsBySeatInstanceIdAndStatusNot(UUID seatInstanceId,
                                                SeatStatus free);
+
+    List<ReservationSeat> findByReservation(Reservation reservation);
 }
