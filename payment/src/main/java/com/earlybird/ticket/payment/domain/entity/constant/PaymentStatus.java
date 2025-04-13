@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum PaymentStatus {
     CREATED(Status.CREATED),
-    WAIT_FOR_DEPOSIT(Status.WAIT_FOR_DEPOSIT),
+    WAIT_FOR_DEPOSIT(Status.WAITING_FOR_DEPOSIT),
     DONE(Status.DONE),
     ABORTED(Status.ABORTED),
     EXPIRED(Status.EXPIRED);
@@ -27,7 +27,7 @@ public enum PaymentStatus {
         public static final String CREATED = "CREATED";
         public static final String DONE = "DONE";
         // 가상계좌만
-        public static final String WAIT_FOR_DEPOSIT = "WAIT_FOR_DEPOSIT";
+        public static final String WAITING_FOR_DEPOSIT = "WAITING_FOR_DEPOSIT";
         // 10분 안에는 재시도 언제든지 가능
         public static final String ABORTED = "ABORTED";
         // 10분 이후에는 좌석 반환과 함께 결제 실패

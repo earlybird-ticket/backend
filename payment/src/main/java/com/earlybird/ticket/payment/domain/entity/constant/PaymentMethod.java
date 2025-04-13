@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum PaymentMethod {
     CREDIT_CARD(Method.CREDIT_CARD),
+    SIMPLE_PAY(Method.SIMPLE_PAY),
     VIRTUAL_ACCOUNT(Method.VIRTUAL_ACCOUNT),
     ;
 
@@ -23,6 +24,7 @@ public enum PaymentMethod {
     static class Method {
 
         public static final String CREDIT_CARD = "카드";
+        public static final String SIMPLE_PAY = "간편결제";
         public static final String VIRTUAL_ACCOUNT = "가상계좌";
     }
 }

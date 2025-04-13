@@ -31,6 +31,7 @@ public class PaymentExternalController {
         @RequestBody CreatePaymentRequest paymentRequest
     ) {
         UUID paymentId = paymentService.createPayment(paymentRequest.toCreatePaymentCommand());
+        //TODO: 결제 아이디 반환
         return ResponseEntity.ok(CommonDto.ok(null, "결제 생성 성공"));
     }
 

@@ -53,7 +53,7 @@ public class Payment extends BaseEntity {
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 15)
+    @Column(name = "status", length = 20)
     private PaymentStatus status;
 
     @Enumerated(EnumType.STRING)
@@ -84,4 +84,12 @@ public class Payment extends BaseEntity {
         this.status = status;
         this.method = method;
     }
+
+    public void confirmPayment(Payment receipt) {
+        this.paymentKey = receipt.paymentKey;
+        this.method = receipt.method;
+        this.status = receipt.status;
+        this.update(this.userId);
+    }
+
 }

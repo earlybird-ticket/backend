@@ -3,6 +3,7 @@ package com.earlybird.ticket.payment.application.service;
 import com.earlybird.ticket.payment.application.service.dto.command.ConfirmPaymentCommand;
 import com.earlybird.ticket.payment.application.service.dto.command.CreatePaymentCommand;
 import com.earlybird.ticket.payment.application.service.dto.query.FindPaymentQuery;
+import com.earlybird.ticket.payment.application.service.exception.PaymentAbortException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentAmountDoesNotMatchException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentNotFoundException;
 import com.earlybird.ticket.payment.domain.entity.Payment;
@@ -42,16 +43,28 @@ public class PaymentServiceImpl implements PaymentService {
         /* TODO:
             1. OrderId로 검색 후 가격 검증 ✅
             2. Base64로 SecretKey 암호화 후 정보 전달 ✅
-            3. 엔티티 상태 업데이트[결제 방법, 결제 상태 변경]
+            3. 엔티티 상태 업데이트[결제 방법, 결제 상태 변경] ✅
             4. 아웃박스 생성
-            5. 예약으로 이벤트 발행
+            5. Reservation으로 이벤트 발행[결제 성공 이벤트 발행]
          */
         Payment payment = paymentRepository.findByOrderId(confirmPaymentCommand.orderId())
             .orElseThrow(PaymentNotFoundException::new);
 
         validatePaymentAmount(payment, confirmPaymentCommand.amount());
 
-        paymentClient.confirmPayment(confirmPaymentCommand, payment.getId());
+        Payment receipt = null;
+        try {
+            // 결제 내역 -> 업데이트용 엔티티 변경
+            receipt = paymentClient.confirmPayment(
+                confirmPaymentCommand, payment.getId()
+            ).toPayment(payment.getUserId());
+        } catch (PaymentAbortException e) {
+            // 재시도.. 최대 3번?
+        }
+        // 결제 방법, 상태 반영
+        if (receipt != null) {
+            payment.confirmPayment(receipt);
+        }
 
     }
 
