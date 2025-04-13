@@ -34,6 +34,9 @@ dependencies {
     implementation 'org.springframework.kafka:spring-kafka'
     testImplementation 'org.springframework.kafka:spring-kafka-test'
 
+    // thymeleaf
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    
     // Spring boot web
     implementation 'org.springframework.boot:spring-boot-starter-web'
     // validation
