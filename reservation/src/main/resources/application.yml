@@ -20,7 +20,7 @@ spring:
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
   kafka:
-    bootstrap-servers: localhost:29092 #포트 및 호스트 수정 필요
+    bootstrap-servers: ${KAFKA_HOST:localhost}:29092 #포트 및 호스트 수정 필요
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect

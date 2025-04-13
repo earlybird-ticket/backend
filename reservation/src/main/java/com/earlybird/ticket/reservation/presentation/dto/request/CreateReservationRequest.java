@@ -11,6 +11,7 @@ import lombok.Builder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public record CreateReservationRequest(
@@ -38,12 +39,7 @@ public record CreateReservationRequest(
         @Nullable String couponName,
         @Nullable CouponStatus couponStatus,
 
-        //논리적 좌석 정보
-        @NotNull(message = "seatInstanceId is Necessary") UUID seatInstanceId,
-        @NotNull(message = "seatRow is Necessary") Integer seatRow,
-        @NotNull(message = "seatCol is Necessary") Integer seatCol,
-        @NotNull(message = "seatGrade is Necessary") SeatGrade seatGrade,
-        @NotNull(message = "seatPrice is Necessary") BigDecimal seatPrice,
+        @NotNull List<SeatRequest> seatList,
 
         // 홀 정보
         @NotNull(message = "hallId is Necessary") UUID hallId,
@@ -68,11 +64,7 @@ public record CreateReservationRequest(
                                     @Nullable CouponType couponType,
                                     @Nullable String couponName,
                                     @Nullable CouponStatus couponStatus,
-                                    @NotNull(message = "seatInstanceId is Necessary") UUID seatInstanceId,
-                                    @NotNull(message = "seatRow is Necessary") Integer seatRow,
-                                    @NotNull(message = "seatCol is Necessary") Integer seatCol,
-                                    @NotNull(message = "seatGrade is Necessary") SeatGrade seatGrade,
-                                    @NotNull(message = "seatPrice is Necessary") BigDecimal seatPrice,
+                                    @NotNull List<SeatRequest> seatList,
                                     @NotNull(message = "hallId is Necessary") UUID hallId,
                                     @NotNull(message = "hallName is Necessary") String hallName,
                                     @NotNull(message = "hallFloor is Necessary") Integer hallFloor,
@@ -91,11 +83,7 @@ public record CreateReservationRequest(
         this.couponType = couponType;
         this.couponName = couponName;
         this.couponStatus = couponStatus;
-        this.seatInstanceId = seatInstanceId;
-        this.seatRow = seatRow;
-        this.seatCol = seatCol;
-        this.seatGrade = seatGrade;
-        this.seatPrice = seatPrice;
+        this.seatList = seatList;
         this.hallId = hallId;
         this.hallName = hallName;
         this.hallFloor = hallFloor;
@@ -118,15 +106,42 @@ public record CreateReservationRequest(
                                        .couponType(command.couponType())
                                        .couponName(command.couponName())
                                        .couponStatus(command.couponStatus())
-                                       .seatInstanceId(command.seatInstanceId())
-                                       .seatRow(command.seatRow())
-                                       .seatCol(command.seatCol())
-                                       .seatGrade(command.seatGrade())
-                                       .seatPrice(command.seatPrice())
+                                       .seatList(command.seatList()
+                                                        .stream()
+                                                        .map(seat -> CreateReservationCommand.SeatRequest.builder()
+                                                                                                         .seatInstanceId(seat.seatInstanceId())
+                                                                                                         .seatRow(seat.seatRow())
+                                                                                                         .seatCol(seat.seatCol())
+                                                                                                         .seatGrade(seat.seatGrade())
+                                                                                                         .seatPrice(seat.seatPrice())
+                                                                                                         .build())
+                                                        .toList())
                                        .hallId(command.hallId())
                                        .hallName(command.hallName())
                                        .hallFloor(command.hallFloor())
                                        .content(command.content())
                                        .build();
+    }
+
+    public record SeatRequest(
+
+            //논리적 좌석 정보
+            @NotNull(message = "seatInstanceId is Necessary") UUID seatInstanceId,
+            @NotNull(message = "seatRow is Necessary") Integer seatRow,
+            @NotNull(message = "seatCol is Necessary") Integer seatCol,
+            @NotNull(message = "seatGrade is Necessary") SeatGrade seatGrade,
+            @NotNull(message = "seatPrice is Necessary") BigDecimal seatPrice) {
+        @Builder
+        public SeatRequest(@NotNull(message = "seatInstanceId is Necessary") UUID seatInstanceId,
+                           @NotNull(message = "seatRow is Necessary") Integer seatRow,
+                           @NotNull(message = "seatCol is Necessary") Integer seatCol,
+                           @NotNull(message = "seatGrade is Necessary") SeatGrade seatGrade,
+                           @NotNull(message = "seatPrice is Necessary") BigDecimal seatPrice) {
+            this.seatInstanceId = seatInstanceId;
+            this.seatRow = seatRow;
+            this.seatCol = seatCol;
+            this.seatGrade = seatGrade;
+            this.seatPrice = seatPrice;
+        }
     }
 }
