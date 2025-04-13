@@ -37,6 +37,12 @@ public class Payment extends BaseEntity {
     @Column(name = "user_id")
     private Long userId;
 
+    @Column(name = "user_email", length = 50)
+    private String userEmail;
+
+    @Column(name = "user_name", nullable = false)
+    private String userName;
+
     @Column(name = "order_id", unique = true, updatable = false)
     private UUID orderId;
 
@@ -59,6 +65,8 @@ public class Payment extends BaseEntity {
         UUID id,
         String paymentKey,
         Long userId,
+        String userEmail,
+        String userName,
         UUID orderId,
         String orderName,
         BigDecimal amount,
@@ -68,6 +76,8 @@ public class Payment extends BaseEntity {
         this.id = id;
         this.paymentKey = paymentKey;
         this.userId = userId;
+        this.userEmail = userEmail;
+        this.userName = userName;
         this.orderId = orderId;
         this.orderName = orderName;
         this.amount = amount;

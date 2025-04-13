@@ -33,7 +33,7 @@ server:
 
 toss:
   client-key: ${TOSS_CLIENT_KEY}
-  client-secret: ${TOSS_CLIENT_SECRET}
+  secret-key: ${TOSS_SECRET_KEY}
   success-url: ${TOSS_SUCCESS_URL}
   fail-url: ${TOSS_FAIL_URL}
 

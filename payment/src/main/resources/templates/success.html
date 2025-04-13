@@ -51,12 +51,12 @@
   // 서버로 결제 승인에 필요한 결제 정보를 보내세요.
   async function confirm() {
     var requestData = {
-      paymentKey: urlParams.get("paymentKey"),
-      orderId: urlParams.get("orderId"),
+      payment_key: urlParams.get("paymentKey"),
+      order_id: urlParams.get("orderId"),
       amount: urlParams.get("amount"),
     };
 
-    const response = await fetch("/api/payment/confirm", {
+    const response = await fetch("/api/v1/payments/confirm", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

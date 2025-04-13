@@ -27,16 +27,6 @@
   let selectedPaymentMethod = null;
   main();
 
-  function selectPaymentMethod(method) {
-    if (selectedPaymentMethod != null) {
-      document.getElementById(selectedPaymentMethod).style.backgroundColor = "#ffffff";
-    }
-
-    selectedPaymentMethod = method;
-
-    document.getElementById(selectedPaymentMethod).style.backgroundColor = "rgb(229 239 255)";
-  }
-
   async function main() {
     // URL에서 트랜잭션 ID 파라미터 가져오기
     const urlParams = new URLSearchParams(window.location.search);
@@ -46,12 +36,14 @@
     // API에서 결제 데이터 가져오기
     let paymentData;
     try {
-      const response = await fetch(`/api/payment/${paymentId}`);
+      const response = await fetch(`/api/v1/payments/${paymentId}`);
       console.log(response);
       if (!response.ok) {
         throw new Error('결제 정보를 가져오는 데 실패했습니다.');
       }
       paymentData = await response.json();
+      paymentData = paymentData.data;
+      console.log(paymentData);
     } catch (error) {
       console.error('API 요청 오류:', error);
       alert('결제 정보를 가져오는 데 문제가 발생했습니다.');
@@ -63,7 +55,7 @@
     const tossPayments = TossPayments(clientKey);
 
     // 회원 결제 - API에서 받은 userId 사용
-    const customerKey = paymentData.userId;
+    const customerKey = paymentData.user_id;
     const payment = tossPayments.payment({
       customerKey,
     });
@@ -71,7 +63,7 @@
     // 주문의 결제 금액 설정 - API에서 받은 amount 사용
     const amount = {
       currency: "KRW",
-      value: parseInt(paymentData.totalAmount),
+      value: parseInt(paymentData.amount),
     };
 
     // '결제하기' 버튼 누르면 결제창 띄우기
@@ -82,12 +74,12 @@
           await payment.requestPayment({
                 method: "CARD", // 카드 및 간편결제
                 amount,
-                orderId: paymentData.orderId,
-                orderName: paymentData.productInfo,
+                orderId: paymentData.order_id,
+                orderName: paymentData.order_name,
                 successUrl: window.location.origin + [[${@environment.getProperty('toss.success-url')}]],
                 failUrl: window.location.origin + [[${@environment.getProperty('toss.fail-url')}]],
-                customerEmail: paymentData.userEmail,
-                customerName: paymentData.userName,
+                customerEmail: paymentData.user_email,
+                customerName: paymentData.user_name,
                 // 가상계좌 안내, 퀵계좌이체 휴대폰 번호 자동 완성에 사용되는 값입니다. 필요하다면 주석을 해제해 주시요.
                 // customerMobilePhone: "01012341234",
                 card: {
@@ -108,12 +100,12 @@
           await payment.requestPayment({
             method: "VIRTUAL_ACCOUNT", // 가상계좌 결제
             amount,
-            orderId: paymentData.orderId,
-            orderName: paymentData.productInfo,
+            orderId: paymentData.order_id,
+            orderName: paymentData.order_name,
             successUrl: window.location.origin + [[${@environment.getProperty('toss.success-url')}]],
             failUrl: window.location.origin + [[${@environment.getProperty('toss.fail-url')}]],
-            customerEmail: paymentData.userEmail,
-            customerName: paymentData.userName,
+            customerEmail: paymentData.user_email,
+            customerName: paymentData.user_name,
             // 가상계좌 안내, 퀵계좌이체 휴대폰 번호 자동 완성에 사용되는 값입니다. 필요하다면 주석을 해제해 주시요.
             // customerMobilePhone: "01012341234",
             virtualAccount: {
@@ -127,6 +119,16 @@
       }
 
     });
+  }
+
+  function selectPaymentMethod(method) {
+    if (selectedPaymentMethod != null) {
+      document.getElementById(selectedPaymentMethod).style.backgroundColor = "#ffffff";
+    }
+
+    selectedPaymentMethod = method;
+
+    document.getElementById(selectedPaymentMethod).style.backgroundColor = "rgb(229 239 255)";
   }
 </script>
 </body>
