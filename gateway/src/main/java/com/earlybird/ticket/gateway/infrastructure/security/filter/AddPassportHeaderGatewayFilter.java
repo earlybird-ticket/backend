@@ -37,9 +37,7 @@ public class AddPassportHeaderGatewayFilter implements GlobalFilter, Ordered {
         "/api/v1/auth/customer/sign-up",
         "/api/v1/auth/withdraw",
         // Payment 테스트용
-        "/api/v1/payments/checkout",
-        "/api/v1/payments/success",
-        "/api/v1/payments/fail"
+        "/api/v1/payments"
     );
 
     @Override
