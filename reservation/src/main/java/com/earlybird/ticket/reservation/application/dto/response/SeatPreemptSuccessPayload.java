@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 @Builder
-public record SeatPreemptSuccessEvent(List<UUID> seatInstanceIdList) implements EventPayload {
+public record SeatPreemptSuccessPayload(List<UUID> seatInstanceIdList) implements EventPayload {
 }

@@ -21,15 +21,15 @@ public class ReservationExternalController {
     private final ReservationService reservationService;
 
     @PostMapping
-    public ResponseEntity<CommonDto<Void>> createReservation(@RequestHeader("X-User-Passport") String passport,
-                                                             @RequestBody @Valid List<CreateReservationRequest> createReservationRequest) {
+    public ResponseEntity<CommonDto<List<String>>> createReservation(@RequestHeader("X-User-Passport") String passport,
+                                                                     @RequestBody @Valid List<CreateReservationRequest> createReservationRequest) {
 
-        reservationService.createResrvation(createReservationRequest.stream()
-                                                                    .map(CreateReservationRequest::toCreateReservationCommand
+        reservationService.createReservation(createReservationRequest.stream()
+                                                                     .map(CreateReservationRequest::toCreateReservationCommand
 
-                                                                    )
-                                                                    .toList(),
-                                            passport);
+                                                                     )
+                                                                     .toList(),
+                                             passport);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                              .body(CommonDto.created(null,

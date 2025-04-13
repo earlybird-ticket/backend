@@ -5,10 +5,9 @@ import com.earlybird.ticket.common.util.PassportUtil;
 import com.earlybird.ticket.reservation.application.dto.CreateReservationCommand;
 import com.earlybird.ticket.reservation.application.dto.response.FindReservationQuery;
 import com.earlybird.ticket.reservation.common.exception.CustomJsonProcessingException;
-import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatPayload;
 import com.earlybird.ticket.reservation.common.exception.NotFoundReservationException;
 import com.earlybird.ticket.reservation.common.exception.SeatAlreadyReservedException;
-import com.earlybird.ticket.reservation.domain.dto.request.SeatReservePayload;
+import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatPayload;
 import com.earlybird.ticket.reservation.domain.entity.Event;
 import com.earlybird.ticket.reservation.domain.entity.Outbox;
 import com.earlybird.ticket.reservation.domain.entity.Reservation;
@@ -39,8 +38,8 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Override
     @Transactional
-    public void createResrvation(List<CreateReservationCommand> createReservationCommands,
-                                 String passport) {
+    public List<String> createReservation(List<CreateReservationCommand> createReservationCommands,
+                                          String passport) {
 
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         Long userId = passportDto.getUserId();
@@ -71,8 +70,7 @@ public class ReservationServiceImpl implements ReservationService {
                                                                                  userId,
                                                                                  passportDto);
 
-        Event<PreemptSeatPayload> event = new Event<>(EventType.SEAT_INSTANCE_RESERVATION,
-
+        Event<PreemptSeatPayload> event = new Event<>(EventType.SEAT_INSTANCE_PREEMPTION,
                                                       payload,
                                                       LocalDateTime.now()
                                                                    .toString());
@@ -89,12 +87,43 @@ public class ReservationServiceImpl implements ReservationService {
                               .aggregateType(Outbox.AggregateType.RESERVATION)
                               .aggregateId(reservations.get(0)
                                                        .getId())
-                              .eventType(EventType.SEAT_INSTANCE_RESERVATION)
+                              .eventType(EventType.SEAT_INSTANCE_PREEMPTION)
                               .payload(payloadJson)
                               .build();
 
         outboxRepository.save(outbox);
+
+        //6. 예약 ID값 반환
+        return reservations.stream()
+                           .map(i -> i.getId()
+                                      .toString())
+                           .toList();
     }
+
+    @Override
+    @Transactional
+    public void cancelReservation(UUID reservationId,
+                                  String passport) {
+
+        PassportDto passportDto = passportUtil.getPassportDto(passport);
+        //1. 예약 엔티티 조회
+        Reservation reservation = reservationRepository.findById(reservationId)
+                                                       .orElseThrow(NotFoundReservationException::new);
+        //2. 예약 취소
+        UUID paymentId = reservation.getPaymentId();
+
+        // 2-2. 결제 취소 요청
+        // TODO:: 결제 취소 성공시 좌석 반환 요청 및 쿠폰 복구 요청
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public FindReservationQuery findReservation(UUID reservationId,
+                                                String passport) {
+        return null;
+    }
+
 
     private void validateReservationCommandsSeatInstanceId(List<CreateReservationCommand> createReservationCommands) {
         createReservationCommands.forEach(command -> {
@@ -109,30 +138,6 @@ public class ReservationServiceImpl implements ReservationService {
 
         });
     }
-
-    @Override
-    @Transactional
-    public void cancelReservation(UUID reservationId,
-                                  String passport) {
-
-        PassportDto passportDto = passportUtil.getPassportDto(passport);
-        //1. 예약 엔티티 조회
-        Reservation reservation = reservationRepository.findById(reservationId)
-                                                       .orElseThrow(() -> new NotFoundReservationException());
-        //2. 예약 취소
-        reservation.cancelReservation(passportDto.getUserId());
-
-        //3. 결제 취소 이벤트 발행
-
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public FindReservationQuery findReservation(UUID reservationId,
-                                                String passport) {
-        return null;
-    }
-
 
     private Reservation createReservation(CreateReservationCommand createReservationCommand,
                                           Long userId) {
