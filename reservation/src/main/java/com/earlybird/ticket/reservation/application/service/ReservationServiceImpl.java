@@ -118,7 +118,14 @@ public class ReservationServiceImpl implements ReservationService {
     @Transactional(readOnly = true)
     public FindReservationQuery findReservation(UUID reservationId,
                                                 String passport) {
-        return null;
+
+        Reservation reservation = reservationRepository.findById(reservationId)
+                                                       .orElseThrow(NotFoundReservationException::new);
+
+        List<ReservationSeat> reservationSeatList = reservationSeatRepository.findByReservation(reservation);
+
+        return FindReservationQuery.createFindReservationQuery(reservation,
+                                                               reservationSeatList);
     }
 
 

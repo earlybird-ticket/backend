@@ -4,6 +4,7 @@ import com.earlybird.ticket.common.entity.CommonDto;
 import com.earlybird.ticket.reservation.application.dto.response.FindReservationQuery;
 import com.earlybird.ticket.reservation.application.service.ReservationService;
 import com.earlybird.ticket.reservation.presentation.dto.request.CreateReservationRequest;
+import com.earlybird.ticket.reservation.presentation.dto.response.FindReservationResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -43,14 +44,15 @@ public class ReservationExternalController {
     }
 
     @GetMapping("/{reservationId}")
-    public ResponseEntity<CommonDto<Void>> findReservations(@PathVariable UUID reservationId,
-                                                            @RequestHeader("X-User-Passport") String passport) {
+    public ResponseEntity<CommonDto<FindReservationResponse>> findReservations(@PathVariable UUID reservationId,
+                                                                               @RequestHeader("X-User-Passport") String passport) {
 
         FindReservationQuery findReservationQuery = reservationService.findReservation(reservationId,
                                                                                        passport);
+        FindReservationResponse findReservationResponse = FindReservationResponse.createFindReservationResponse(findReservationQuery);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                             .body(CommonDto.ok(null,
+                             .body(CommonDto.ok(findReservationResponse,
                                                 "예약 조회 성공"));
     }
 
