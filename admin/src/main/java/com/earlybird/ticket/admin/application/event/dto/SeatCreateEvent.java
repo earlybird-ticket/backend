@@ -8,7 +8,7 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record SeatCreatePayload(
+public record SeatCreateEvent(
         PassportDto passportDto,
         UUID hallId,
         UUID venueId,
@@ -16,12 +16,12 @@ public record SeatCreatePayload(
 ) implements EventPayload {
 
     public static EventPayload toPayload(PassportDto passport, RegisterSeatCommand command) {
-        return SeatCreatePayload.builder()
+        return SeatCreateEvent.builder()
                 .passportDto(passport)
                 .hallId(command.hallId())
                 .venueId(command.venueId())
                 .seatList(command.seatList().stream()
-                                  .map(seatInfo -> new SeatCreatePayload.SeatInfo(
+                                  .map(seatInfo -> new SeatCreateEvent.SeatInfo(
                                           seatInfo.section(), seatInfo.rowCnt(), seatInfo.colCnt(),
                                           seatInfo.floor()
                                   ))

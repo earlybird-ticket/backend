@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -26,6 +27,7 @@ public class OutboxPublisher {
             timeUnit = TimeUnit.SECONDS,
             scheduler = "publishPendingEventExecutor"
     )
+    @Transactional
     public void publishPendingEvent() {
         List<Outbox> outboxes = outboxRepository
                 .findAllByCreatedAtLessThanEqualAndSuccessFalseOrderByCreatedAtAsc(
@@ -37,14 +39,15 @@ public class OutboxPublisher {
         }
     }
 
-    private void publishEvent(Outbox outbox) {
+    public void publishEvent(Outbox outbox) {
         try {
             kafkaTemplate.send(
                     outbox.getEventType().getTopic(),
                     outbox.getPayload()
             ).get(1, TimeUnit.SECONDS);
-            outboxRepository.delete(outbox);
+            outbox.markSuccess();
         } catch (Exception e) {
+            // TODO : 재시도 로직 구현 예정
             log.error("outbox={}", outbox, e);
         }
     }

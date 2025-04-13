@@ -12,6 +12,7 @@ public record RegisterVenueCommand(
         List<HallCreateCommand> hallList
 ) {
 
+    @Builder
     public record HallCreateCommand(
             String hallName,
             int hallFloor
