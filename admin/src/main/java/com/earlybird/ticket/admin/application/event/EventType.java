@@ -24,8 +24,8 @@ public enum EventType {
     DELETE_COUPON(CouponDeletePayload.class, Topic.ADMIN_TO_COUPON),
     UPDATE_COUPON(CouponUpdatePayload.class, Topic.ADMIN_TO_COUPON),
     CREATE_SEAT(SeatCreatePayload.class, Topic.ADMIN_TO_SEAT),
-    UPDATE_SEAT(SeatInstanceUpdatePayload.class, Topic.ADMIN_TO_SEAT),
-    DELETE_SEAT(SeatInstanceDeletePayload.class, Topic.ADMIN_TO_SEAT),
+    UPDATE_SEAT_INSTANCE(SeatInstanceUpdatePayload.class, Topic.ADMIN_TO_SEAT),
+    DELETE_SEAT_INSTANCE(SeatInstanceDeletePayload.class, Topic.ADMIN_TO_SEAT),
     CREATE_VENUE(VenueCreatePayload.class, Topic.ADMIN_TO_VENUE),
     UPDATE_VENUE(VenueUpdatePayload.class, Topic.ADMIN_TO_VENUE),
     DELETE_VENUE(VenueDeletePayload.class, Topic.ADMIN_TO_VENUE);
