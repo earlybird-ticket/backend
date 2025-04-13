@@ -43,7 +43,7 @@ public class SeatServiceImpl implements SeatService {
         List<Seat> seatList = seatRepository.findSeatListWithSeatInstanceInSeatInstanceIdList(seatInstanceIdList);
 
         // 2. seat이 다 존재하는 지 확인
-        if(seatList.size() != seatInstanceIdList.size()) {
+        if(seatList.size() != seatInstanceIdList.size() && seatList.get(0).getSeatInstances().size() != seatInstanceIdList.size()) {
             throw new SeatNotFoundException();
         }
 
