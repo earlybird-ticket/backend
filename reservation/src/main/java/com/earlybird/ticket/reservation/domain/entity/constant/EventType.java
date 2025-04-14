@@ -6,8 +6,8 @@ import com.earlybird.ticket.reservation.application.dto.response.PaymentSuccessP
 import com.earlybird.ticket.reservation.application.dto.response.SeatPreemptFailPayload;
 import com.earlybird.ticket.reservation.application.dto.response.SeatPreemptSuccessPayload;
 import com.earlybird.ticket.reservation.domain.dto.request.ConfirmSeatEvent;
-import com.earlybird.ticket.reservation.domain.dto.request.FailCouponEvent;
 import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatPayload;
+import com.earlybird.ticket.reservation.domain.dto.request.ReturnCouponEvent;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ public enum EventType {
                   Topic.RESERVATION_TO_COUPON),
     COUPON_CONFIRM(CouponReservePayload.class,
                    Topic.RESERVATION_TO_COUPON),
-    COUPON_FAIL(FailCouponEvent.class,
+    COUPON_FAIL(ReturnCouponEvent.class,
                 Topic.RESERVATION_TO_COUPON),
     //consume,
     SEAT_PREEMPT_SUCCESS(SeatPreemptSuccessPayload.class,

@@ -4,8 +4,8 @@ import com.earlybird.ticket.common.entity.PassportDto;
 import com.earlybird.ticket.reservation.application.dto.response.CouponReservePayload;
 import com.earlybird.ticket.reservation.application.event.EventHandler;
 import com.earlybird.ticket.reservation.common.exception.CustomJsonProcessingException;
-import com.earlybird.ticket.reservation.domain.dto.request.FailCouponEvent;
 import com.earlybird.ticket.reservation.domain.dto.request.ReserveCouponEvent;
+import com.earlybird.ticket.reservation.domain.dto.request.ReturnCouponEvent;
 import com.earlybird.ticket.reservation.domain.entity.Event;
 import com.earlybird.ticket.reservation.domain.entity.Outbox;
 import com.earlybird.ticket.reservation.domain.entity.Reservation;
@@ -106,16 +106,16 @@ public class ReserveCouponPayloadHandler implements EventHandler<CouponReservePa
             log.error("[CouponEventHandler] 쿠폰 적용 중 예외 발생",
                       e);
 
-            FailCouponEvent failCouponEvent = FailCouponEvent.builder()
-                                                             .couponId(payload.couponId())
-                                                             .passportDto(passport)
-                                                             .code("C01")
-                                                             .build();
+            ReturnCouponEvent returnCouponEvent = ReturnCouponEvent.builder()
+                                                                   .couponId(payload.couponId())
+                                                                   .passportDto(passport)
+                                                                   .code("C01")
+                                                                   .build();
 
-            Event<FailCouponEvent> failCouponPayloadEvent = new Event<>(EventType.COUPON_FAIL,
-                                                                        failCouponEvent,
-                                                                        LocalDateTime.now()
-                                                                                     .toString());
+            Event<ReturnCouponEvent> failCouponPayloadEvent = new Event<>(EventType.COUPON_FAIL,
+                                                                          returnCouponEvent,
+                                                                          LocalDateTime.now()
+                                                                                       .toString());
 
             try {
                 payloadJson = new ObjectMapper().writeValueAsString(failCouponPayloadEvent);
