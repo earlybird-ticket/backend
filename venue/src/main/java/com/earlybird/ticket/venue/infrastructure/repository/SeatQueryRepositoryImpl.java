@@ -58,7 +58,7 @@ public class SeatQueryRepositoryImpl implements SeatQueryRepository {
 
         UUID concertId =
                 queryFactory
-                        .select(
+                        .selectDistinct(
                         seatInstance.concertId
                         )
                         .from(seatInstance)
@@ -101,7 +101,7 @@ public class SeatQueryRepositoryImpl implements SeatQueryRepository {
 
         SeatListResult seatListResult =
                 queryFactory
-                        .select(Projections.constructor(
+                        .selectDistinct(Projections.constructor(
                                 SeatListResult.class,
                                 seatInstance.concertId,
                                 seatInstance.concertSequenceId,

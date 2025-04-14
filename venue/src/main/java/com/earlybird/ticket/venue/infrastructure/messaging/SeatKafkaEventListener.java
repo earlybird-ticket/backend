@@ -2,11 +2,9 @@ package com.earlybird.ticket.venue.infrastructure.messaging;
 
 import com.earlybird.ticket.common.entity.EventPayload;
 import com.earlybird.ticket.venue.application.event.dispatcher.EventDispatcher;
-import com.earlybird.ticket.venue.application.event.dto.request.SeatConfirmPayload;
 import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.common.exception.JsonDeserializationException;
 import com.earlybird.ticket.venue.domain.entity.Event;
-import com.earlybird.ticket.venue.domain.entity.Outbox;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -59,7 +57,7 @@ public class SeatKafkaEventListener {
         } catch (Exception e) {
             log.error("메시지 처리 실패: {}", e.getMessage());
             ack.acknowledge();
-            // 재처리 로직
+            // 재처리 로직 (좌석 관련 예외면 재처리 X)
         }
     }
 
@@ -80,7 +78,7 @@ public class SeatKafkaEventListener {
         } catch (Exception e) {
             log.error("메시지 처리 실패: {}", e.getMessage());
             ack.acknowledge();
-            // 재처리 로직
+            // 재처리 로직 (좌석 관련 예외면 재처리 X)
         }
     }
 

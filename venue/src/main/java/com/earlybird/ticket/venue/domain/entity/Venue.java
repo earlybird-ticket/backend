@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -36,8 +37,9 @@ public class Venue extends BaseEntity {
     @Column(name = "total_number_of_seats")
     private Integer totalNumberOfSeats;
 
+    @Builder.Default
     @OneToMany(mappedBy = "venue", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    private Set<Hall> halls;
+    private Set<Hall> halls = new HashSet<>();
 
     public static Venue create(
             String venueName,
