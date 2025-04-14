@@ -47,7 +47,7 @@ public class PaymentServiceImpl implements PaymentService {
             4. 아웃박스 생성
             5. Reservation으로 이벤트 발행[결제 성공 이벤트 발행]
          */
-        Payment payment = paymentRepository.findByOrderId(confirmPaymentCommand.orderId())
+        Payment payment = paymentRepository.findByReservationId(confirmPaymentCommand.reservationId())
             .orElseThrow(PaymentNotFoundException::new);
 
         validatePaymentAmount(payment, confirmPaymentCommand.amount());

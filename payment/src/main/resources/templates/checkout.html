@@ -74,7 +74,7 @@
           await payment.requestPayment({
                 method: "CARD", // 카드 및 간편결제
                 amount,
-                orderId: paymentData.order_id,
+                orderId: paymentData.reservation_id,
                 orderName: paymentData.order_name,
                 successUrl: window.location.origin + [[${@environment.getProperty('toss.success-url')}]],
                 failUrl: window.location.origin + [[${@environment.getProperty('toss.fail-url')}]],
@@ -100,7 +100,7 @@
           await payment.requestPayment({
             method: "VIRTUAL_ACCOUNT", // 가상계좌 결제
             amount,
-            orderId: paymentData.order_id,
+            orderId: paymentData.reservation_id,
             orderName: paymentData.order_name,
             successUrl: window.location.origin + [[${@environment.getProperty('toss.success-url')}]],
             failUrl: window.location.origin + [[${@environment.getProperty('toss.fail-url')}]],

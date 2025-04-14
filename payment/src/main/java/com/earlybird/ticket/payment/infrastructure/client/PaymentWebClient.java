@@ -46,7 +46,7 @@ public class PaymentWebClient implements PaymentClient {
             .headers(httpHeaders -> {
                 httpHeaders.add(HttpHeaders.AUTHORIZATION, getAuthorizationValue());
                 httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-                //httpHeaders.add(IDEMPOTENCY_KEY, command.orderId().toString());
+                //httpHeaders.add(IDEMPOTENCY_KEY, command.reservationId().toString());
             })
             .bodyValue(command)
             .retrieve()
