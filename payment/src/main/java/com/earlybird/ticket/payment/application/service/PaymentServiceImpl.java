@@ -1,7 +1,10 @@
 package com.earlybird.ticket.payment.application.service;
 
 import com.earlybird.ticket.common.entity.EventPayload;
+import com.earlybird.ticket.common.entity.PassportDto;
+import com.earlybird.ticket.common.entity.constant.Role;
 import com.earlybird.ticket.common.util.CommonUtil;
+import com.earlybird.ticket.common.util.PassportUtil;
 import com.earlybird.ticket.payment.application.event.dto.request.PaymentSuccessEvent;
 import com.earlybird.ticket.payment.application.service.dto.command.ConfirmPaymentCommand;
 import com.earlybird.ticket.payment.application.service.dto.command.CreatePaymentCommand;
@@ -73,9 +76,17 @@ public class PaymentServiceImpl implements PaymentService {
             // 결제 방법, 상태 반영
             payment.confirmPayment(receipt);
 
+            // 임시 passport 생성
+            PassportDto passport = PassportDto.builder()
+                .userId(payment.getUserId())
+                .userRole(Role.USER.getValue())
+                .build();
+
             // 이벤트 생성
             PaymentSuccessEvent event = PaymentSuccessEvent.builder()
                 .reservationId(payment.getReservationId())
+                .passportDto(passport)
+                .totalPrice(payment.getAmount())
                 .paymentMethod(payment.getMethod())
                 .paymentId(payment.getId())
                 .paymentStatus(payment.getStatus())
