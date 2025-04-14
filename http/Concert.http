@@ -1,0 +1,44 @@
+@baseUrl= http://localhost:18085
+### 쿠폰 생성
+POST {{baseUrl}}/api/v1/external/concerts/register
+content-type: application/json
+X-User-Passport: {"userId":1,"userRole":"ADMIN"}
+
+{
+  "concert_name": "Cold play",
+  "entertainer_name": "Cold play",
+  "start_date": "2025-05-01T19:00:00",
+  "end_date": "2025-05-01T21:00:00",
+  "genre": "ROCK",
+  "running_time": 120,
+  "seller_id": 1001,
+  "price_info": "VIP:100000, R:80000, S:60000",
+  "seat_instance_info_list": [
+    {
+      "section": "A",
+      "grade": "VIP",
+      "price": 100000
+    },
+    {
+      "section": "B",
+      "grade": "R",
+      "price": 80000
+    },
+    {
+      "section": "C",
+      "grade": "S",
+      "price": 60000
+    }
+  ],
+  "concert_sequences": [
+    {
+      "hall_id": "d0f8e1b4-0f4f-4a92-95fb-3d7de6f0be19",
+      "venue_id": "a1f98aa3-7423-4635-b457-83e8d661234a",
+      "sequence_start_date": "2025-05-01T19:00:00",
+      "sequence_end_date": "2025-05-01T21:00:00",
+      "ticket_sale_start_date": "2025-04-01T00:00:00",
+      "ticket_sale_end_date": "2025-04-30T23:59:59",
+      "status": "OPEN"
+    }
+  ]
+}
