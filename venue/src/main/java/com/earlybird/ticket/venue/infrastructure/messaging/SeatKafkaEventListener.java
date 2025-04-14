@@ -48,9 +48,7 @@ public class SeatKafkaEventListener {
     public void listenReservationToSeatForPreemptTopic(@Payload String message, Acknowledgment ack) {
 
         try{
-            log.info("메세지 수신");
             Event<? extends EventPayload> event = Event.fromJson(message);
-            log.info("메세지 event로 변환 : {}", event);
             eventDispatcher.handle(event);
             ack.acknowledge();
 
