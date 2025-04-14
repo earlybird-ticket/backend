@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <script src="https://js.tosspayments.com/v2/standard"></script>
+</head>
+<body>
+<!-- 주문서 영역 -->
+<div class="wrapper">
+  <div class="box_section"
+       style="padding: 40px 30px 50px 30px; margin-top: 30px; margin-bottom: 50px">
+    <h1>일반 결제</h1>
+    <!-- 결제 UI -->
+    <div id="payment-method" style="display: flex">
+      <button id="CARD" class="button2" onclick="selectPaymentMethod('CARD')">카드</button>
+      <button id="VIRTUAL_ACCOUNT" class="button2" onclick="selectPaymentMethod('VIRTUAL_ACCOUNT')">
+        가상계좌
+      </button>
+    </div>
+    <!-- 결제하기 버튼 -->
+    <div id="agreement"></div>
+    <!-- 결제하기 버튼 -->
+    <button class="button" id="payment-button" style="margin-top: 30px">결제하기</button>
+  </div>
+</div>
+<script th:inline="javascript">
+  let selectedPaymentMethod = null;
+  main();
+
+  async function main() {
+    // URL에서 트랜잭션 ID 파라미터 가져오기
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentId = urlParams.get('paymentId');
+    console.log(paymentId);
+
+    // API에서 결제 데이터 가져오기
+    let paymentData;
+    try {
+      const response = await fetch(`/api/v1/payments/${paymentId}`);
+      console.log(response);
+      if (!response.ok) {
+        throw new Error('결제 정보를 가져오는 데 실패했습니다.');
+      }
+      paymentData = await response.json();
+      paymentData = paymentData.data;
+      console.log(paymentData);
+    } catch (error) {
+      console.error('API 요청 오류:', error);
+      alert('결제 정보를 가져오는 데 문제가 발생했습니다.');
+      return;
+    }
+
+    // 결제위젯 초기화
+    const clientKey = [[${@environment.getProperty('toss.client-key')}]];
+    const tossPayments = TossPayments(clientKey);
+
+    // 회원 결제 - API에서 받은 userId 사용
+    const customerKey = paymentData.user_id;
+    const payment = tossPayments.payment({
+      customerKey,
+    });
+
+    // 주문의 결제 금액 설정 - API에서 받은 amount 사용
+    const amount = {
+      currency: "KRW",
+      value: parseInt(paymentData.amount),
+    };
+
+    // '결제하기' 버튼 누르면 결제창 띄우기
+    const button = document.getElementById("payment-button");
+    button.addEventListener("click", async function () {
+      switch (selectedPaymentMethod) {
+        case "CARD":
+          await payment.requestPayment({
+                method: "CARD", // 카드 및 간편결제
+                amount,
+                orderId: paymentData.reservation_id,
+                orderName: paymentData.order_name,
+                successUrl: window.location.origin + [[${@environment.getProperty('toss.success-url')}]],
+                failUrl: window.location.origin + [[${@environment.getProperty('toss.fail-url')}]],
+                customerEmail: paymentData.user_email,
+                customerName: paymentData.user_name,
+                // 가상계좌 안내, 퀵계좌이체 휴대폰 번호 자동 완성에 사용되는 값입니다. 필요하다면 주석을 해제해 주시요.
+                // customerMobilePhone: "01012341234",
+                card: {
+                  useEscrow: false,
+                  flowMode:
+                      "DEFAULT",
+                  useCardPoint:
+                      false,
+                  useAppCardOnly:
+                      false,
+                }
+              }
+          )
+          ;
+        case
+        "VIRTUAL_ACCOUNT"
+        :
+          await payment.requestPayment({
+            method: "VIRTUAL_ACCOUNT", // 가상계좌 결제
+            amount,
+            orderId: paymentData.reservation_id,
+            orderName: paymentData.order_name,
+            successUrl: window.location.origin + [[${@environment.getProperty('toss.success-url')}]],
+            failUrl: window.location.origin + [[${@environment.getProperty('toss.fail-url')}]],
+            customerEmail: paymentData.user_email,
+            customerName: paymentData.user_name,
+            // 가상계좌 안내, 퀵계좌이체 휴대폰 번호 자동 완성에 사용되는 값입니다. 필요하다면 주석을 해제해 주시요.
+            // customerMobilePhone: "01012341234",
+            virtualAccount: {
+              cashReceipt: {
+                type: "소득공제",
+              },
+              useEscrow: false,
+              validHours: 24,
+            },
+          });
+      }
+
+    });
+  }
+
+  function selectPaymentMethod(method) {
+    if (selectedPaymentMethod != null) {
+      document.getElementById(selectedPaymentMethod).style.backgroundColor = "#ffffff";
+    }
+
+    selectedPaymentMethod = method;
+
+    document.getElementById(selectedPaymentMethod).style.backgroundColor = "rgb(229 239 255)";
+  }
+</script>
+</body>
+</html>

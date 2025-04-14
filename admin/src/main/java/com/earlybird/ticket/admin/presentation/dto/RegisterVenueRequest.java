@@ -24,7 +24,10 @@ public record RegisterVenueRequest(
 
     public List<HallCreateCommand> toHallCreateCommand() {
         return hallList.stream()
-                .map(hall -> new HallCreateCommand(hall.hallName(), hall.hallFloor()))
+                .map(hall -> HallCreateCommand.builder()
+                        .hallName(hall.hallName())
+                        .hallFloor(hall.hallFloor())
+                        .build())
                 .toList();
     }
 

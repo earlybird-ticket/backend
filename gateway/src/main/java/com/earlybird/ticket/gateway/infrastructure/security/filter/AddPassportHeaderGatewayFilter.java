@@ -4,6 +4,7 @@ import com.earlybird.ticket.common.entity.PassportDto;
 import com.earlybird.ticket.common.entity.constant.Role;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
@@ -34,17 +35,21 @@ public class AddPassportHeaderGatewayFilter implements GlobalFilter, Ordered {
         "/api/v1/auth/sign-in",
         "/api/v1/auth/seller/sign-up",
         "/api/v1/auth/customer/sign-up",
-        "/api/v1/auth/withdraw"
+        "/api/v1/auth/withdraw",
+        // Payment 테스트용
+        "/api/v1/payments"
     );
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
-        // TODO: JWT 토큰 발급 이후 검증
         String path = exchange.getRequest().getURI().getPath();
         log.info("path = {}", path);
 //         회원가입과 로그인 과정은 인증되지 않은 상태이므로 인가 필터 거치지 X
-        if (ALLOWED_UNAUTHORIZED_REQUEST.contains(path)) {
+        for (String pattern : ALLOWED_UNAUTHORIZED_REQUEST) {
+            if (!path.startsWith(pattern)) {
+                continue;
+            }
             return chain.filter(exchange)
                 .doFirst(() -> log.info("no auth request path = {}", path))
                 .then(Mono.fromRunnable(() -> {

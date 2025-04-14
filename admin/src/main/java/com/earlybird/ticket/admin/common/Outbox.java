@@ -70,6 +70,6 @@ public class Outbox {
 
         public static final String COUPON = "COUPON";
         public static final String SEAT = "SEAT";
-
+        public static final String VENUE = "VENUE";
     }
 }

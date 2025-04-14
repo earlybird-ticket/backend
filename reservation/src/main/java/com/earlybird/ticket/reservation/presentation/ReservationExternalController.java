@@ -1,16 +1,21 @@
 package com.earlybird.ticket.reservation.presentation;
 
 import com.earlybird.ticket.common.entity.CommonDto;
+import com.earlybird.ticket.common.util.PageUtil;
 import com.earlybird.ticket.reservation.application.dto.response.FindReservationQuery;
 import com.earlybird.ticket.reservation.application.service.ReservationService;
+import com.earlybird.ticket.reservation.domain.dto.response.ReservationSearchResult;
 import com.earlybird.ticket.reservation.presentation.dto.request.CreateReservationRequest;
+import com.earlybird.ticket.reservation.presentation.dto.response.FindReservationResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -21,18 +26,14 @@ public class ReservationExternalController {
     private final ReservationService reservationService;
 
     @PostMapping
-    public ResponseEntity<CommonDto<Void>> createReservation(@RequestHeader("X-User-Passport") String passport,
-                                                             @RequestBody @Valid List<CreateReservationRequest> createReservationRequest) {
+    public ResponseEntity<CommonDto<String>> createReservation(@RequestHeader("X-User-Passport") String passport,
+                                                               @RequestBody @Valid CreateReservationRequest createReservationRequest) {
 
-        reservationService.createResrvation(createReservationRequest.stream()
-                                                                    .map(CreateReservationRequest::toCreateReservationCommand
-
-                                                                    )
-                                                                    .toList(),
-                                            passport);
+        String reservationId = reservationService.createReservation(CreateReservationRequest.toCreateReservationCommand(createReservationRequest),
+                                                                    passport);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                             .body(CommonDto.created(null,
+                             .body(CommonDto.created(reservationId,
                                                      "예약 생성 성공"));
     }
 
@@ -48,30 +49,43 @@ public class ReservationExternalController {
     }
 
     @GetMapping("/{reservationId}")
-    public ResponseEntity<CommonDto<Void>> findReservations(@PathVariable UUID reservationId,
-                                                            @RequestHeader("X-User-Passport") String passport) {
+    public ResponseEntity<CommonDto<FindReservationResponse>> findReservations(@PathVariable UUID reservationId,
+                                                                               @RequestHeader("X-User-Passport") String passport) {
 
         FindReservationQuery findReservationQuery = reservationService.findReservation(reservationId,
                                                                                        passport);
+        FindReservationResponse findReservationResponse = FindReservationResponse.createFindReservationResponse(findReservationQuery);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                             .body(CommonDto.ok(null,
+                             .body(CommonDto.ok(findReservationResponse,
                                                 "예약 조회 성공"));
     }
 
-    @GetMapping("search")
-    public ResponseEntity<CommonDto<Void>> searchReservations(@PathVariable String q,
-                                                              @PathVariable int size,
-                                                              @PathVariable String sort,
-                                                              @PathVariable String order_by,
-                                                              @PathVariable String startTime,
-                                                              @PathVariable String endTime,
-                                                              @RequestHeader("X-User-Passport") String passport) {
+    @GetMapping("/search")
+    public ResponseEntity<CommonDto<PagedModel<ReservationSearchResult>>> searchReservations(@RequestParam(value = "q") String q,
+                                                                                             @RequestParam(value = "size") int size,
+                                                                                             @RequestParam(value = "page") int page,
+                                                                                             @RequestParam(value = "sort") String sort,
+                                                                                             @RequestParam(value = "orderBy") String orderBy,
+                                                                                             @RequestParam(value = "startTime") String startTime,
+                                                                                             @RequestParam(value = "endTime") String endTime,
+                                                                                             @RequestHeader("X-User-Passport") String passport) {
 
-        //1. reservationService.searchResrvation(pageable객체)로 전달
+        Pageable pageable = PageUtil.getPageable(page,
+                                                 size,
+                                                 sort,
+                                                 orderBy);
+
+        Page<ReservationSearchResult> pageResult = reservationService.searchReservations(pageable,
+                                                                                         q,
+                                                                                         startTime,
+                                                                                         endTime,
+                                                                                         passport);
+
+        PagedModel<ReservationSearchResult> pagedModel = new PagedModel<>(pageResult);
 
         return ResponseEntity.status(HttpStatus.OK)
-                             .body(CommonDto.ok(null,
+                             .body(CommonDto.ok(pagedModel,
                                                 "예약 검색 성공"));
     }
 

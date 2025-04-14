@@ -1,32 +1,35 @@
 package com.earlybird.ticket.admin.application;
 
 import com.earlybird.ticket.admin.application.dto.DeleteCouponCommand;
-import com.earlybird.ticket.admin.application.dto.DeleteSeatCommand;
+import com.earlybird.ticket.admin.application.dto.DeleteSeatInstanceCommand;
 import com.earlybird.ticket.admin.application.dto.DeleteVenueCommand;
 import com.earlybird.ticket.admin.application.dto.IssueCouponCommand;
+import com.earlybird.ticket.admin.application.dto.RegisterCouponCommand;
 import com.earlybird.ticket.admin.application.dto.RegisterSeatCommand;
 import com.earlybird.ticket.admin.application.dto.RegisterVenueCommand;
 import com.earlybird.ticket.admin.application.dto.UpdateCouponCommand;
-import com.earlybird.ticket.admin.application.dto.UpdateSeatCommand;
+import com.earlybird.ticket.admin.application.dto.UpdateSeatInstanceCommand;
 import com.earlybird.ticket.admin.application.dto.UpdateVenueCommand;
 
 public interface AdminService {
 
-    void issueCoupon(IssueCouponCommand command);
+    void issueCoupon(String passport, IssueCouponCommand command);
 
-    void modifyCoupon(UpdateCouponCommand updateCouponCommand);
+    void registerCoupon(String passport, RegisterCouponCommand command);
 
-    void withdrawCoupon(DeleteCouponCommand deleteCouponCommand);
+    void modifyCoupon(String passport, UpdateCouponCommand updateCouponCommand);
 
-    void registerVenue(RegisterVenueCommand registerVenueCommand);
+    void withdrawCoupon(String passport, DeleteCouponCommand deleteCouponCommand);
 
-    void modifyVenue(UpdateVenueCommand updateVenueCommand);
+    void registerVenue(String passport, RegisterVenueCommand registerVenueCommand);
 
-    void withdrawVenue(DeleteVenueCommand deleteVenueCommand);
+    void modifyVenue(String passport, UpdateVenueCommand updateVenueCommand);
 
-    void modifiedSeat(UpdateSeatCommand updateSeatCommand);
+    void withdrawVenue(String passport, DeleteVenueCommand deleteVenueCommand);
 
-    void registerSeat(RegisterSeatCommand registerSeatCommand);
+    void modifySeatInstance(String passport, UpdateSeatInstanceCommand updateSeatInstanceCommand);
 
-    void withdrawSeat(DeleteSeatCommand deleteSeatCommand);
+    void registerSeat(String passport, RegisterSeatCommand registerSeatCommand);
+
+    void withdrawSeatInstance(String passport, DeleteSeatInstanceCommand deleteSeatInstanceCommand);
 }

@@ -1,0 +1,125 @@
+@baseUrl= http://localhost:18083
+### 쿠폰 생성
+POST {{baseUrl}}/api/v1/external/admin/coupons
+content-type: application/json
+X-User-Passport: {"userId":1,"userRole":"ADMIN"}
+
+{
+  "coupon_name": "생일쿠폰",
+  "discount_rate": 10,
+  "coupon_type": "BIRTHDAY"
+}
+
+### 쿠폰 수정
+PUT {{baseUrl}}/api/v1/external/admin/coupons
+Content-Type: application/json
+X-User-Passport: {"userId":1,"userRole":"ADMIN"}
+
+{
+  "coupon_id": "00000000-0000-0000-0000-000000000001",
+  "coupon_name": "수정된쿠폰",
+  "discount_rate": 15,
+  "coupon_type": "BIRTHDAY"
+}
+
+### 쿠폰 삭제
+DELETE {{baseUrl}}/api/v1/external/admin/coupons
+Content-Type: application/json
+X-User-Passport: {"userId":1,"userRole":"ADMIN"}
+
+{
+  "coupon_id": "00000000-0000-0000-0000-000000000001"
+}
+
+### 공연장 등록
+POST {{baseUrl}}/api/v1/external/admin/venues
+Content-Type: application/json
+X-User-Passport: {"userId":1,"userRole":"ADMIN"}
+
+{
+  "venue_name": "강남아트홀",
+  "location": "서울 강남구",
+  "area": "강남",
+  "total_number_of_seat": 500,
+  "hall_list": [
+    {
+      "hall_name": "1관",
+      "hall_floor": 1
+    },
+    {
+      "hall_name": "2관",
+      "hall_floor": 2
+    }
+  ]
+}
+
+### 공연장 수정
+PUT {{baseUrl}}/api/v1/external/admin/venues
+Content-Type: application/json
+X-User-Passport: {"userId":1,"userRole":"ADMIN"}
+
+{
+  "venue_id": "00000000-0000-0000-0000-000000000002",
+  "venue_name": "강남아트홀 리뉴얼",
+  "location": "서울 강남구",
+  "area": "강남",
+  "total_number_of_seat": 600
+}
+
+### 공연장 삭제
+DELETE {{baseUrl}}/api/v1/external/admin/venues
+Content-Type: application/json
+X-User-Passport: {"userId":1,"userRole":"ADMIN"}
+
+{
+  "venue_id": "00000000-0000-0000-0000-000000000002"
+}
+
+
+### 좌석 생성
+POST {{baseUrl}}/api/v1/external/admin/seats
+Content-Type: application/json
+X-User-Passport: {"userId":1,"userRole":"ADMIN"}
+
+{
+  "hall_id": "00000000-0000-0000-0000-000000000003",
+  "venue_id": "00000000-0000-0000-0000-000000000002",
+  "seat_list": [
+    {
+      "section": "A",
+      "row_cnt": 10,
+      "col_cnt": 15,
+      "floor": 1
+    },
+    {
+      "section": "B",
+      "row_cnt": 8,
+      "col_cnt": 12,
+      "floor": 2
+    }
+  ]
+}
+
+### 좌석 인스턴스 수정
+PUT {{baseUrl}}/api/v1/external/admin/seats
+Content-Type: application/json
+X-User-Passport: {"userId":1,"userRole":"ADMIN"}
+
+{
+  "seat_instance_id": "00000000-0000-0000-0000-000000000004",
+  "hall_id": "00000000-0000-0000-0000-000000000003",
+  "concert_id": "00000000-0000-0000-0000-000000000005",
+  "concert_sequence_id": "00000000-0000-0000-0000-000000000006",
+  "grade": "VIP",
+  "status": "AVAILABLE",
+  "price": 150000
+}
+
+### 좌석 인스턴스 삭제
+DELETE {{baseUrl}}/api/v1/external/admin/seats
+Content-Type: application/json
+X-User-Passport: {"userId":1,"userRole":"ADMIN"}
+
+{
+  "seat_instance_id": "00000000-0000-0000-0000-000000000004"
+}
