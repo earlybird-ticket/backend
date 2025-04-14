@@ -8,4 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface VenueJpaRepository extends JpaRepository<Venue, UUID> {
+    Venue findVenueWithHallById(UUID venueId);
 }

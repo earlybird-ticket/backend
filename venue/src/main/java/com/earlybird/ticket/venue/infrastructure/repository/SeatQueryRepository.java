@@ -18,4 +18,6 @@ public interface SeatQueryRepository {
     List<Seat> findSeatListWithSeatInstanceInSeatInstanceIdList(List<UUID> seatInstanceIdList);
 
     Seat findSeatBySeatInstanceId(UUID seatInstanceId);
+
+    List<Seat> findSeatListWithSeatInstanceByVenueId(UUID venueId);
 }

@@ -165,4 +165,10 @@ public class Seat extends BaseEntity {
                 .findFirst()
                 .ifPresent(seatInstance -> seatInstance.returnSeatInstance(userId));
     }
+
+    public void deleteSeatAndSeatInstance(Long userId) {
+        this.delete(userId);
+        this.seatInstances.stream()
+                .forEach(seatInstance -> seatInstance.deleteSeatInstance(userId));
+    }
 }

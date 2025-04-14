@@ -46,4 +46,7 @@ public class Hall extends BaseEntity {
         return hall;
     }
 
+    public void deleteHall(Long userId) {
+        this.delete(userId);
+    }
 }
