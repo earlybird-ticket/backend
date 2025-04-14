@@ -101,4 +101,10 @@ public class Venue extends BaseEntity {
 
         this.update(userId);
     }
+
+    public void deleteVenueAndHall(Long userId) {
+        this.delete(userId);
+        this.getHalls().stream()
+                .forEach(hall -> hall.deleteHall(userId));
+    }
 }

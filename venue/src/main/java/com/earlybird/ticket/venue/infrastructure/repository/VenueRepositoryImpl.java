@@ -11,6 +11,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class VenueRepositoryImpl implements VenueRepository {
     private final VenueJpaRepository venueJpaRepository;
+    private final VenueQueryRepository venueQueryRepository;
 
     @Override
     public Venue save(Venue venue) {
@@ -20,5 +21,10 @@ public class VenueRepositoryImpl implements VenueRepository {
     @Override
     public Venue findById(UUID venueId) {
         return venueJpaRepository.findById(venueId).orElse(null);
+    }
+
+    @Override
+    public Venue findVenueWithHallById(UUID venueId) {
+        return venueQueryRepository.findVenueWithHallById(venueId);
     }
 }

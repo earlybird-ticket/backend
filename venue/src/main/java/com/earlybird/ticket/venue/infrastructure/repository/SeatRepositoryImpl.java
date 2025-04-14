@@ -47,4 +47,9 @@ public class SeatRepositoryImpl implements SeatRepository {
     public Seat findSeatBySeatInstanceId(UUID seatInstanceId) {
         return seatQueryRepository.findSeatBySeatInstanceId(seatInstanceId);
     }
+
+    @Override
+    public List<Seat> findSeatListWithSeatInstanceByVenueId(UUID venueId) {
+        return seatQueryRepository.findSeatListWithSeatInstanceByVenueId(venueId);
+    }
 }
