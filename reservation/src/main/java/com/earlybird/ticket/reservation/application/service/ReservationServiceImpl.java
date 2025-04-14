@@ -8,6 +8,7 @@ import com.earlybird.ticket.reservation.common.exception.CustomJsonProcessingExc
 import com.earlybird.ticket.reservation.common.exception.NotFoundReservationException;
 import com.earlybird.ticket.reservation.common.exception.SeatAlreadyReservedException;
 import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatPayload;
+import com.earlybird.ticket.reservation.domain.dto.response.ReservationSearchResult;
 import com.earlybird.ticket.reservation.domain.entity.Event;
 import com.earlybird.ticket.reservation.domain.entity.Outbox;
 import com.earlybird.ticket.reservation.domain.entity.Reservation;
@@ -20,6 +21,8 @@ import com.earlybird.ticket.reservation.domain.repository.ReservationSeatReposit
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -126,6 +129,22 @@ public class ReservationServiceImpl implements ReservationService {
 
         return FindReservationQuery.createFindReservationQuery(reservation,
                                                                reservationSeatList);
+    }
+
+    @Override
+    public Page<ReservationSearchResult> searchReservations(Pageable pageable,
+                                                            String q,
+                                                            String startTime,
+                                                            String endTime,
+                                                            String passport) {
+
+        PassportDto passportDto = passportUtil.getPassportDto(passport);
+        return reservationSeatRepository.searchReservations(q,
+                                                            startTime,
+                                                            endTime,
+                                                            pageable,
+                                                            passportDto);
+
     }
 
 
