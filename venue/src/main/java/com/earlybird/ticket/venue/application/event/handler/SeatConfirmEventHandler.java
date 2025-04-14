@@ -4,6 +4,7 @@ import com.earlybird.ticket.venue.application.event.dto.request.SeatConfirmPaylo
 import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 @Component

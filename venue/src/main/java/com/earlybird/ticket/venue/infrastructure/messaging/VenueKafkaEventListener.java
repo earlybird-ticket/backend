@@ -23,6 +23,8 @@ public class VenueKafkaEventListener {
     }, containerFactory = "kafkaListenerContainerFactory", groupId = "test-group-id")
     public void listenAdminToVenueTopic(@Payload String message, Acknowledgment ack) {
         try{
+            log.info("AdminToVenueTopic: {}", message);
+
             Event<? extends EventPayload> event = Event.fromJson(message);
             eventDispatcher.handle(event);
             ack.acknowledge();

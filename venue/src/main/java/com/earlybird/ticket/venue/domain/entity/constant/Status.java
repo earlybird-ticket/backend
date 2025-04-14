@@ -9,8 +9,7 @@ import lombok.RequiredArgsConstructor;
 public enum Status {
     PREEMPTED("PREEMPTED"),
     CONFIRMED("CONFIRMED"),
-    FREE("FREE"),
-    RESERVED("RESERVED")
+    FREE("FREE")
     ;
     private final String value;
 

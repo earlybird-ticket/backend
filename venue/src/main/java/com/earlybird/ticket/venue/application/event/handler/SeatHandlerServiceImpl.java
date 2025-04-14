@@ -3,10 +3,10 @@ package com.earlybird.ticket.venue.application.event.handler;
 import com.earlybird.ticket.common.entity.EventPayload;
 import com.earlybird.ticket.common.entity.constant.Code;
 import com.earlybird.ticket.common.util.CommonUtil;
-import com.earlybird.ticket.common.util.EventPayloadConverter;
 import com.earlybird.ticket.venue.application.event.dto.request.*;
 import com.earlybird.ticket.venue.application.event.dto.response.*;
 import com.earlybird.ticket.venue.common.event.EventType;
+import com.earlybird.ticket.venue.common.event.util.EventConverter;
 import com.earlybird.ticket.venue.common.exception.SeatNotFoundException;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.domain.entity.Outbox;
@@ -30,7 +30,7 @@ import java.util.UUID;
 public class SeatHandlerServiceImpl implements SeatHandlerService {
     private final SeatRepository seatRepository;
     private final OutboxRepository outboxRepository;
-    private final EventPayloadConverter eventPayloadConverter;
+    private final EventConverter eventConverter;
 
     @Override
     @Transactional
@@ -41,7 +41,8 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
         List<Seat> seatList = new ArrayList<>();
 
         for(SeatCreatePayload.SeatInfo seatInfo : seatCreatePayload.seatList()) {
-            seatList = Seat.create(
+            seatList.addAll(
+                    Seat.create(
                     seatInfo.rowCnt(),
                     seatInfo.colCnt(),
                     seatInfo.section(),
@@ -49,6 +50,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                     seatCreatePayload.venueId(),
                     seatCreatePayload.venueId(),
                     seatCreatePayload.passportDto().getUserId()
+                    )
             );
         }
         //3. seatList 저장
@@ -260,7 +262,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                 .aggregateId(seatInstanceIdList.get(0))
                 .aggregateType(Outbox.AggregateType.SEAT_INSTANCE)
                 .eventType(eventType)
-                .payload(eventPayloadConverter.serializePayload((EventPayload) event))
+                .payload(eventConverter.serializePayload(event))
                 .build()
         );
     }

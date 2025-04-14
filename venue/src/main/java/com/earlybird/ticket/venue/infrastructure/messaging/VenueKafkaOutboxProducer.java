@@ -35,7 +35,7 @@ public class VenueKafkaOutboxProducer {
                 log.warn("Failed to publish event, id={}, retryCount={}", outbox.getId(), outbox.getRetryCount(), e);
                 outbox.incrementRetry();
 
-                if (outbox.getRetryCount() > 3) {
+                if (outbox.getRetryCount() >= 3) {
                     kafkaTemplate.send(outbox.getEventType().getTopic() + "Dlq", outbox.getPayload());
                     log.error("Event sent to DLQ");
                 }

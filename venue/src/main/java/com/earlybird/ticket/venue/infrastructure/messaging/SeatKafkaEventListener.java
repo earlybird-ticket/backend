@@ -48,7 +48,9 @@ public class SeatKafkaEventListener {
     public void listenReservationToSeatForPreemptTopic(@Payload String message, Acknowledgment ack) {
 
         try{
+            log.info("메세지 수신");
             Event<? extends EventPayload> event = Event.fromJson(message);
+            log.info("메세지 event로 변환 : {}", event);
             eventDispatcher.handle(event);
             ack.acknowledge();
 
@@ -59,7 +61,7 @@ public class SeatKafkaEventListener {
         } catch (Exception e) {
             log.error("메시지 처리 실패: {}", e.getMessage());
             ack.acknowledge();
-            // 재처리 로직
+            // 재처리 로직 (좌석 관련 예외면 재처리 X)
         }
     }
 
@@ -80,7 +82,7 @@ public class SeatKafkaEventListener {
         } catch (Exception e) {
             log.error("메시지 처리 실패: {}", e.getMessage());
             ack.acknowledge();
-            // 재처리 로직
+            // 재처리 로직 (좌석 관련 예외면 재처리 X)
         }
     }
 

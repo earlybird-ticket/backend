@@ -1,11 +1,11 @@
 package com.earlybird.ticket.venue.infrastructure.config.kafka;
 
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ser.std.StringSerializer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerInterceptor;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
+@EnableKafka
 public class KafkaProducerConfig {
 
     //TODO:: Kafka host, port 맞추기
@@ -29,7 +30,7 @@ public class KafkaProducerConfig {
 
         // Key와 Value 직렬화 설정 (Key는 String, Value는 JSON)
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
 
         // 메시지 중복 방지 (Idempotence 활성화 true면 멱등성 활성화)
         props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);

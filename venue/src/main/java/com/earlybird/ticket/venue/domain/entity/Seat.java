@@ -6,14 +6,13 @@ import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.domain.entity.constant.Status;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
+@Slf4j
 @Builder
 @Entity
 @Getter
@@ -46,8 +45,9 @@ public class Seat extends BaseEntity {
     @Column(name = "floor", columnDefinition = "SMALLINT")
     private Integer floor;
 
+    @Builder.Default
     @OneToMany(mappedBy = "seat", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    private Set<SeatInstance> seatInstances;
+    private Set<SeatInstance> seatInstances = new HashSet<>();
 
     public static List<Seat> create(
             Integer rowCnt,
@@ -79,10 +79,12 @@ public class Seat extends BaseEntity {
         return seatList;
     }
 
-    public void checkSeatStatus(List<UUID> seatInstanceIdList, Status status) {
+    public boolean checkSeatStatus(List<UUID> seatInstanceIdList, Status status) {
         this.seatInstances.stream()
                 .filter(seatInstance -> seatInstanceIdList.contains(seatInstance.getId()))
                 .forEach(seatInstance -> seatInstance.checkSeatInstanceStatus(status));
+
+        return true;
     }
 
     public void createSeatInstance(
@@ -153,6 +155,11 @@ public class Seat extends BaseEntity {
     }
 
     public void returnSeat(List<UUID> seatInstanceIdList, Long userId) {
+
+        if(checkSeatStatus(seatInstanceIdList, Status.FREE)) {
+            log.error("The seat in the free state has been returned.");
+        }
+
         this.seatInstances.stream()
                 .filter(seatInstance -> seatInstanceIdList.contains(seatInstance.getId()))
                 .findFirst()
