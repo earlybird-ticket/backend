@@ -37,7 +37,7 @@ public class ReservationExternalController {
                                                      "예약 생성 성공"));
     }
 
-    @PutMapping("/{reservationId}")
+    @DeleteMapping("/{reservationId}")
     public ResponseEntity<CommonDto<Void>> cancelReservation(@PathVariable UUID reservationId,
                                                              @RequestHeader("X-User-Passport") String passport) {
         reservationService.cancelReservation(reservationId,

@@ -7,7 +7,10 @@ import com.earlybird.ticket.reservation.application.dto.response.FindReservation
 import com.earlybird.ticket.reservation.common.exception.CustomJsonProcessingException;
 import com.earlybird.ticket.reservation.common.exception.NotFoundReservationException;
 import com.earlybird.ticket.reservation.common.exception.SeatAlreadyReservedException;
+import com.earlybird.ticket.reservation.common.util.EventPayloadConverter;
 import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatPayload;
+import com.earlybird.ticket.reservation.domain.dto.request.ReturnCouponEvent;
+import com.earlybird.ticket.reservation.domain.dto.request.ReturnSeatPayload;
 import com.earlybird.ticket.reservation.domain.dto.response.ReservationSearchResult;
 import com.earlybird.ticket.reservation.domain.entity.Event;
 import com.earlybird.ticket.reservation.domain.entity.Outbox;
@@ -38,6 +41,7 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationSeatRepository reservationSeatRepository;
     private final OutboxRepository outboxRepository;
+    private final EventPayloadConverter eventPayloadConverter;
 
     @Override
     @Transactional
@@ -60,9 +64,7 @@ public class ReservationServiceImpl implements ReservationService {
         List<ReservationSeat> reservationSeatList = createReservationSeat(createReservationCommands,
                                                                           reservation);
         List<ReservationSeat> reservationSeats = reservationSeatRepository.saveAll(reservationSeatList);
-        reservationSeats.forEach(seat -> {
-            seatInstanceList.add(seat.getSeatInstanceId());
-        });
+        reservationSeats.forEach(seat -> seatInstanceList.add(seat.getSeatInstanceId()));
 
 
         // 4. 아웃박스 payload 생성 (seatInstanceIds를 한 번에)
@@ -109,11 +111,63 @@ public class ReservationServiceImpl implements ReservationService {
         //1. 예약 엔티티 조회
         Reservation reservation = reservationRepository.findById(reservationId)
                                                        .orElseThrow(NotFoundReservationException::new);
+
+        //2. 반환 좌석 조회
+        List<ReservationSeat> reservationSeatList = reservationSeatRepository.findByReservation(reservation);
         //2. 예약 취소
         UUID paymentId = reservation.getPaymentId();
 
         // 2-2. 결제 취소 요청
         // TODO:: 결제 취소 성공시 좌석 반환 요청 및 쿠폰 복구 요청
+        //고도화에서 진행할 예정
+
+
+        Event<ReturnCouponEvent> returnCouponEvent = new Event<>(EventType.COUPON_RETURN,
+                                                                 ReturnCouponEvent.builder()
+                                                                                  .passportDto(passportDto)
+                                                                                  .code("C01")
+                                                                                  .couponId(reservation.getCouponId())
+                                                                                  .build(),
+                                                                 LocalDateTime.now()
+                                                                              .toString());
+
+        String couponRecord = eventPayloadConverter.serializePayload(returnCouponEvent);
+
+        Outbox couponOutbox = Outbox.builder()
+                                    .aggregateId(reservation.getId())
+                                    .aggregateType("RESERVATION")
+                                    .eventType(EventType.COUPON_RETURN)
+                                    .payload(couponRecord)
+                                    .build();
+
+        outboxRepository.save(couponOutbox);
+
+
+        Event<ReturnSeatPayload> returnSeatPayloadEvent = new Event<>(EventType.SEAT_INSTANCE_RETURN,
+                                                                      ReturnSeatPayload.builder()
+                                                                                       .seatInstanceList(reservationSeatList.stream()
+                                                                                                                            .map(ReservationSeat::getId)
+                                                                                                                            .toList())
+                                                                                       .passportDto(passportDto)
+                                                                                       .build(),
+                                                                      LocalDateTime.now()
+                                                                                   .toString());
+        //TODO :: serialize한 변수들 이름 일치시키기
+        String payloadRecord = eventPayloadConverter.serializePayload(returnSeatPayloadEvent);
+
+        Outbox seatOutbox = Outbox.builder()
+                                  .aggregateId(reservation.getId())
+                                  .aggregateType("RESERVATION")
+                                  .eventType(EventType.SEAT_INSTANCE_RETURN)
+                                  .payload(payloadRecord)
+                                  .build();
+
+        outboxRepository.save(seatOutbox);
+
+        reservation.delete(passportDto.getUserId());
+        reservationSeatList.forEach(seat -> {
+            seat.delete(passportDto.getUserId());
+        });
 
     }
 
