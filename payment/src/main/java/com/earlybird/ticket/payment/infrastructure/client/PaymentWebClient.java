@@ -56,6 +56,7 @@ public class PaymentWebClient implements PaymentClient {
         log.info("토스페이 결제 성공 = {}", receipt);
 
         if (receipt == null) {
+            log.error("결제 실패 = {}", paymentId);
             throw new PaymentAbortException();
         }
 

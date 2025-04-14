@@ -1,7 +1,5 @@
 package com.earlybird.ticket.payment.infrastructure.messaging;
 
-import com.earlybird.ticket.payment.common.EventType;
-import com.earlybird.ticket.payment.common.EventType.Topic;
 import com.earlybird.ticket.payment.domain.entity.Outbox;
 import com.earlybird.ticket.payment.domain.repository.OutboxRepository;
 import java.util.List;
@@ -17,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PaymentKafkaOutboxProducer {
 
+    private static final String DLT_SUFFIX = ".DLT";
+
     private final OutboxRepository outboxRepository;
     private final KafkaTemplate<String, String> paymentKafkaTemplate;
 
@@ -27,6 +27,7 @@ public class PaymentKafkaOutboxProducer {
 
         for (Outbox outbox : outboxes) {
             try {
+                log.info("Outbox 발행] id = {}, payload = {}", outbox.getId(), outbox.getPayload());
                 paymentKafkaTemplate.send(outbox.getEventType().getTopic(), outbox.getPayload());
                 outbox.markSuccess();
 
@@ -38,14 +39,15 @@ public class PaymentKafkaOutboxProducer {
                 // 실패 시 카운트 올림
                 outbox.incrementRetry();
 
-                // 실패횟수가 3회 이상이면 =>
-                if (outbox.getRetryCount() == 3) {
-                    log.error("이벤트 3회 발행 실패 => DLQ로 이동");
-                    paymentKafkaTemplate.send(
-                        outbox.getEventType().getTopic() + ".DLT",
-                        outbox.getPayload()
-                    );
+                if (outbox.getRetryCount() < 3) {
+                    continue;
                 }
+                // 실패횟수가 3회 이상이면 =>
+                log.error("이벤트 3회 발행 실패 => DLQ로 이동");
+                paymentKafkaTemplate.send(
+                    outbox.getEventType().getTopic() + DLT_SUFFIX,
+                    outbox.getPayload()
+                );
             }
         }
     }
