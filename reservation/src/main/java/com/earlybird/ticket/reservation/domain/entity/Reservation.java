@@ -1,7 +1,8 @@
 package com.earlybird.ticket.reservation.domain.entity;
 
 import com.earlybird.ticket.common.entity.BaseEntity;
-import com.earlybird.ticket.reservation.application.dto.response.ReserveCouponPayload;
+import com.earlybird.ticket.reservation.application.dto.response.CouponReservePayload;
+import com.earlybird.ticket.reservation.application.dto.response.PaymentSuccessPayload;
 import com.earlybird.ticket.reservation.domain.entity.constant.*;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -203,7 +204,7 @@ public class Reservation extends BaseEntity {
         this.reservationStatus = ReservationStatus.CANCELLED;
     }
 
-    public void updateCouponData(ReserveCouponPayload payload) {
+    public void updateCouponData(CouponReservePayload payload) {
         validateCouponData(payload);
         this.couponId = payload.couponId();
         this.couponName = payload.couponName();
@@ -211,9 +212,18 @@ public class Reservation extends BaseEntity {
         this.couponStatus = CouponStatus.RESERVED;
     }
 
-    private void validateCouponData(ReserveCouponPayload payload) {
+    private void validateCouponData(CouponReservePayload payload) {
         if (payload.couponId() == null || payload.couponName() == null || payload.couponType() == null) {
             throw new NullPointerException("coupon data should not be null");
         }
+    }
+
+    public void updatePaymentInfo(PaymentSuccessPayload payload) {
+        this.paymentMethod = payload.paymentMethod();
+        this.paymentId = payload.paymentId();
+        this.paymentTotalPrice = payload.totalPrice();
+        this.reservationStatus = ReservationStatus.CONFIRMED;
+        update(payload.passportDto()
+                      .getUserId());
     }
 }

@@ -28,6 +28,7 @@ public class Event<T extends EventPayload> {
         this.timestamp = timestamp;
     }
 
+
     public static Event<? extends EventPayload> fromJson(String json) {
         try {
             ObjectMapper mapper = new ObjectMapper();

@@ -1,6 +1,6 @@
 package com.earlybird.ticket.reservation.application.handler;
 
-import com.earlybird.ticket.reservation.application.dto.response.SeatPreemptSuccessPayload;
+import com.earlybird.ticket.reservation.application.dto.response.SeatReturnSuccessPayload;
 import com.earlybird.ticket.reservation.application.event.EventHandler;
 import com.earlybird.ticket.reservation.domain.entity.Event;
 import com.earlybird.ticket.reservation.domain.entity.ReservationSeat;
@@ -16,14 +16,14 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ReserveSeatSuccessEventHandler implements EventHandler<SeatPreemptSuccessPayload> {
+public class ReturnSeatSuccessPayloadHandler implements EventHandler<SeatReturnSuccessPayload> {
 
     private final ReservationSeatRepository reservationSeatRepository;
 
     @Override
     @Transactional
-    public void handle(Event<SeatPreemptSuccessPayload> event) {
-        SeatPreemptSuccessPayload payload = event.getPayload();
+    public void handle(Event<SeatReturnSuccessPayload> event) {
+        SeatReturnSuccessPayload payload = event.getPayload();
         log.info("event 수행 !!!!!!!!!");
         log.info("payload = {} ",
                  payload);
@@ -42,7 +42,12 @@ public class ReserveSeatSuccessEventHandler implements EventHandler<SeatPreemptS
                      seat.getStatus());
         });
 
-        seatIntanceList.forEach(ReservationSeat::updateStatusReserveSuccess);
+        seatIntanceList.forEach(ReservationSeat::updateStatusReserveFREE);
+        seatIntanceList.forEach(seat -> {
+            seat.getReservation()
+                .delete(payload.passport()
+                               .getUserId());
+        });
 
         seatIntanceList.forEach(seat -> log.info("업데이트 후 상태 확인: id={}, status={}",
                                                  seat.getSeatInstanceId(),
@@ -51,7 +56,7 @@ public class ReserveSeatSuccessEventHandler implements EventHandler<SeatPreemptS
     }
 
     @Override
-    public boolean support(Event<SeatPreemptSuccessPayload> event) {
-        return event.getEventType() == EventType.SEAT_PREEMPT_SUCCESS;
+    public boolean support(Event<SeatReturnSuccessPayload> event) {
+        return event.getEventType() == EventType.SEAT_RETURN_SUCCESS;
     }
 }

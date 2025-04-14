@@ -44,7 +44,7 @@ public class ConcertSequence extends BaseEntity {
     private LocalDateTime ticketSaleEndDate;
 
     @Enumerated(EnumType.STRING)
-    private ConcertStatus status;
+    private ConcertStatus concertStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "concert_id")
@@ -54,7 +54,7 @@ public class ConcertSequence extends BaseEntity {
     public ConcertSequence(
             UUID hallId, UUID venueId, LocalDateTime sequenceStartDate,
             LocalDateTime sequenceEndDate, LocalDateTime ticketSaleStartDate,
-            LocalDateTime ticketSaleEndDate, ConcertStatus status,
+            LocalDateTime ticketSaleEndDate, ConcertStatus concertStatus,
             Concert concert
     ) {
         this.hallId = hallId;
@@ -63,7 +63,20 @@ public class ConcertSequence extends BaseEntity {
         this.sequenceEndDate = sequenceEndDate;
         this.ticketSaleStartDate = ticketSaleStartDate;
         this.ticketSaleEndDate = ticketSaleEndDate;
-        this.status = status;
+        this.concertStatus = concertStatus;
         this.concert = concert;
+    }
+
+
+    public void update(
+            LocalDateTime sequenceStartDate, LocalDateTime sequenceEndDate,
+            LocalDateTime ticketSaleStartDate, LocalDateTime ticketSaleEndDate, ConcertStatus status
+    ) {
+
+        this.sequenceStartDate = sequenceStartDate;
+        this.sequenceEndDate = sequenceEndDate;
+        this.ticketSaleStartDate = ticketSaleStartDate;
+        this.ticketSaleEndDate = ticketSaleEndDate;
+        this.concertStatus = status;
     }
 }

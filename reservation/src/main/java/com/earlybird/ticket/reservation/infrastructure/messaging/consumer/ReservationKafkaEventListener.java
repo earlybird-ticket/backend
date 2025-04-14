@@ -10,8 +10,7 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import static com.earlybird.ticket.reservation.domain.entity.constant.EventType.Topic.RESERVATION_TO_COUPON;
-import static com.earlybird.ticket.reservation.domain.entity.constant.EventType.Topic.SEAT_RESERVE_TOPIC;
+import static com.earlybird.ticket.reservation.domain.entity.constant.EventType.Topic.*;
 
 @Slf4j
 @Component
@@ -19,7 +18,7 @@ import static com.earlybird.ticket.reservation.domain.entity.constant.EventType.
 public class ReservationKafkaEventListener {
     private final EventDispatcher eventDispatcher;
 
-    @KafkaListener(topics = {SEAT_RESERVE_TOPIC, RESERVATION_TO_COUPON}, containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(topics = {SEAT_RESERVE_TOPIC, RESERVATION_TO_COUPON, PAYMENT_TO_RESERVATION}, containerFactory = "kafkaListenerContainerFactory")
     public void listen(@Payload String message,
                        Acknowledgment ack) {
         try {

@@ -12,19 +12,24 @@ import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class FailCouponPayload implements EventPayload {
+public class ReserveCouponEvent implements EventPayload {
 
     private UUID couponId;
     private PassportDto passportDto;
-    private String code;
 
     @Builder
-    public FailCouponPayload(UUID couponId,
-                             PassportDto passportDto,
-                             String code) {
+    public ReserveCouponEvent(UUID couponId,
+                              PassportDto passportDto) {
         this.couponId = couponId;
-        this.passportDto = passportDto;
-        this.code = code;
+        this.passportDto = this.passportDto;
+    }
+
+    public static ReserveCouponEvent createSeatPreemptPayload(UUID requestCouponId,
+                                                              PassportDto passportDto) {
+        return ReserveCouponEvent.builder()
+                                 .couponId(requestCouponId)
+                                 .passportDto(passportDto)
+                                 .build();
     }
 
     @Getter
