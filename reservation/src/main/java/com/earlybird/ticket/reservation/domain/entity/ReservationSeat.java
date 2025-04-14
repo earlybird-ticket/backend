@@ -99,4 +99,8 @@ public class ReservationSeat extends BaseEntity {
     public void updateStatusReserveFail() {
         this.status = SeatStatus.FREE;
     }
+
+    public void updateStatusConfirmSuccess() {
+        this.status = SeatStatus.CONFIRMED;
+    }
 }
