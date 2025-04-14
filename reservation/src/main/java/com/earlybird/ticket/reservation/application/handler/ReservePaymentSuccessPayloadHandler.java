@@ -6,8 +6,8 @@ import com.earlybird.ticket.reservation.application.dto.response.PaymentSuccessP
 import com.earlybird.ticket.reservation.application.event.EventHandler;
 import com.earlybird.ticket.reservation.common.exception.NotFoundReservationException;
 import com.earlybird.ticket.reservation.common.util.EventPayloadConverter;
-import com.earlybird.ticket.reservation.domain.dto.request.ConfirmCouponPayload;
-import com.earlybird.ticket.reservation.domain.dto.request.ConfirmSeatPayload;
+import com.earlybird.ticket.reservation.domain.dto.request.ConfirmCouponEvent;
+import com.earlybird.ticket.reservation.domain.dto.request.ConfirmSeatEvent;
 import com.earlybird.ticket.reservation.domain.entity.Event;
 import com.earlybird.ticket.reservation.domain.entity.Outbox;
 import com.earlybird.ticket.reservation.domain.entity.Reservation;
@@ -44,18 +44,18 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
         reservation.updatePaymentInfo(payload);
 
         //좌석 확정 상태로 변경
-        ConfirmSeatPayload confirmSeatPayload = ConfirmSeatPayload.builder()
-                                                                  .seatInstanceList(reservationSeatList.stream()
-                                                                                                       .map(ReservationSeat::getId)
-                                                                                                       .toList())
-                                                                  .userId(passportDto.getUserId())
-                                                                  .role(Role.from(passportDto.getUserRole()))
-                                                                  .build();
+        ConfirmSeatEvent confirmSeatEvent = ConfirmSeatEvent.builder()
+                                                            .seatInstanceList(reservationSeatList.stream()
+                                                                                                 .map(ReservationSeat::getId)
+                                                                                                 .toList())
+                                                            .userId(passportDto.getUserId())
+                                                            .role(Role.from(passportDto.getUserRole()))
+                                                            .build();
 
-        Event<ConfirmSeatPayload> confirmSeatPayloadEvent = new Event<>(EventType.SEAT_INSTANCE_CONFIRM,
-                                                                        confirmSeatPayload,
-                                                                        LocalDateTime.now()
-                                                                                     .toString());
+        Event<ConfirmSeatEvent> confirmSeatPayloadEvent = new Event<>(EventType.SEAT_INSTANCE_CONFIRM,
+                                                                      confirmSeatEvent,
+                                                                      LocalDateTime.now()
+                                                                                   .toString());
 
         String convertedConfirmSeatPayload = eventPayloadConverter.serializePayload(confirmSeatPayloadEvent);
 
@@ -70,13 +70,13 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
 
 
         //쿠폰 확정 상태로 변경
-        ConfirmCouponPayload confirmCouponPayload = ConfirmCouponPayload.createSeatPreemptPayload(reservation.getCouponId(),
-                                                                                                  passportDto);
+        ConfirmCouponEvent confirmCouponEvent = ConfirmCouponEvent.createSeatPreemptPayload(reservation.getCouponId(),
+                                                                                            passportDto);
 
-        Event<ConfirmCouponPayload> confirmCouponPayloadEvent = new Event<>(EventType.COUPON_CONFIRM,
-                                                                            confirmCouponPayload,
-                                                                            LocalDateTime.now()
-                                                                                         .toString());
+        Event<ConfirmCouponEvent> confirmCouponPayloadEvent = new Event<>(EventType.COUPON_CONFIRM,
+                                                                          confirmCouponEvent,
+                                                                          LocalDateTime.now()
+                                                                                       .toString());
 
         String convertedConfirmCouponPayload = eventPayloadConverter.serializePayload(confirmCouponPayloadEvent);
 

@@ -5,10 +5,9 @@ import com.earlybird.ticket.reservation.application.dto.response.CouponReservePa
 import com.earlybird.ticket.reservation.application.dto.response.PaymentSuccessPayload;
 import com.earlybird.ticket.reservation.application.dto.response.SeatPreemptFailPayload;
 import com.earlybird.ticket.reservation.application.dto.response.SeatPreemptSuccessPayload;
-import com.earlybird.ticket.reservation.domain.dto.request.ConfirmSeatPayload;
-import com.earlybird.ticket.reservation.domain.dto.request.FailCouponPayload;
+import com.earlybird.ticket.reservation.domain.dto.request.ConfirmSeatEvent;
+import com.earlybird.ticket.reservation.domain.dto.request.FailCouponEvent;
 import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatPayload;
-import com.earlybird.ticket.reservation.domain.dto.request.ReserveCouponPayload;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public enum EventType {
     //produce
-    SEAT_INSTANCE_CONFIRM(ConfirmSeatPayload.class,
+    SEAT_INSTANCE_CONFIRM(ConfirmSeatEvent.class,
                           Topic.RESERVATION_TO_SEAT),
     SEAT_INSTANCE_PREEMPTION(PreemptSeatPayload.class,
                              Topic.RESERVATION_TO_SEAT_FOR_PREEMPTION),
@@ -28,14 +27,14 @@ public enum EventType {
                   Topic.RESERVATION_TO_COUPON),
     COUPON_CONFIRM(CouponReservePayload.class,
                    Topic.RESERVATION_TO_COUPON),
-    COUPON_FAIL(FailCouponPayload.class,
+    COUPON_FAIL(FailCouponEvent.class,
                 Topic.RESERVATION_TO_COUPON),
     //consume,
     SEAT_PREEMPT_SUCCESS(SeatPreemptSuccessPayload.class,
                          Topic.RESERVATION_TO_SEAT),
     SEAT_PREEMPT_FAIL(SeatPreemptFailPayload.class,
                       Topic.RESERVATION_TO_SEAT),
-    COUPON_SUCCESS(ReserveCouponPayload.class,
+    COUPON_SUCCESS(CouponReservePayload.class,
                    Topic.RESERVATION_TO_COUPON),
     PAYMENT_SUCCESS(PaymentSuccessPayload.class,
                     Topic.PAYMENT_TO_RESERVATION);
