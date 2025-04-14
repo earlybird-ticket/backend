@@ -35,15 +35,16 @@ public class ReserveCouponPayloadHandler implements EventHandler<CouponReservePa
     @Override
     @Transactional
     public void handle(Event<CouponReservePayload> event) {
-        String cacheKey = null;
-
-        cacheKey = "TIME_LIMIT:RESERVATION_ID:" + event.getPayload()
-                                                       .reservationList()
-                                                       .get(0);
+        String cacheKey = "TIME_LIMIT:RESERVATION_ID:" + event.getPayload()
+                                                              .reservationList()
+                                                              .get(0);
 
         if (!redissonClient.getBucket(cacheKey)
                            .isExists()) {
             log.error("이미 만료된 선점");
+            //TODO:: 어떻게처리...?
+            return;
+
         }
         log.info("[CouponEventHandler] 이벤트 수신: {}",
                  event);

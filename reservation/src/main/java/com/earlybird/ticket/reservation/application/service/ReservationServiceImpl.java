@@ -101,7 +101,7 @@ public class ReservationServiceImpl implements ReservationService {
             sendToDLT(instanceSeatList,
                       passportDto);
         }
-        validateReservationCommandsSeatInstanceId(createReservationCommands);
+        //        validateReservationCommandsSeatInstanceId(createReservationCommands);
 
         try {
             // 2. 예약 생성
