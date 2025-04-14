@@ -36,7 +36,7 @@ public class VenueKafkaOutboxProducer {
                 outbox.incrementRetry();
 
                 if (outbox.getRetryCount() >= 3) {
-                    kafkaTemplate.send(outbox.getEventType().getTopic() + "Dlq", outbox.getPayload());
+                    kafkaTemplate.send(outbox.getEventType().getTopic() + ".DLT", outbox.getPayload());
                     log.error("Event sent to DLQ");
                 }
             }

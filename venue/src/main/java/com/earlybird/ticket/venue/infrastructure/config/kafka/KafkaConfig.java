@@ -32,7 +32,7 @@ public class KafkaConfig {
      */
     @Bean
     public NewTopic seatToReservationDlq() {
-        return new NewTopic("seatToReservationDlq", 1, (short) 3);
+        return new NewTopic("seatToReservation.DLT", 1, (short) 3);
     }
 
     /**
@@ -40,6 +40,6 @@ public class KafkaConfig {
      */
     @Bean
     public NewTopic seatToReservationForPreemptionDlq() {
-        return new NewTopic("seatToReservationForPreemptionDlq", 1, (short) 3);
+        return new NewTopic("seatToReservationForPreemption.DLT", 1, (short) 3);
     }
 }
