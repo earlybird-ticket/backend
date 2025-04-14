@@ -8,14 +8,14 @@ import lombok.Builder;
 import java.util.List;
 import java.util.UUID;
 
-public record ReserveCouponPayload(UUID couponId,
+public record CouponReservePayload(UUID couponId,
                                    String couponName,
                                    CouponType couponType,
                                    List<UUID> reservationList,
                                    PassportDto passport) implements EventPayload {
 
     @Builder
-    public ReserveCouponPayload(UUID couponId,
+    public CouponReservePayload(UUID couponId,
                                 String couponName,
                                 CouponType couponType,
                                 List<UUID> reservationList,

@@ -12,16 +12,16 @@ import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class FailCouponPayload implements EventPayload {
+public class FailCouponEvent implements EventPayload {
 
     private UUID couponId;
     private PassportDto passportDto;
     private String code;
 
     @Builder
-    public FailCouponPayload(UUID couponId,
-                             PassportDto passportDto,
-                             String code) {
+    public FailCouponEvent(UUID couponId,
+                           PassportDto passportDto,
+                           String code) {
         this.couponId = couponId;
         this.passportDto = passportDto;
         this.code = code;

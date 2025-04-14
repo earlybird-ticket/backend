@@ -10,28 +10,35 @@ import org.springframework.kafka.annotation.EnableKafka;
 public class KafkaConfig {
 
     @Bean
-    public NewTopic ReservationToSeatForPreemption() {
+    public NewTopic reservationToSeatForPreemption() {
         return new NewTopic("ReservationToSeatForPreemption",
                             1,
                             (short) 3);
     }
 
     @Bean
-    public NewTopic ReservationToSeat() {
+    public NewTopic reservationToSeat() {
         return new NewTopic("ReservationToSeat",
                             1,
                             (short) 3);
     }
 
     @Bean
-    public NewTopic ReservationToPayment() {
+    public NewTopic paymentToReservation() {
+        return new NewTopic("PaymentToReservation",
+                            1,
+                            (short) 3);
+    }
+
+    @Bean
+    public NewTopic reservationToPayment() {
         return new NewTopic("ReservationToPayment",
                             1,
                             (short) 3);
     }
 
     @Bean
-    public NewTopic ReservationToCoupon() {
+    public NewTopic reservationToCoupon() {
         return new NewTopic("ReservationToCoupon",
                             1,
                             (short) 3);
