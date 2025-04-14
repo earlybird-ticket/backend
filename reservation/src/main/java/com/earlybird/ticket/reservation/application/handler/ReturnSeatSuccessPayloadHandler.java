@@ -24,9 +24,6 @@ public class ReturnSeatSuccessPayloadHandler implements EventHandler<SeatReturnS
     @Transactional
     public void handle(Event<SeatReturnSuccessPayload> event) {
         SeatReturnSuccessPayload payload = event.getPayload();
-        log.info("event 수행 !!!!!!!!!");
-        log.info("payload = {} ",
-                 payload);
 
         List<ReservationSeat> seatIntanceList = reservationSeatRepository.findAllBySeatInstaceIdIn(payload.seatInstanceIdList());
         log.info("Received UUID List: {}",
