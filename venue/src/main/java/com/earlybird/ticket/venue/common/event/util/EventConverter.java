@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class EventConverter {
     private final ObjectMapper objectMapper;
 
-    public <T extends EventPayload> String serializePayload(Event<T> event) {
+    public <T extends EventPayload> String serializeEvent(Event<T> event) {
         try {
             return objectMapper.writeValueAsString(event);
         } catch (JsonProcessingException e) {

@@ -262,7 +262,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                 .aggregateId(seatInstanceIdList.get(0))
                 .aggregateType(Outbox.AggregateType.SEAT_INSTANCE)
                 .eventType(eventType)
-                .payload(eventConverter.serializePayload(event))
+                .payload(eventConverter.serializeEvent(event))
                 .build()
         );
     }
