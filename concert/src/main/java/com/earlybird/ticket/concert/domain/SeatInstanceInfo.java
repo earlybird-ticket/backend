@@ -1,6 +1,8 @@
 package com.earlybird.ticket.concert.domain;
 
 import com.earlybird.ticket.common.entity.BaseEntity;
+import com.earlybird.ticket.concert.domain.constant.Grade;
+import com.earlybird.ticket.concert.domain.constant.Section;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -26,8 +28,8 @@ public class SeatInstanceInfo extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID seatInstanceInfoId;
-    private String section;
-    private String grade;
+    private Section section;
+    private Grade grade;
     private Integer price;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -35,7 +37,7 @@ public class SeatInstanceInfo extends BaseEntity {
     private Concert concert;
 
     @Builder
-    public SeatInstanceInfo(String section, String grade, Integer price, Concert concert) {
+    public SeatInstanceInfo(Section section, Grade grade, Integer price, Concert concert) {
         this.section = section;
         this.grade = grade;
         this.price = price;

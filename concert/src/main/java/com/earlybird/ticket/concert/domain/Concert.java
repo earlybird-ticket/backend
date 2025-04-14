@@ -1,6 +1,7 @@
 package com.earlybird.ticket.concert.domain;
 
 import com.earlybird.ticket.common.entity.BaseEntity;
+import com.earlybird.ticket.concert.domain.constant.ConcertStatus;
 import com.earlybird.ticket.concert.domain.constant.Genre;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -70,5 +71,51 @@ public class Concert extends BaseEntity {
         this.priceInfo = priceInfo;
         this.seatInstanceInfo = seatInstanceInfo;
         this.concertSequences = concertSequences;
+    }
+
+    public void deleteConcertSequence(Long userId, UUID concertSequenceId) {
+        for (ConcertSequence concertSequence : this.concertSequences) {
+            if (concertSequence.getDeletedAt() == null && concertSequence.getConcertSequenceId()
+                    .equals(concertSequenceId)) {
+                concertSequence.delete(userId);
+            }
+        }
+    }
+
+    public void updateConcert(
+            String concertName, String entertainerName, LocalDateTime startDate,
+            LocalDateTime endDate, Genre genre, Integer runningTime, String priceInfo
+    ) {
+        this.concertName = concertName;
+        this.entertainerName = entertainerName;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.genre = genre;
+        this.runningTime = runningTime;
+        this.priceInfo = priceInfo;
+    }
+
+    public void deleteConcert(Long userId) {
+        super.delete(userId);
+    }
+
+    @Builder(builderMethodName = "updateConcertSequenceBuilder")
+    public void updateConcertSequence(
+            UUID concertSequenceId, LocalDateTime sequenceStartDate,
+            LocalDateTime sequenceEndDate, LocalDateTime ticketSaleStartDate,
+            LocalDateTime ticketSaleEndDate, ConcertStatus status
+    ) {
+
+        concertSequences.stream()
+                .map(concertSequence -> {
+                    if (concertSequence.getConcertSequenceId().equals(concertSequenceId)) {
+                        concertSequence.update(
+                                sequenceStartDate, sequenceEndDate,
+                                ticketSaleStartDate, ticketSaleEndDate, status
+                        );
+                    }
+                    return concertSequence;
+                })
+                .forEach(concertSequences::add);
     }
 }
