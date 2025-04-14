@@ -8,6 +8,7 @@ import com.earlybird.ticket.venue.application.event.dto.response.*;
 import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.common.event.util.EventConverter;
 import com.earlybird.ticket.venue.common.exception.SeatNotFoundException;
+import com.earlybird.ticket.venue.common.exception.TimeOutException;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.domain.entity.Outbox;
 import com.earlybird.ticket.venue.domain.entity.Seat;
@@ -16,6 +17,8 @@ import com.earlybird.ticket.venue.domain.repository.OutboxRepository;
 import com.earlybird.ticket.venue.domain.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +34,9 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
     private final SeatRepository seatRepository;
     private final OutboxRepository outboxRepository;
     private final EventConverter eventConverter;
+    private final RedissonClient redissonClient;
+
+    private final String timeCachePrefix = "TIME_LIMIT:RESERVATION_ID:";
 
     @Override
     @Transactional
@@ -171,6 +177,10 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
         List<UUID> seatInstanceIdList = seatConfirmPayload.seatInstanceIdList();
 
         try{
+            if(!redissonClient.getBucket(timeCachePrefix).isExists()) {
+                throw new TimeOutException();
+            }
+
             //1. seatInstance 가져오기
             List<Seat> seatList = getSeatList(seatInstanceIdList);
 
