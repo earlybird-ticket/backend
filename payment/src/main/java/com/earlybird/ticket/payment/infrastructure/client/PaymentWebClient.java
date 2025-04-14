@@ -3,6 +3,10 @@ package com.earlybird.ticket.payment.infrastructure.client;
 
 import com.earlybird.ticket.payment.application.service.PaymentClient;
 import com.earlybird.ticket.payment.application.service.dto.command.ConfirmPaymentCommand;
+import com.earlybird.ticket.payment.application.service.dto.command.UpdatePaymentCommand;
+import com.earlybird.ticket.payment.application.service.exception.PaymentAbortException;
+import com.earlybird.ticket.payment.infrastructure.client.dto.response.ConfirmPaymentMethodClientResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.UUID;
@@ -32,21 +36,31 @@ public class PaymentWebClient implements PaymentClient {
     }
 
     @Override
-    public void confirmPayment(ConfirmPaymentCommand command, UUID paymentId) {
+    public UpdatePaymentCommand confirmPayment(ConfirmPaymentCommand command,
+        UUID paymentId) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
         log.info("토스페이 결제 요청 보냄");
-        String block = webClient.post()
+        ConfirmPaymentMethodClientResponse receipt = webClient.post()
             .uri("https://api.tosspayments.com/v1/payments/confirm")
             .headers(httpHeaders -> {
                 httpHeaders.add(HttpHeaders.AUTHORIZATION, getAuthorizationValue());
                 httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-                //httpHeaders.add(IDEMPOTENCY_KEY, command.orderId().toString());
+                //httpHeaders.add(IDEMPOTENCY_KEY, command.reservationId().toString());
             })
             .bodyValue(command)
             .retrieve()
-            .bodyToMono(String.class)
+            .bodyToMono(ConfirmPaymentMethodClientResponse.class)
             .block();
 
-        log.info("response = {}", block);
+        log.info("토스페이 결제 성공 = {}", receipt);
+
+        if (receipt == null) {
+            throw new PaymentAbortException();
+        }
+
+        // TODO: 추후 가상계좌의 경우 만료기간 까지 입금 X시, 취소 처리
+        return receipt.toCommand();
     }
 
     private String getAuthorizationValue() {

@@ -11,7 +11,7 @@ public record FindPaymentQuery(
     String userEmail,
     String userName,
     BigDecimal amount,
-    UUID orderId,
+    UUID reservationId,
     String orderName
 ) {
 
@@ -21,7 +21,7 @@ public record FindPaymentQuery(
             .userEmail(payment.getUserEmail())
             .userName(payment.getUserName())
             .amount(payment.getAmount())
-            .orderId(payment.getOrderId())
+            .reservationId(payment.getReservationId())
             .orderName(payment.getOrderName())
             .build();
     }

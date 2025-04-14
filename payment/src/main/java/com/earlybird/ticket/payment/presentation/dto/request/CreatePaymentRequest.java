@@ -13,7 +13,7 @@ public record CreatePaymentRequest(
     String userEmail,
     @NotEmpty(message = "user name cannot be empty") String userName,
     @NotNull(message = "total amount cannot be null") BigDecimal amount,
-    @NotNull(message = "order id cannot be null") UUID orderId,
+    @NotNull(message = "reservation id cannot be null") UUID reservationId,
     @NotEmpty(message = "product info cannot be empty") String orderName
 ) {
 
@@ -23,7 +23,7 @@ public record CreatePaymentRequest(
             .userEmail(userEmail)
             .userName(userName)
             .amount(amount)
-            .orderId(orderId)
+            .reservationId(reservationId)
             .orderName(orderName)
             .build();
     }

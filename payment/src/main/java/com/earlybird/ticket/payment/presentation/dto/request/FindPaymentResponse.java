@@ -11,17 +11,17 @@ public record FindPaymentResponse(
     String userEmail,
     String userName,
     BigDecimal amount,
-    UUID orderId,
+    UUID reservationId,
     String orderName
 ) {
 
     public static FindPaymentResponse of(FindPaymentQuery payment) {
         return FindPaymentResponse.builder()
-            .userId("EBT-"+ payment.userId())
+            .userId("EBT-" + payment.userId())
             .userEmail(payment.userEmail())
             .userName(payment.userName())
             .amount(payment.amount())
-            .orderId(payment.orderId())
+            .reservationId(payment.reservationId())
             .orderName(payment.orderName())
             .build();
     }

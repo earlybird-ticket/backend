@@ -12,7 +12,7 @@ public record CreatePaymentCommand(
     String userEmail,
     String userName,
     BigDecimal amount,
-    UUID orderId,
+    UUID reservationId,
     String orderName
 ) {
 
@@ -22,7 +22,7 @@ public record CreatePaymentCommand(
             .userEmail(userEmail)
             .userName(userName)
             .amount(amount)
-            .orderId(orderId)
+            .reservationId(reservationId)
             .orderName(orderName)
             .status(PaymentStatus.CREATED)
             .build();

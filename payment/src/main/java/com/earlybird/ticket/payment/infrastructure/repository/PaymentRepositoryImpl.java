@@ -24,7 +24,7 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     }
 
     @Override
-    public Optional<Payment> findByOrderId(UUID orderId) {
-        return paymentJpaRepository.findPaymentByOrderId(orderId);
+    public Optional<Payment> findByReservationId(UUID reservationId) {
+        return paymentJpaRepository.findPaymentByReservationId(reservationId);
     }
 }
