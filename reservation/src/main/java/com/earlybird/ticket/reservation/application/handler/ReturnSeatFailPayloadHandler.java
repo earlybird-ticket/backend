@@ -33,7 +33,7 @@ public class ReturnSeatFailPayloadHandler implements EventHandler<SeatReturnFail
                            .delete(passport.getUserId());
 
             //예약 좌석 상태 FREE로 수정
-            reservationSeat.updateStatusReserveFail();
+            reservationSeat.updateStatusReserveFREE();
             reservationSeat.delete(passport.getUserId());
 
             //TODO:: 실패 알람(메일) 처리

@@ -96,7 +96,7 @@ public class ReservationSeat extends BaseEntity {
         this.status = SeatStatus.PREEMPTED;
     }
 
-    public void updateStatusReserveFail() {
+    public void updateStatusReserveFREE() {
         this.status = SeatStatus.FREE;
     }
 

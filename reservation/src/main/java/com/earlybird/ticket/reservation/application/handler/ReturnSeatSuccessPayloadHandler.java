@@ -42,7 +42,12 @@ public class ReturnSeatSuccessPayloadHandler implements EventHandler<SeatReturnS
                      seat.getStatus());
         });
 
-        seatIntanceList.forEach(ReservationSeat::updateStatusConfirmSuccess);
+        seatIntanceList.forEach(ReservationSeat::updateStatusReserveFREE);
+        seatIntanceList.forEach(seat -> {
+            seat.getReservation()
+                .delete(payload.passport()
+                               .getUserId());
+        });
 
         seatIntanceList.forEach(seat -> log.info("업데이트 후 상태 확인: id={}, status={}",
                                                  seat.getSeatInstanceId(),

@@ -33,7 +33,7 @@ public class PreemptSeatFailPayloadHandler implements EventHandler<SeatPreemptFa
                            .delete(passport.getUserId());
 
             //예약 좌석 상태 FREE로 수정
-            reservationSeat.updateStatusReserveFail();
+            reservationSeat.updateStatusReserveFREE();
             reservationSeat.delete(passport.getUserId());
 
             //TODO:: 실패 알람 처리

@@ -33,8 +33,9 @@ public class ConfirmSeatFailPayloadHandler implements EventHandler<SeatConfirmFa
                            .delete(passport.getUserId());
 
             //예약 좌석 상태 FREE로 수정
-            reservationSeat.updateStatusReserveFail();
+            reservationSeat.updateStatusReserveFREE();
             reservationSeat.delete(passport.getUserId());
+
 
             //TODO:: 실패 알람 처리
             //Code를 가지고 내용 보내기
