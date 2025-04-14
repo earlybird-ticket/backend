@@ -19,20 +19,16 @@ public class ConfirmCouponPayload implements EventPayload {
 
     @Builder
     public ConfirmCouponPayload(UUID couponId,
-                                Long userId,
-                                String userRole) {
+                                PassportDto passport) {
         this.couponId = couponId;
-        this.passport = new PassportDto(userId,
-                                        userRole);
+        this.passport = passport;
     }
 
     public static ConfirmCouponPayload createSeatPreemptPayload(UUID requestCouponId,
-                                                                Long userId,
                                                                 PassportDto passportDto) {
         return ConfirmCouponPayload.builder()
                                    .couponId(requestCouponId)
-                                   .userId(userId)
-                                   .userRole(passportDto.getUserRole())
+                                   .passport(passportDto)
                                    .build();
     }
 

@@ -1,12 +1,14 @@
 package com.earlybird.ticket.reservation.domain.entity.constant;
 
 import com.earlybird.ticket.common.entity.EventPayload;
-import com.earlybird.ticket.reservation.application.dto.response.ReserveCouponPayload;
+import com.earlybird.ticket.reservation.application.dto.response.CouponReservePayload;
+import com.earlybird.ticket.reservation.application.dto.response.PaymentSuccessPayload;
 import com.earlybird.ticket.reservation.application.dto.response.SeatPreemptFailPayload;
 import com.earlybird.ticket.reservation.application.dto.response.SeatPreemptSuccessPayload;
-import com.earlybird.ticket.reservation.domain.dto.request.ConfirmCouponPayload;
+import com.earlybird.ticket.reservation.domain.dto.request.ConfirmSeatPayload;
 import com.earlybird.ticket.reservation.domain.dto.request.FailCouponPayload;
 import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatPayload;
+import com.earlybird.ticket.reservation.domain.dto.request.ReserveCouponPayload;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,27 +18,27 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public enum EventType {
     //produce
-    SEAT_INSTANCE_CONFIRM(PreemptSeatPayload.class,
+    SEAT_INSTANCE_CONFIRM(ConfirmSeatPayload.class,
                           Topic.RESERVATION_TO_SEAT),
     SEAT_INSTANCE_PREEMPTION(PreemptSeatPayload.class,
                              Topic.RESERVATION_TO_SEAT_FOR_PREEMPTION),
-    COUPON_RETURN(PreemptSeatPayload.class,
-                  Topic.RESERVATION_TO_COUPON),
-    PAYMENT_REQUEST(PreemptSeatPayload.class,
-                    Topic.RESERVATION_TO_PAYMENT),
     SEAT_INSTANCE_RETURN(PreemptSeatPayload.class,
                          Topic.RESERVATION_TO_SEAT),
+    COUPON_RETURN(PreemptSeatPayload.class,
+                  Topic.RESERVATION_TO_COUPON),
+    COUPON_CONFIRM(CouponReservePayload.class,
+                   Topic.RESERVATION_TO_COUPON),
+    COUPON_FAIL(FailCouponPayload.class,
+                Topic.RESERVATION_TO_COUPON),
     //consume,
     SEAT_PREEMPT_SUCCESS(SeatPreemptSuccessPayload.class,
                          Topic.RESERVATION_TO_SEAT),
     SEAT_PREEMPT_FAIL(SeatPreemptFailPayload.class,
                       Topic.RESERVATION_TO_SEAT),
-    COUPON_CONFIRM(ReserveCouponPayload.class,
+    COUPON_SUCCESS(ReserveCouponPayload.class,
                    Topic.RESERVATION_TO_COUPON),
-    COUPON_SUCCESS(ConfirmCouponPayload.class,
-                   Topic.RESERVATION_TO_COUPON),
-    COUPON_FAIL(FailCouponPayload.class,
-                Topic.RESERVATION_TO_COUPON);
+    PAYMENT_SUCCESS(PaymentSuccessPayload.class,
+                    Topic.PAYMENT_TO_RESERVATION);
 
 
     private final Class<? extends EventPayload> payloadClass;
@@ -57,7 +59,7 @@ public enum EventType {
 
         public static final String RESERVATION_TO_SEAT_FOR_PREEMPTION = "ReservationToSeatForPreemption";
         public static final String RESERVATION_TO_SEAT = "ReservationToSeat";
-        public static final String RESERVATION_TO_PAYMENT = "ReservationToPayment";
+        public static final String PAYMENT_TO_RESERVATION = "PaymentToReservation";
         public static final String RESERVATION_TO_COUPON = "ReservationToCoupon";
         public static final String SEAT_RESERVE_TOPIC = "SeatToReservation";
 

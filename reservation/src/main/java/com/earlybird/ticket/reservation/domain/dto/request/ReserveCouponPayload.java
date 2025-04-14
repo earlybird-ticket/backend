@@ -8,32 +8,27 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReserveCouponPayload implements EventPayload {
 
-    private List<UUID> couponId;
-    private Passport passportDto;
+    private UUID couponId;
+    private PassportDto passportDto;
 
     @Builder
-    public ReserveCouponPayload(List<UUID> couponId,
-                                Long userId,
-                                Role role) {
+    public ReserveCouponPayload(UUID couponId,
+                                PassportDto passportDto) {
         this.couponId = couponId;
-        this.passportDto = new Passport(userId,
-                                        role);
+        this.passportDto = this.passportDto;
     }
 
-    public static ReserveCouponPayload createSeatPreemptPayload(List<UUID> requestCouponId,
-                                                                Long userId,
+    public static ReserveCouponPayload createSeatPreemptPayload(UUID requestCouponId,
                                                                 PassportDto passportDto) {
         return ReserveCouponPayload.builder()
                                    .couponId(requestCouponId)
-                                   .userId(userId)
-                                   .role(Role.from(passportDto.getUserRole()))
+                                   .passportDto(passportDto)
                                    .build();
     }
 
