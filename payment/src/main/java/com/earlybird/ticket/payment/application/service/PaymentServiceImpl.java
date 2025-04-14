@@ -4,12 +4,14 @@ import com.earlybird.ticket.common.entity.EventPayload;
 import com.earlybird.ticket.common.entity.PassportDto;
 import com.earlybird.ticket.common.entity.constant.Role;
 import com.earlybird.ticket.common.util.CommonUtil;
+import com.earlybird.ticket.payment.application.TemporaryStore;
 import com.earlybird.ticket.payment.application.event.dto.request.PaymentSuccessEvent;
 import com.earlybird.ticket.payment.application.service.dto.command.ConfirmPaymentCommand;
 import com.earlybird.ticket.payment.application.service.dto.command.CreatePaymentCommand;
 import com.earlybird.ticket.payment.application.service.dto.query.FindPaymentQuery;
 import com.earlybird.ticket.payment.application.service.exception.PaymentAmountDoesNotMatchException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentNotFoundException;
+import com.earlybird.ticket.payment.application.service.exception.PaymentTimeoutException;
 import com.earlybird.ticket.payment.common.EventConverter;
 import com.earlybird.ticket.payment.common.EventType;
 import com.earlybird.ticket.payment.domain.entity.Event;
@@ -34,10 +36,15 @@ public class PaymentServiceImpl implements PaymentService {
     private final OutboxRepository outboxRepository;
     private final PaymentClient paymentClient;
     private final EventConverter eventConverter;
+    private final TemporaryStore temporaryStore;
 
     @Override
     public UUID createPayment(CreatePaymentCommand paymentRequest) {
         // TODO : Redis 결제 타임아웃 검증
+        if (temporaryStore.isTimedOut(paymentRequest.reservationId())) {
+            throw new PaymentTimeoutException();
+        }
+
         log.info("createPayment = {}", paymentRequest);
         Payment save = paymentRepository.save(paymentRequest.toPayment());
         return save.getId();
@@ -45,9 +52,12 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public FindPaymentQuery findPayment(UUID paymentId) {
-        // TODO : Redis 결제 타임아웃 검증
         Payment payment = paymentRepository.findByPaymentId(paymentId)
             .orElseThrow(PaymentNotFoundException::new);
+        // TODO : Redis 결제 타임아웃 검증
+        if (temporaryStore.isTimedOut(payment.getReservationId())) {
+            throw new PaymentTimeoutException();
+        }
         return FindPaymentQuery.of(payment);
     }
 
@@ -62,6 +72,10 @@ public class PaymentServiceImpl implements PaymentService {
             5. Reservation으로 이벤트 발행[결제 성공 이벤트 발행] ✅
          */
         // TODO : Redis 결제 타임아웃 검증
+        if (temporaryStore.isTimedOut(confirmPaymentCommand.reservationId())) {
+            throw new PaymentTimeoutException();
+        }
+
         Payment payment = paymentRepository.findByReservationId(
                 confirmPaymentCommand.reservationId())
             .orElseThrow(PaymentNotFoundException::new);
