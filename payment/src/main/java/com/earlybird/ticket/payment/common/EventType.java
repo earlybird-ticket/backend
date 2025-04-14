@@ -2,7 +2,7 @@ package com.earlybird.ticket.payment.common;
 
 import com.earlybird.ticket.common.entity.EventPayload;
 import com.earlybird.ticket.payment.application.event.dto.request.PaymentSuccessEvent;
-import com.earlybird.ticket.payment.application.event.dto.response.PaymentFailEvent;
+import com.earlybird.ticket.payment.application.event.dto.request.PaymentFailEvent;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
