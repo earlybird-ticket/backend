@@ -27,7 +27,7 @@ public class ReturnSeatFailPayloadHandler implements EventHandler<SeatReturnFail
 
 
         List<ReservationSeat> seatIntanceList = reservationSeatRepository.findAllBySeatInstaceIdIn(payload.seatInstanceIdList());
-        PassportDto passport = payload.passport();
+        PassportDto passport = payload.passportDto();
         seatIntanceList.forEach(reservationSeat -> {
             reservationSeat.getReservation()
                            .delete(passport.getUserId());

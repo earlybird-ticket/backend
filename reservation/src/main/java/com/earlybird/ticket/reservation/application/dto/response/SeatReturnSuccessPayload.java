@@ -9,6 +9,5 @@ import java.util.UUID;
 
 @Builder
 public record SeatReturnSuccessPayload(List<UUID> seatInstanceIdList,
-                                       PassportDto passport,
-                                       String code) implements EventPayload {
+                                       PassportDto passportDto) implements EventPayload {
 }

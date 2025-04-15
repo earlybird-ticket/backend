@@ -77,6 +77,10 @@ public class Reservation extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
 
+    @Column(name = "payment_status")
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus;
+
     @Column(name = "coupon_id")
     private UUID couponId;
 
@@ -142,6 +146,7 @@ public class Reservation extends BaseEntity {
         this.paymentId = paymentId;
         this.paymentTotalPrice = paymentTotalPrice;
         this.paymentMethod = paymentMethod;
+        this.paymentStatus = paymentStatus;
         this.couponId = couponId;
         this.couponType = couponType;
         this.couponName = couponName;
@@ -222,6 +227,7 @@ public class Reservation extends BaseEntity {
         this.paymentMethod = payload.paymentMethod();
         this.paymentId = payload.paymentId();
         this.paymentTotalPrice = payload.totalPrice();
+        this.paymentStatus = payload.paymentStatus();
         this.reservationStatus = ReservationStatus.CONFIRMED;
         update(payload.passportDto()
                       .getUserId());

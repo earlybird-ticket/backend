@@ -9,6 +9,6 @@ import java.util.UUID;
 
 @Builder
 public record SeatPreemptFailPayload(List<UUID> seatInstanceIdList,
-                                     PassportDto passport,
+                                     PassportDto passportDto,
                                      String code) implements EventPayload {
 }
