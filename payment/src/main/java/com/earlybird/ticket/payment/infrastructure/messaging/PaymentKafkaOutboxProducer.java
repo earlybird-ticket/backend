@@ -29,31 +29,36 @@ public class PaymentKafkaOutboxProducer {
         List<CompletableFuture<Outbox>> futures = outboxes.stream()
             .map(outbox -> {
                 log.info("Outbox 발행] id = {}, payload = {}", outbox.getId(), outbox.getPayload());
+                // 실패 테스트
+//                CompletableFuture<Object> failed = new CompletableFuture<>();
+//                failed.completeExceptionally(new RuntimeException("테스트"));
+//                return failed
                 return paymentKafkaTemplate.send(
-                        outbox.getEventType().getTopic(), outbox.getPayload())
-                    // 성공 시 마킹
-                    .thenApply(res -> {
+                        outbox.getEventType().getTopic(),
+                        outbox.getPayload()
+                    )
+                    .handle((res, ex) -> {
+                        if (ex != null) {
+                            log.error("Outbox 발행 실패] id =  {}, retryCount = {}",
+                                outbox.getId(),
+                                outbox.getRetryCount()
+                            );
+                            // 카운트 올림
+                            outbox.incrementRetry();
+
+                            if (outbox.getRetryCount() > 3) {
+                                log.error("이벤트 3회 발행 실패 => DLQ로 이동 = {}", outbox.getId());
+                                paymentKafkaTemplate.send(
+                                    outbox.getEventType().getTopic() + DLT_SUFFIX,
+                                    outbox.getPayload()
+                                );
+                            }
+                            return outbox;
+                        }
                         outbox.markSuccess();
                         return outbox;
-                    })
-                    // 실패 시
-                    .exceptionally(ex -> {
-                        log.error("Outbox 발행 실패] id =  {}, retryCount = {}",
-                            outbox.getId(),
-                            outbox.getRetryCount()
-                        );
-                        // 카운트 올림
-                        outbox.incrementRetry();
-
-                        if (outbox.getRetryCount() >= 3) {
-                            log.error("이벤트 3회 발행 실패 => DLQ로 이동 = {}", outbox.getId());
-                            paymentKafkaTemplate.send(
-                                outbox.getEventType().getTopic() + DLT_SUFFIX,
-                                outbox.getPayload()
-                            );
-                        }
-                        return outbox;
                     });
+
             }).toList();
 
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
