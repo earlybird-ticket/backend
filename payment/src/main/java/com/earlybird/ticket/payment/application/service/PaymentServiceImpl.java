@@ -40,10 +40,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public UUID createPayment(CreatePaymentCommand paymentRequest) {
-        // TODO : Redis 결제 타임아웃 검증
-        if (temporaryStore.isTimedOut(paymentRequest.reservationId())) {
-            throw new PaymentTimeoutException();
-        }
+        validateReservationTimedOut(paymentRequest.reservationId());
 
         log.info("createPayment = {}", paymentRequest);
         Payment save = paymentRepository.save(paymentRequest.toPayment());
@@ -54,10 +51,7 @@ public class PaymentServiceImpl implements PaymentService {
     public FindPaymentQuery findPayment(UUID paymentId) {
         Payment payment = paymentRepository.findByPaymentId(paymentId)
             .orElseThrow(PaymentNotFoundException::new);
-        // TODO : Redis 결제 타임아웃 검증
-        if (temporaryStore.isTimedOut(payment.getReservationId())) {
-            throw new PaymentTimeoutException();
-        }
+        validateReservationTimedOut(payment.getReservationId());
         return FindPaymentQuery.of(payment);
     }
 
@@ -65,16 +59,15 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public void confirmPayment(ConfirmPaymentCommand confirmPaymentCommand) {
         /* TODO:
-            1. OrderId로 검색 후 가격 검증 ✅
+            0. PAYMENT:CONFIRM:{RESERVATION_ID}로 결제한 적 있는지 확인
+            1. reservationId로 검색 후 가격 검증 ✅
             2. Base64로 SecretKey 암호화 후 정보 전달 ✅
             3. 엔티티 상태 업데이트[결제 방법, 결제 상태 변경] ✅
-            4. 아웃박스 생성 ✅
-            5. Reservation으로 이벤트 발행[결제 성공 이벤트 발행] ✅
+            4. 결제 성공 후 PAYMENT:CONFIRM:{RESERVATION_ID}로 레디스 캐싱
+            5. 아웃박스 생성 ✅
+            6. outbox에서 이벤트 발행[결제 성공 이벤트 발행] ✅
          */
-        // TODO : Redis 결제 타임아웃 검증
-        if (temporaryStore.isTimedOut(confirmPaymentCommand.reservationId())) {
-            throw new PaymentTimeoutException();
-        }
+        validateReservationTimedOut(confirmPaymentCommand.reservationId());
 
         Payment payment = paymentRepository.findByReservationId(
                 confirmPaymentCommand.reservationId())
@@ -112,6 +105,12 @@ public class PaymentServiceImpl implements PaymentService {
 
     }
 
+    @Override
+    public void cancelPayment(UUID paymentId) {
+        // TODO : 결제 취소 요청
+        // paymentClient.cancelPayment();
+    }
+
     private void validatePaymentAmount(Payment payment, BigDecimal amount) {
         // equals 검증의 경우 scale까지 비교
         if (payment.getAmount().compareTo(amount) != 0) {
@@ -120,6 +119,11 @@ public class PaymentServiceImpl implements PaymentService {
         log.info("가격 검증 성공");
     }
 
+    private void validateReservationTimedOut(UUID reservationId) {
+        if (temporaryStore.isTimedOut(reservationId)) {
+            throw new PaymentTimeoutException();
+        }
+    }
 
     // SUCCESS, FAIL 당장은 두 개만 필요함
     protected <T extends EventPayload> Outbox createOutbox(

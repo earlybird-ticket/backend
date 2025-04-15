@@ -8,5 +8,7 @@ public interface OutboxRepository {
 
     Outbox save(Outbox outbox);
 
+    List<Outbox> saveAll(List<Outbox> outboxes);
+
     List<Outbox> findTop100UnmarkedOutboxOrderByCreatedAt();
 }

@@ -11,4 +11,6 @@ public interface PaymentService {
     FindPaymentQuery findPayment(UUID paymentId);
 
     void confirmPayment(ConfirmPaymentCommand confirmPaymentCommand);
+
+    void cancelPayment(UUID paymentId);
 }
