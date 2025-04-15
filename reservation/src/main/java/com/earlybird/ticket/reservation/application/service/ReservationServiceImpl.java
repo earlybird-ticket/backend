@@ -125,7 +125,7 @@ public class ReservationServiceImpl implements ReservationService {
                                                                                  passportDto,
                                                                                  reservation.getId());
 
-            Event<PreemptSeatEvent> event = new Event<>(EventType.SEAT_PREEMPTION,
+            Event<PreemptSeatEvent> event = new Event<>(EventType.SEAT_PREEMPT,
                                                         payload,
                                                         LocalDateTime.now()
                                                                      .toString());
@@ -138,7 +138,7 @@ public class ReservationServiceImpl implements ReservationService {
             Outbox outbox = Outbox.builder()
                                   .aggregateType(Outbox.AggregateType.RESERVATION)
                                   .aggregateId(reservation.getId())
-                                  .eventType(EventType.SEAT_PREEMPTION)
+                                  .eventType(EventType.SEAT_PREEMPT)
                                   .payload(payloadJson)
                                   .build();
 

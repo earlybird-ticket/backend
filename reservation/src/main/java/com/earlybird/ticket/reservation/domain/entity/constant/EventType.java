@@ -14,8 +14,8 @@ public enum EventType {
     //produce
 
     //좌석 선점 요청(Reservation -> Venue)
-    SEAT_PREEMPTION(PreemptSeatEvent.class,
-                    Topic.RESERVATION_TO_SEAT_FOR_PREEMPTION_TOPIC),
+    SEAT_PREEMPT(PreemptSeatEvent.class,
+                 Topic.RESERVATION_TO_SEAT_FOR_PREEMPTION_TOPIC),
 
     //좌석 확정 요청(Reservation -> Venue)
     SEAT_CONFIRM(ConfirmSeatEvent.class,
