@@ -22,4 +22,9 @@ public class OutboxRepositoryImpl implements OutboxRepository {
         return outboxJpaRepository.findTOP100ByOrderByCreatedAtAsc();
     }
 
+    @Override
+    public void saveAll(List<Outbox> updatedOutboxes) {
+        outboxJpaRepository.saveAll(updatedOutboxes);
+    }
+
 }

@@ -17,7 +17,6 @@ import com.earlybird.ticket.reservation.domain.repository.ReservationRepository;
 import com.earlybird.ticket.reservation.domain.repository.ReservationSeatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +33,6 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
     private final ReservationSeatRepository reservationSeatRepository;
     private final EventPayloadConverter eventPayloadConverter;
     private final OutboxRepository outboxRepository;
-    private final RedissonClient redissonClient;
 
     @Override
     public void handle(Event<PaymentSuccessPayload> event) {
@@ -48,6 +46,7 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
         List<ReservationSeat> reservationSeatList = reservationSeatRepository.findByReservation(reservation);
         //결제정보 업데이트 , 예약 확정상태
         reservation.updatePaymentInfo(payload);
+        reservationSeatList.forEach(ReservationSeat::updateStatusConfirmSuccess);
 
         //좌석 확정 상태로 변경
         ConfirmSeatEvent confirmSeatEvent = ConfirmSeatEvent.builder()

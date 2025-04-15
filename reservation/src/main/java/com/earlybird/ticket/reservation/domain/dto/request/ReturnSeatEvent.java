@@ -8,28 +8,29 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ReturnCouponPayload implements EventPayload {
+public class ReturnSeatEvent implements EventPayload {
 
-    private UUID couponId;
+    private List<UUID> seatInstanceList;
     private PassportDto passportDto;
 
     @Builder
-    public ReturnCouponPayload(UUID couponId,
-                               PassportDto passportDto) {
-        this.couponId = couponId;
+    public ReturnSeatEvent(List<UUID> seatInstanceList,
+                           PassportDto passportDto) {
+        this.seatInstanceList = seatInstanceList;
         this.passportDto = passportDto;
     }
 
-    public static ReturnCouponPayload createSeatPreemptPayload(UUID requestCouponId,
-                                                               PassportDto passportDto) {
-        return ReturnCouponPayload.builder()
-                                  .couponId(requestCouponId)
-                                  .passportDto(passportDto)
-                                  .build();
+    public static ReturnSeatEvent createSeatPreemptPayload(List<UUID> seatInstanceIds,
+                                                           PassportDto passportDto) {
+        return ReturnSeatEvent.builder()
+                              .seatInstanceList(seatInstanceIds)
+                              .passportDto(passportDto)
+                              .build();
     }
 
     @Getter
