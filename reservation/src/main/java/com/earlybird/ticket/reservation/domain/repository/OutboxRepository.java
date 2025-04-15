@@ -8,4 +8,6 @@ public interface OutboxRepository {
     Outbox save(Outbox outbox);
 
     List<Outbox> findTOP100ByOrderByCreatedAtAsc();
+
+    void saveAll(List<Outbox> updatedOutboxes);
 }
