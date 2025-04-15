@@ -18,6 +18,11 @@ public class OutboxRepositoryImpl implements OutboxRepository {
     }
 
     @Override
+    public List<Outbox> saveAll(List<Outbox> outboxes) {
+        return outboxJpaRepository.saveAll(outboxes);
+    }
+
+    @Override
     public List<Outbox> findTop100UnmarkedOutboxOrderByCreatedAt() {
         return outboxJpaRepository.findTop100UnmarkedOutboxOrderByCreatedAt();
     }

@@ -3,6 +3,7 @@ package com.earlybird.ticket.payment.infrastructure.messaging;
 import com.earlybird.ticket.payment.domain.entity.Outbox;
 import com.earlybird.ticket.payment.domain.repository.OutboxRepository;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -25,30 +26,49 @@ public class PaymentKafkaOutboxProducer {
     public void publishOutbox() {
         List<Outbox> outboxes = outboxRepository.findTop100UnmarkedOutboxOrderByCreatedAt();
 
-        for (Outbox outbox : outboxes) {
-            try {
+        List<CompletableFuture<Outbox>> futures = outboxes.stream()
+            .map(outbox -> {
                 log.info("Outbox 발행] id = {}, payload = {}", outbox.getId(), outbox.getPayload());
-                paymentKafkaTemplate.send(outbox.getEventType().getTopic(), outbox.getPayload());
-                outbox.markSuccess();
+                return paymentKafkaTemplate.send(
+                        outbox.getEventType().getTopic(), outbox.getPayload())
+                    // 성공 시 마킹
+                    .thenApply(res -> {
+                        outbox.markSuccess();
+                        return outbox;
+                    })
+                    // 실패 시
+                    .exceptionally(ex -> {
+                        log.error("Outbox 발행 실패] id =  {}, retryCount = {}",
+                            outbox.getId(),
+                            outbox.getRetryCount()
+                        );
+                        // 카운트 올림
+                        outbox.incrementRetry();
 
-            } catch (Exception e) {
-                log.error("Outbox 발행 실패] id =  {}, retryCount = {}",
-                    outbox.getId(),
-                    outbox.getRetryCount()
-                );
-                // 실패 시 카운트 올림
-                outbox.incrementRetry();
+                        if (outbox.getRetryCount() >= 3) {
+                            log.error("이벤트 3회 발행 실패 => DLQ로 이동 = {}", outbox.getId());
+                            paymentKafkaTemplate.send(
+                                outbox.getEventType().getTopic() + DLT_SUFFIX,
+                                outbox.getPayload()
+                            );
+                        }
+                        return outbox;
+                    });
+            }).toList();
 
-                if (outbox.getRetryCount() < 3) {
-                    continue;
-                }
-                // 실패횟수가 3회 이상이면 =>
-                log.error("이벤트 3회 발행 실패 => DLQ로 이동");
-                paymentKafkaTemplate.send(
-                    outbox.getEventType().getTopic() + DLT_SUFFIX,
-                    outbox.getPayload()
-                );
-            }
-        }
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+            // 모든 작업들이 끝날 때까지 대기 후 한 번만 실행
+            .thenRun(() -> {
+                List<Outbox> updated = futures.stream()
+                    .map(CompletableFuture::join)
+                    .toList();
+
+                outboxRepository.saveAll(updated);
+            })
+            .exceptionally(ex -> {
+                log.error("Outbox 저장 중 에러 발생", ex);
+                return null;
+            });
     }
 }
+
