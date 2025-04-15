@@ -34,6 +34,9 @@ dependencies {
     implementation 'org.springframework.kafka:spring-kafka'
     testImplementation 'org.springframework.kafka:spring-kafka-test'
 
+    // redis
+    implementation 'org.redisson:redisson-spring-boot-starter:3.45.1'
+
     // thymeleaf
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
