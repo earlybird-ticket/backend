@@ -1,6 +1,5 @@
 package com.earlybird.ticket.venue.application.event.handler;
 
-import com.earlybird.ticket.venue.application.service.SeatService;
 import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.application.event.dto.request.SeatReturnPayload;
