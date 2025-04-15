@@ -8,7 +8,8 @@ import com.earlybird.ticket.reservation.common.exception.CustomJsonProcessingExc
 import com.earlybird.ticket.reservation.common.exception.NotFoundReservationException;
 import com.earlybird.ticket.reservation.common.exception.SeatAlreadyReservedException;
 import com.earlybird.ticket.reservation.common.util.EventPayloadConverter;
-import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatPayload;
+import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatDltEvent;
+import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatEvent;
 import com.earlybird.ticket.reservation.domain.dto.request.ReturnCouponEvent;
 import com.earlybird.ticket.reservation.domain.dto.request.ReturnSeatPayload;
 import com.earlybird.ticket.reservation.domain.dto.response.ReservationSearchResult;
@@ -23,26 +24,38 @@ import com.earlybird.ticket.reservation.domain.repository.ReservationRepository;
 import com.earlybird.ticket.reservation.domain.repository.ReservationSeatRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.ws.rs.InternalServerErrorException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.RedissonMultiLock;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import static com.earlybird.ticket.reservation.application.dto.CreateReservationCommand.SeatRequest;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReservationServiceImpl implements ReservationService {
     private final PassportUtil passportUtil;
     private final ReservationRepository reservationRepository;
     private final ReservationSeatRepository reservationSeatRepository;
     private final OutboxRepository outboxRepository;
     private final EventPayloadConverter eventPayloadConverter;
+    private final RedissonClient redissonClient;
 
+
+    //TODO::         validateReservationCommandsSeatInstanceId(createReservationCommands)을 삭제하고 Redis캐싱을 통해 이미 선점된 좌석인지 체크하고 락 획득
     @Override
     @Transactional
     public String createReservation(CreateReservationCommand createReservationCommands,
@@ -51,55 +64,120 @@ public class ReservationServiceImpl implements ReservationService {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         Long userId = passportDto.getUserId();
 
-        List<UUID> seatInstanceList = new ArrayList<>();
-        // 1. 좌석 예약 유무 확인
+        List<UUID> instanceSeatList = createReservationCommands.seatList()
+                                                               .stream()
+                                                               .map(SeatRequest::seatInstanceId)
+                                                               .toList();
+
+        // MultiRock 생성
+        List<RLock> seatLocks = instanceSeatList.stream()
+                                                .map(id -> redissonClient.getLock("lock:seatInstance:" + id))
+                                                .toList();
+
+        RedissonMultiLock multiLock = new RedissonMultiLock(seatLocks.toArray(new RLock[0]));
+
+        int maxAttempts = 3;
+        boolean locked = false;
+        Random random = new Random();
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                locked = multiLock.tryLock(3,
+                                           10,
+                                           TimeUnit.SECONDS);
+                if (locked)
+                    break;
+
+                log.warn("[Retry:{}] 좌석 락 획득 실패. 재시도 예정",
+                         attempt);
+                long sleepMillis = (long) (Math.pow(2,
+                                                    attempt) * 100L + random.nextInt(150));
+                Thread.sleep(sleepMillis);
+            } catch (InterruptedException e) {
+                Thread.currentThread()
+                      .interrupt();
+                throw new InternalServerErrorException("락 재시도 중 인터럽트 발생");
+            }
+        }
+        if (!locked) {
+            log.error("[DLT] 좌석 락 시도 3회 초과");
+            throw new SeatAlreadyReservedException();
+        }
         validateReservationCommandsSeatInstanceId(createReservationCommands);
 
-        // 2. 예약 생성
-        Reservation reservation = createReservation(createReservationCommands,
-                                                    userId);
-        reservation = reservationRepository.save(reservation);
+        try {
+            // 2. 예약 생성
+            Reservation reservation = createReservation(createReservationCommands,
+                                                        userId);
+            reservation = reservationRepository.save(reservation);
 
-        // 3. 예약 좌석 생성(기본적으로 예약된상태)
-        List<ReservationSeat> reservationSeatList = createReservationSeat(createReservationCommands,
-                                                                          reservation);
-        List<ReservationSeat> reservationSeats = reservationSeatRepository.saveAll(reservationSeatList);
-        reservationSeats.forEach(seat -> seatInstanceList.add(seat.getSeatInstanceId()));
+            // 3. 예약 좌석 생성(기본적으로 예약된상태)
+            List<ReservationSeat> reservationSeatList = createReservationSeat(createReservationCommands,
+                                                                              reservation);
+            reservationSeatRepository.saveAll(reservationSeatList);
 
 
-        // 4. 아웃박스 payload 생성 (seatInstanceIds를 한 번에)
-        if (seatInstanceList.isEmpty()) {
-            throw new NullPointerException();
-        }
-        PreemptSeatPayload payload = PreemptSeatPayload.createSeatPreemptPayload(seatInstanceList,
+            // 4. 아웃박스 payload 생성 (seatInstanceIds를 한 번에)
+            if (instanceSeatList.isEmpty()) {
+                throw new NullPointerException();
+            }
+
+            PreemptSeatEvent payload = PreemptSeatEvent.createSeatPreemptPayload(instanceSeatList,
                                                                                  userId,
                                                                                  passportDto);
 
-        Event<PreemptSeatPayload> event = new Event<>(EventType.SEAT_INSTANCE_PREEMPTION,
-                                                      payload,
-                                                      LocalDateTime.now()
-                                                                   .toString());
+            Event<PreemptSeatEvent> event = new Event<>(EventType.SEAT_INSTANCE_PREEMPTION,
+                                                        payload,
+                                                        LocalDateTime.now()
+                                                                     .toString());
 
-        String payloadJson;
-        try {
+            String payloadJson;
             payloadJson = new ObjectMapper().writeValueAsString(event);
+
+            // 5. Outbox 저장
+            // 동기 처리시에는 Outbox패턴이 아닌 커밋이전에 데이터를 발행하고 응답을 받아오는 방식으로 수행해야 함
+            Outbox outbox = Outbox.builder()
+                                  .aggregateType(Outbox.AggregateType.RESERVATION)
+                                  .aggregateId(reservation.getId())
+                                  .eventType(EventType.SEAT_INSTANCE_PREEMPTION)
+                                  .payload(payloadJson)
+                                  .build();
+
+            outboxRepository.save(outbox);
+
+            //6. 예약 ID값 반환
+            return reservation.getId()
+                              .toString();
         } catch (JsonProcessingException e) {
             throw new CustomJsonProcessingException();
+        } catch (Exception e) {
+            sendToDLT(instanceSeatList,
+                      passportDto);
+        } finally {
+            if (locked) {
+                multiLock.unlock();
+            }
         }
+        return null;
+    }
 
-        // 5. Outbox 저장
-        Outbox outbox = Outbox.builder()
-                              .aggregateType(Outbox.AggregateType.RESERVATION)
-                              .aggregateId(reservation.getId())
-                              .eventType(EventType.SEAT_INSTANCE_PREEMPTION)
-                              .payload(payloadJson)
-                              .build();
+    private void sendToDLT(List<UUID> instanceSeatList,
+                           PassportDto passportDto) {
+        Event<PreemptSeatDltEvent> preemptSeatDltEventEvent = new Event<>(EventType.RESERVATION_LOCK_FAIL,
+                                                                          PreemptSeatDltEvent.createSeatPreemptPayload(instanceSeatList,
+                                                                                                                       passportDto),
+                                                                          LocalDateTime.now()
+                                                                                       .toString());
+        String payload = eventPayloadConverter.serializePayload(preemptSeatDltEventEvent);
 
-        outboxRepository.save(outbox);
+        Outbox dltOutbox = Outbox.builder()
+                                 .aggregateId(instanceSeatList.get(0))
+                                 .aggregateType("DLT")
+                                 .eventType(EventType.RESERVATION_LOCK_FAIL)
+                                 .payload(payload)
+                                 .build();
 
-        //6. 예약 ID값 반환
-        return reservation.getId()
-                          .toString();
+        outboxRepository.save(dltOutbox);
+
     }
 
     @Override
@@ -165,9 +243,7 @@ public class ReservationServiceImpl implements ReservationService {
         outboxRepository.save(seatOutbox);
 
         reservation.delete(passportDto.getUserId());
-        reservationSeatList.forEach(seat -> {
-            seat.delete(passportDto.getUserId());
-        });
+        reservationSeatList.forEach(seat -> seat.delete(passportDto.getUserId()));
 
     }
 
@@ -198,22 +274,6 @@ public class ReservationServiceImpl implements ReservationService {
                                                             endTime,
                                                             pageable,
                                                             passportDto);
-
-    }
-
-
-    private void validateReservationCommandsSeatInstanceId(CreateReservationCommand createReservationCommands) {
-        //해당 좌석이 FREE가 아닌 상태가 있다면
-        createReservationCommands.seatList()
-                                 .forEach(seatRequest -> {
-                                     boolean isSeatReservationExist = reservationSeatRepository.existsBySeatInstanceIdAndSeatStatusNotFREE(seatRequest.seatInstanceId(),
-                                                                                                                                           SeatStatus.FREE);
-
-                                     //예외 발생
-                                     if (isSeatReservationExist) {
-                                         throw new SeatAlreadyReservedException();
-                                     }
-                                 });
 
     }
 
@@ -252,5 +312,20 @@ public class ReservationServiceImpl implements ReservationService {
                                                                                                  seatCommand.seatGrade(),
                                                                                                  seatCommand.seatPrice()))
                                        .toList();
+    }
+
+    private void validateReservationCommandsSeatInstanceId(CreateReservationCommand createReservationCommands) {
+        //해당 좌석이 FREE가 아닌 상태가 있다면
+        createReservationCommands.seatList()
+                                 .forEach(seatRequest -> {
+                                     boolean isSeatReservationExist = reservationSeatRepository.existsBySeatInstanceIdAndSeatStatusNotFREE(seatRequest.seatInstanceId(),
+                                                                                                                                           SeatStatus.FREE);
+
+                                     //예외 발생
+                                     if (isSeatReservationExist) {
+                                         throw new SeatAlreadyReservedException();
+                                     }
+                                 });
+
     }
 }

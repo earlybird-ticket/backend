@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,10 +30,22 @@ public class ReserveCouponPayloadHandler implements EventHandler<CouponReservePa
 
     private final ReservationRepository reservationRepository;
     private final OutboxRepository outboxRepository;
+    private final RedissonClient redissonClient;
 
     @Override
     @Transactional
     public void handle(Event<CouponReservePayload> event) {
+        String cacheKey = "TIME_LIMIT:RESERVATION_ID:" + event.getPayload()
+                                                              .reservationList()
+                                                              .get(0);
+
+        if (!redissonClient.getBucket(cacheKey)
+                           .isExists()) {
+            log.error("이미 만료된 선점");
+            //TODO:: 어떻게처리...?
+            return;
+
+        }
         log.info("[CouponEventHandler] 이벤트 수신: {}",
                  event);
 

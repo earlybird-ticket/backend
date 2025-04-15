@@ -1,6 +1,8 @@
 package com.earlybird.ticket.reservation.infrastructure.messaging.config;
 
+import com.earlybird.ticket.reservation.common.exception.NonRecoverableReservationException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -9,7 +11,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
+import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.ExponentialBackOffWithMaxRetries;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import java.util.HashMap;
@@ -67,14 +73,41 @@ public class KafkaConsumerConfig {
     }
 
     @Bean(name = "kafkaListenerContainerFactory")
-    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(DefaultErrorHandler defaultErrorHandler) {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
 
         // 메시지 처리 완료 즉시 커밋 (중복 방지)
         factory.getContainerProperties()
                .setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
+        factory.setCommonErrorHandler(defaultErrorHandler);
 
         return factory;
+    }
+
+    @Bean
+    public DefaultErrorHandler errorHandler(KafkaTemplate<String, String> kafkaTemplate) {
+        // DLQ 설정
+        DeadLetterPublishingRecoverer recoverer = new DeadLetterPublishingRecoverer(kafkaTemplate,
+                                                                                    (record, ex) -> {
+                                                                                        // 원본 토픽 이름에 .DLT 접미사 추가
+                                                                                        return new TopicPartition(record.topic() + ".DLT",
+                                                                                                                  record.partition());
+                                                                                    });
+        // 지터를 포함한 지수 백오프 설정 (최대 5회)
+        ExponentialBackOffWithMaxRetries backoff = new ExponentialBackOffWithMaxRetries(3);
+        backoff.setInitialInterval(2000); // 2초
+        backoff.setMultiplier(2.0);       // 2배씩 증가
+        backoff.setMaxInterval(10000);    // 최대 10초
+
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer,
+                                                                   backoff);
+
+        // 특정 예외는 재시도하지 않고 바로 DLQ로 보내고 싶을 때
+        // 이 예외는 재시도 하지 않고 바로 DLQ로 보냄
+        errorHandler.addNotRetryableExceptions(NonRecoverableReservationException.class,
+                                               IllegalArgumentException.class);
+
+        return errorHandler;
     }
 }

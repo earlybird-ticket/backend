@@ -13,27 +13,27 @@ import java.util.UUID;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ConfirmSeatEvent implements EventPayload {
+public class PreemptSeatEvent implements EventPayload {
 
     private List<UUID> seatInstanceList;
-    private UUID reservationId;
-    private PassportDto passportDto;
+    private Passport passportDto;
 
     @Builder
-    public ConfirmSeatEvent(List<UUID> seatInstanceList,
-                            UUID reservationId,
-                            PassportDto passportDto) {
+    public PreemptSeatEvent(List<UUID> seatInstanceList,
+                            Long userId,
+                            Role role) {
         this.seatInstanceList = seatInstanceList;
-        this.passportDto = passportDto;
+        this.passportDto = new Passport(userId,
+                                        role);
     }
 
-    public static ConfirmSeatEvent createSeatPreemptPayload(List<UUID> seatInstanceIds,
-                                                            UUID reservationId,
+    public static PreemptSeatEvent createSeatPreemptPayload(List<UUID> seatInstanceIds,
+                                                            Long userId,
                                                             PassportDto passportDto) {
-        return ConfirmSeatEvent.builder()
+        return PreemptSeatEvent.builder()
                                .seatInstanceList(seatInstanceIds)
-                               .reservationId(reservationId)
-                               .passportDto(passportDto)
+                               .userId(userId)
+                               .role(Role.from(passportDto.getUserRole()))
                                .build();
     }
 

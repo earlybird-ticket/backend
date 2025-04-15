@@ -56,4 +56,6 @@ public class ReservationSeatRepositoryImpl implements ReservationSeatRepository 
                                                                 pageable,
                                                                 passportDto);
     }
+
+
 }
