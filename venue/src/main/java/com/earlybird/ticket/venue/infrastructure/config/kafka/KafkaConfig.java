@@ -15,7 +15,7 @@ public class KafkaConfig {
      */
     @Bean
     public NewTopic seatToReservation() {
-        return new NewTopic("seatToReservation", 1, (short) 3);
+        return new NewTopic("SeatToReservation", 1, (short) 3);
     }
 
     /**
@@ -24,7 +24,7 @@ public class KafkaConfig {
      */
     @Bean
     public NewTopic seatToReservationForPreemption() {
-        return new NewTopic("seatToReservationForPreemption", 1, (short) 3);
+        return new NewTopic("SeatToReservationForPreemption", 1, (short) 3);
     }
 
     /**
@@ -32,7 +32,7 @@ public class KafkaConfig {
      */
     @Bean
     public NewTopic seatToReservationDlq() {
-        return new NewTopic("seatToReservation.DLT", 1, (short) 3);
+        return new NewTopic("SeatToReservation.DLT", 1, (short) 3);
     }
 
     /**
@@ -40,6 +40,6 @@ public class KafkaConfig {
      */
     @Bean
     public NewTopic seatToReservationForPreemptionDlq() {
-        return new NewTopic("seatToReservationForPreemption.DLT", 1, (short) 3);
+        return new NewTopic("SeatToReservationForPreemption.DLT", 1, (short) 3);
     }
 }
