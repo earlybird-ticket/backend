@@ -11,7 +11,7 @@ import com.earlybird.ticket.reservation.common.util.EventPayloadConverter;
 import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatDltEvent;
 import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatEvent;
 import com.earlybird.ticket.reservation.domain.dto.request.ReturnCouponEvent;
-import com.earlybird.ticket.reservation.domain.dto.request.ReturnSeatPayload;
+import com.earlybird.ticket.reservation.domain.dto.request.ReturnSeatEvent;
 import com.earlybird.ticket.reservation.domain.dto.response.ReservationSearchResult;
 import com.earlybird.ticket.reservation.domain.entity.Event;
 import com.earlybird.ticket.reservation.domain.entity.Outbox;
@@ -221,15 +221,15 @@ public class ReservationServiceImpl implements ReservationService {
         outboxRepository.save(couponOutbox);
 
 
-        Event<ReturnSeatPayload> returnSeatPayloadEvent = new Event<>(EventType.SEAT_INSTANCE_RETURN,
-                                                                      ReturnSeatPayload.builder()
-                                                                                       .seatInstanceList(reservationSeatList.stream()
-                                                                                                                            .map(ReservationSeat::getId)
-                                                                                                                            .toList())
-                                                                                       .passportDto(passportDto)
-                                                                                       .build(),
-                                                                      LocalDateTime.now()
-                                                                                   .toString());
+        Event<ReturnSeatEvent> returnSeatPayloadEvent = new Event<>(EventType.SEAT_INSTANCE_RETURN,
+                                                                    ReturnSeatEvent.builder()
+                                                                                   .seatInstanceList(reservationSeatList.stream()
+                                                                                                                        .map(ReservationSeat::getId)
+                                                                                                                        .toList())
+                                                                                   .passportDto(passportDto)
+                                                                                   .build(),
+                                                                    LocalDateTime.now()
+                                                                                 .toString());
         //TODO :: serialize한 변수들 이름 일치시키기
         String payloadRecord = eventPayloadConverter.serializePayload(returnSeatPayloadEvent);
 

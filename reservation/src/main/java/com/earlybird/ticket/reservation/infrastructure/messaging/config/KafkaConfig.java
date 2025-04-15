@@ -44,5 +44,33 @@ public class KafkaConfig {
                             (short) 3);
     }
 
+    @Bean
+    public NewTopic seatToReservationForPreemptionDlt() {
+        return new NewTopic("SeatToReservationForPreemption.DLT",
+                            1,
+                            (short) 3);
+    }
+
+    @Bean
+    public NewTopic reservationToCouponDlt() {
+        return new NewTopic("ReservationToCoupon.DLT",
+                            1,
+                            (short) 3);
+    }
+
+    @Bean
+    public NewTopic paymentToReservationDlt() {
+        return new NewTopic("PaymentToReservation.DLT",
+                            1,
+                            (short) 3);
+    }
+
+    @Bean
+    public NewTopic createReservationDlt() {
+        return new NewTopic("CreateReservation.DLT",
+                            1,
+                            (short) 3);
+    }
+
 
 }

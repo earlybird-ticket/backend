@@ -16,14 +16,16 @@ public enum EventType {
                           Topic.RESERVATION_TO_SEAT),
     SEAT_INSTANCE_PREEMPTION(PreemptSeatEvent.class,
                              Topic.RESERVATION_TO_SEAT_FOR_PREEMPTION),
-    SEAT_INSTANCE_RETURN(ReturnSeatPayload.class,
+    SEAT_INSTANCE_RETURN(ReturnSeatEvent.class,
                          Topic.RESERVATION_TO_SEAT),
-    COUPON_RETURN(ReturnCouponPayload.class,
+    COUPON_RETURN(ReturnCouponEvent.class,
                   Topic.RESERVATION_TO_COUPON),
-    COUPON_CONFIRM(CouponReservePayload.class,
+    COUPON_CONFIRM(ConfirmCouponEvent.class,
                    Topic.RESERVATION_TO_COUPON),
     COUPON_FAIL(ReturnCouponEvent.class,
                 Topic.RESERVATION_TO_COUPON),
+    COUPON_SUCCESS(SuccessCouponEvent.class,
+                   Topic.RESERVATION_TO_COUPON),
     //consume,
     SEAT_PREEMPT_SUCCESS(SeatPreemptSuccessPayload.class,
                          Topic.SEAT_TO_RESERVATION_FOR_PREEMPT_TOPIC),
@@ -37,12 +39,12 @@ public enum EventType {
                      Topic.SEAT_TO_RESERVATION_FOR_PREEMPT_TOPIC),
     SEAT_CONFIRM_FAIL(SeatConfirmFailPayload.class,
                       Topic.SEAT_TO_RESERVATION_FOR_PREEMPT_TOPIC),
-    COUPON_SUCCESS(CouponReservePayload.class,
-                   Topic.RESERVATION_TO_COUPON),
+    COUPON_RESERVE(CouponReservePayload.class,
+                   Topic.COUPON_TO_RESERVATION),
     PAYMENT_SUCCESS(PaymentSuccessPayload.class,
                     Topic.PAYMENT_TO_RESERVATION),
     RESERVATION_LOCK_FAIL(PreemptSeatDltEvent.class,
-                          "CreateReservation.DLT");
+                          Topic.CREATE_RESERVATION_DLT);
 
 
     private final Class<? extends EventPayload> payloadClass;
@@ -66,6 +68,8 @@ public enum EventType {
         public static final String PAYMENT_TO_RESERVATION = "PaymentToReservation";
         public static final String RESERVATION_TO_COUPON = "ReservationToCoupon";
         public static final String SEAT_TO_RESERVATION_FOR_PREEMPT_TOPIC = "SeatToReservationForPreemption";
+        public static final String COUPON_TO_RESERVATION = "CouponToReservation";
+        public static final String CREATE_RESERVATION_DLT = "CreateReservation.DLT";
 
 
     }
