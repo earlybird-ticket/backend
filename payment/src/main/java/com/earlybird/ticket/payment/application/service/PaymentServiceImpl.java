@@ -119,8 +119,8 @@ public class PaymentServiceImpl implements PaymentService {
         log.info("가격 검증 성공");
     }
 
-    private void validateReservationTimedOut(UUID payment) {
-        if (temporaryStore.isTimedOut(payment)) {
+    private void validateReservationTimedOut(UUID reservationId) {
+        if (temporaryStore.isTimedOut(reservationId)) {
             throw new PaymentTimeoutException();
         }
     }
