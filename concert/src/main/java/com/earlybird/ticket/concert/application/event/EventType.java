@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public enum EventType {
 
-    CONCERT_CREATE_SUCCESS(ConcertCreateSuccessEvent.class, Topic.CONCERT_TO_VENUE);
+    SEAT_INSTANCE_CREATE(ConcertCreateSuccessEvent.class, Topic.CONCERT_TO_SEAT_TOPIC);
 
     private final Class<? extends EventPayload> payloadClass;
     private final String topic;
@@ -27,7 +27,7 @@ public enum EventType {
 
     private static class Topic {
 
-        public static final String CONCERT_TO_VENUE = "ConcertToVenue";
+        public static final String CONCERT_TO_SEAT_TOPIC = "ConcertToVenue";
 
     }
 }
