@@ -28,15 +28,7 @@ public class ConfirmSeatSuccessPayloadHandler implements EventHandler<SeatConfir
     public void handle(Event<SeatConfirmSuccessPayload> event) {
         SeatConfirmSuccessPayload payload = event.getPayload();
         UUID reservationId = payload.reservationId();
-        String cacheKey = "TIME_LIMIT:RESERVATION_ID:" + reservationId;
 
-        if (!redissonClient.getBucket(cacheKey)
-                           .isExists()) {
-            log.error("이미 만료된 선점");
-            //TODO:: 어떻게처리...?
-            return;
-
-        }
         List<ReservationSeat> seatIntanceList = reservationSeatRepository.findAllBySeatInstaceIdIn(payload.seatInstanceIdList());
         log.info("Received UUID List: {}",
                  payload.seatInstanceIdList());

@@ -28,15 +28,7 @@ public class PreemptSeatSuccessPayloadHandler implements EventHandler<SeatPreemp
     public void handle(Event<SeatPreemptSuccessPayload> event) {
         SeatPreemptSuccessPayload payload = event.getPayload();
         UUID reservationId = payload.reservationId();
-        String cacheKey = "TIME_LIMIT:RESERVATION_ID:" + reservationId;
 
-        if (!redissonClient.getBucket(cacheKey)
-                           .isExists()) {
-            log.error("이미 만료된 선점");
-            //TODO:: 어떻게처리...?
-            return;
-
-        }
         log.info("payload = {} ",
                  payload);
 

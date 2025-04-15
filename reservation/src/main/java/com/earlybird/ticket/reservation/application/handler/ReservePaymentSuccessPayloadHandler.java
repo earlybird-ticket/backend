@@ -42,15 +42,7 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
         PaymentSuccessPayload payload = event.getPayload();
         UUID reservationId = payload.reservationId();
         PassportDto passportDto = payload.passportDto();
-        String cacheKey = "TIME_LIMIT:RESERVATION_ID:" + reservationId;
 
-        if (!redissonClient.getBucket(cacheKey)
-                           .isExists()) {
-            log.error("이미 만료된 선점");
-            //TODO:: 어떻게처리...?
-            return;
-
-        }
 
         Reservation reservation = reservationRepository.findById(reservationId)
                                                        .orElseThrow(NotFoundReservationException::new);

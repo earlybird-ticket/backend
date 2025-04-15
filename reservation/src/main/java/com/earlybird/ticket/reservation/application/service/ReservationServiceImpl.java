@@ -54,6 +54,8 @@ public class ReservationServiceImpl implements ReservationService {
     private final EventPayloadConverter eventPayloadConverter;
     private final RedissonClient redissonClient;
 
+
+    //TODO::         validateReservationCommandsSeatInstanceId(createReservationCommands)을 삭제하고 Redis캐싱을 통해 이미 선점된 좌석인지 체크하고 락 획득
     @Override
     @Transactional
     public String createReservation(CreateReservationCommand createReservationCommands,
@@ -98,10 +100,9 @@ public class ReservationServiceImpl implements ReservationService {
         }
         if (!locked) {
             log.error("[DLT] 좌석 락 시도 3회 초과");
-            sendToDLT(instanceSeatList,
-                      passportDto);
+            throw new SeatAlreadyReservedException();
         }
-        //        validateReservationCommandsSeatInstanceId(createReservationCommands);
+        validateReservationCommandsSeatInstanceId(createReservationCommands);
 
         try {
             // 2. 예약 생성
@@ -147,11 +148,15 @@ public class ReservationServiceImpl implements ReservationService {
                               .toString();
         } catch (JsonProcessingException e) {
             throw new CustomJsonProcessingException();
+        } catch (Exception e) {
+            sendToDLT(instanceSeatList,
+                      passportDto);
         } finally {
             if (locked) {
                 multiLock.unlock();
             }
         }
+        return null;
     }
 
     private void sendToDLT(List<UUID> instanceSeatList,
