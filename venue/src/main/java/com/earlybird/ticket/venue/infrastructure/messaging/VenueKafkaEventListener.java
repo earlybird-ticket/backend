@@ -1,7 +1,6 @@
 package com.earlybird.ticket.venue.infrastructure.messaging;
 
 import com.earlybird.ticket.common.entity.EventPayload;
-import com.earlybird.ticket.venue.common.exception.JsonDeserializationException;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.application.event.dispatcher.EventDispatcher;
@@ -27,15 +26,12 @@ public class VenueKafkaEventListener {
             eventDispatcher.handle(event);
             ack.acknowledge();
 
-        } catch (JsonDeserializationException e) {
-            log.error("메시지 처리 실패: {}", e.getMessage());
-            ack.acknowledge();
-
         } catch (Exception e) {
             log.error("메시지 처리 실패: {}", e.getMessage());
-            ack.acknowledge();
-            // 재처리 로직
+            throw e;
         }
     }
+
+    // TODO : 추후 DLT 처리 로직 추가
 
 }
