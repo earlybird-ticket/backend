@@ -71,6 +71,8 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
         //1. hallId가 같은 모든 좌석 조회
         List<Seat> seatList = seatRepository.findSeatByHallId(seatInstanceCreatePayload.hallId());
 
+        checkSeatListExists(seatList);
+
         //2. 모든 좌석에 대해서 concertSequenceList만큼 반복
         for (UUID concertSequenceId : seatInstanceCreatePayload.concertSequenceList()) {
             for (Seat seat : seatList) {
@@ -99,9 +101,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
         //1. seatInstance 가져오기
         Seat seat = seatRepository.findSeatBySeatInstanceId(seatInstanceUpdatePayload.seatInstanceId());
 
-        if(seat == null) {
-            throw new SeatNotFoundException();
-        }
+        checkSeatExist(seat);
 
         //2. seatInstance 업데이트
         seat.updateSeatInstance(
@@ -122,6 +122,9 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
     public void deleteSeatInstance(SeatInstanceDeletePayload seatInstanceDeletePayload) {
         //1. seatInstance 가져오기
         Seat seat = seatRepository.findSeatBySeatInstanceId(seatInstanceDeletePayload.seatInstanceId());
+
+        checkSeatExist(seat);
+
         //2. seatInstance delete 업데이트
         seat.deleteSeatInstance(
                 seatInstanceDeletePayload.seatInstanceId(),
@@ -221,14 +224,6 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
         }
     }
 
-    private void checkExpiredReservationTime(UUID reservationId) {
-        RBucket<String> bucket = redissonClient.getBucket(timeCachePrefix + reservationId);
-
-        if(!bucket.isExists()) {
-            throw new TimeOutException();
-        }
-    }
-
     @Override
     @Transactional
     public void returnSeat(SeatReturnPayload seatReturnPayload) {
@@ -291,6 +286,14 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
         );
     }
 
+    private void checkExpiredReservationTime(UUID reservationId) {
+        RBucket<String> bucket = redissonClient.getBucket(timeCachePrefix + reservationId);
+
+        if(!bucket.isExists()) {
+            throw new TimeOutException();
+        }
+    }
+
     private List<Seat> getSeatList(List<UUID> seatInstanceIdList) {
         // 1. seatInstanceId와 일치하는 seat 가져오기
         List<Seat> seatList = seatRepository.findSeatListWithSeatInstanceInSeatInstanceIdList(seatInstanceIdList);
@@ -300,5 +303,17 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
             throw new SeatNotFoundException();
         }
         return seatList;
+    }
+
+    private void checkSeatExist(Seat seat) {
+        if(seat == null)  {
+            throw new SeatNotFoundException();
+        }
+    }
+
+    private void checkSeatListExists(List<Seat> seatList) {
+        if(seatList.isEmpty()) {
+            throw new SeatNotFoundException();
+        }
     }
 }

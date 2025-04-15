@@ -32,6 +32,4 @@ public class VenueKafkaEventListener {
         }
     }
 
-    // TODO : 추후 DLT 처리 로직 추가
-
 }
