@@ -10,5 +10,6 @@ import java.util.UUID;
 @Builder
 public record SeatConfirmSuccessPayload(List<UUID> seatInstanceIdList,
                                         PassportDto passport,
+                                        UUID reservationId,
                                         String code) implements EventPayload {
 }

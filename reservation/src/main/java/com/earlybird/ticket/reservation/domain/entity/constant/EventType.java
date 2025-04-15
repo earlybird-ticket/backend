@@ -14,7 +14,7 @@ public enum EventType {
     //produce
     SEAT_INSTANCE_CONFIRM(ConfirmSeatEvent.class,
                           Topic.RESERVATION_TO_SEAT),
-    SEAT_INSTANCE_PREEMPTION(PreemptSeatPayload.class,
+    SEAT_INSTANCE_PREEMPTION(PreemptSeatEvent.class,
                              Topic.RESERVATION_TO_SEAT_FOR_PREEMPTION),
     SEAT_INSTANCE_RETURN(ReturnSeatPayload.class,
                          Topic.RESERVATION_TO_SEAT),
@@ -40,7 +40,9 @@ public enum EventType {
     COUPON_SUCCESS(CouponReservePayload.class,
                    Topic.RESERVATION_TO_COUPON),
     PAYMENT_SUCCESS(PaymentSuccessPayload.class,
-                    Topic.PAYMENT_TO_RESERVATION);
+                    Topic.PAYMENT_TO_RESERVATION),
+    RESERVATION_LOCK_FAIL(PreemptSeatDltEvent.class,
+                          "CreateReservation.DLT");
 
 
     private final Class<? extends EventPayload> payloadClass;
@@ -63,7 +65,6 @@ public enum EventType {
         public static final String RESERVATION_TO_SEAT = "ReservationToSeat";
         public static final String PAYMENT_TO_RESERVATION = "PaymentToReservation";
         public static final String RESERVATION_TO_COUPON = "ReservationToCoupon";
-        public static final String SEAT_RESERVE_TOPIC = "SeatToReservation";
         public static final String SEAT_TO_RESERVATION_FOR_PREEMPT_TOPIC = "SeatToReservationForPreemption";
 
 

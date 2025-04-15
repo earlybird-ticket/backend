@@ -31,8 +31,8 @@ public enum Code {
                 HttpStatus.BAD_REQUEST),
     NOT_FOUND("G04",
               HttpStatus.NOT_FOUND),
-    CONFLICT("G05",
-             HttpStatus.CONFLICT),
+    CONFLICT("G05", HttpStatus.CONFLICT),
+    TIMEOUT("G06", HttpStatus.REQUEST_TIMEOUT),
 
     // 🔄 Feign 에러
     FEIGN_BAD_REQUEST("F01",

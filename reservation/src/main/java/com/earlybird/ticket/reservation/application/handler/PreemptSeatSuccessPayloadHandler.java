@@ -8,6 +8,7 @@ import com.earlybird.ticket.reservation.domain.entity.constant.EventType;
 import com.earlybird.ticket.reservation.domain.repository.ReservationSeatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,12 +20,13 @@ import java.util.List;
 public class PreemptSeatSuccessPayloadHandler implements EventHandler<SeatPreemptSuccessPayload> {
 
     private final ReservationSeatRepository reservationSeatRepository;
+    private final RedissonClient redissonClient;
 
     @Override
     @Transactional
     public void handle(Event<SeatPreemptSuccessPayload> event) {
         SeatPreemptSuccessPayload payload = event.getPayload();
-        log.info("event 수행 !!!!!!!!!");
+
         log.info("payload = {} ",
                  payload);
 

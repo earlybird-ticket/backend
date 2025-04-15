@@ -32,7 +32,6 @@ public class PaymentExternalController {
         @RequestBody CreatePaymentRequest paymentRequest
     ) {
         UUID paymentId = paymentService.createPayment(paymentRequest.toCreatePaymentCommand());
-        //TODO: 결제 아이디 반환
         GetPaymentIdResponse getPaymentIdResponse = new GetPaymentIdResponse(paymentId);
         return ResponseEntity.ok(CommonDto.ok(getPaymentIdResponse, "결제 생성 성공"));
     }
@@ -41,6 +40,7 @@ public class PaymentExternalController {
     public ResponseEntity<CommonDto<FindPaymentResponse>> findPayment(
         @PathVariable(name = "paymentId") UUID paymentId
     ) {
+        // TODO : Redis 결제 타임아웃 검증
         FindPaymentQuery payment = paymentService.findPayment(paymentId);
         return ResponseEntity.ok(CommonDto.ok(FindPaymentResponse.of(payment), "조회 성공"));
     }
@@ -49,6 +49,7 @@ public class PaymentExternalController {
     public ResponseEntity<CommonDto<Void>> confirmPayment(
         @RequestBody ConfirmPaymentRequest paymentRequest
     ) {
+        // TODO : Redis 결제 타임아웃 검증
         log.info("confirmPayment = {}", paymentRequest);
         paymentService.confirmPayment(paymentRequest.toConfirmPaymentCommand());
 

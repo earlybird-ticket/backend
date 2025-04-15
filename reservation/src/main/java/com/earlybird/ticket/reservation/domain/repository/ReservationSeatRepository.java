@@ -28,4 +28,5 @@ public interface ReservationSeatRepository {
                                                      String endTime,
                                                      Pageable pageable,
                                                      PassportDto passportDto);
+
 }

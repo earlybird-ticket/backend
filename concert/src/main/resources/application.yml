@@ -3,6 +3,8 @@ spring:
     name: concert
   config:
     import: optional:file:.env[.properties]
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST}:${KAFKA_PORT}
   jpa:
     hibernate:
       ddl-auto: update

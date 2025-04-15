@@ -15,4 +15,5 @@ public interface ReservationSeatJpaRepository extends JpaRepository<ReservationS
                                                SeatStatus free);
 
     List<ReservationSeat> findByReservation(Reservation reservation);
+
 }

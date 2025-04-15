@@ -13,4 +13,9 @@ public class KafkaConfig {
     public NewTopic seatToReservation() {
         return new NewTopic("paymentToReservation", 1, (short) 3);
     }
+
+    @Bean
+    public NewTopic seatToReservationDLT() {
+        return new NewTopic("paymentToReservation.DLT", 1, (short) 3);
+    }
 }
