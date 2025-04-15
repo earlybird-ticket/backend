@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.UUID;
 
 public record SeatPreemptPayload(
+        PassportDto passportDto,
         List<UUID> seatInstanceIdList,
-        PassportDto passportDto
+        UUID reservationId
 ) implements EventPayload {
 }
