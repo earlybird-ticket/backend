@@ -16,24 +16,25 @@ import java.util.UUID;
 public class PreemptSeatEvent implements EventPayload {
 
     private List<UUID> seatInstanceList;
-    private Passport passportDto;
+    private PassportDto passportDto;
+    private UUID reservationId;
 
     @Builder
     public PreemptSeatEvent(List<UUID> seatInstanceList,
-                            Long userId,
-                            Role role) {
+                            PassportDto passportDto,
+                            UUID reservationId) {
         this.seatInstanceList = seatInstanceList;
-        this.passportDto = new Passport(userId,
-                                        role);
+        this.passportDto = passportDto;
+        this.reservationId = reservationId;
     }
 
     public static PreemptSeatEvent createSeatPreemptPayload(List<UUID> seatInstanceIds,
-                                                            Long userId,
-                                                            PassportDto passportDto) {
+                                                            PassportDto passportDto,
+                                                            UUID reservationId) {
         return PreemptSeatEvent.builder()
                                .seatInstanceList(seatInstanceIds)
-                               .userId(userId)
-                               .role(Role.from(passportDto.getUserRole()))
+                               .passportDto(passportDto)
+                               .reservationId(reservationId)
                                .build();
     }
 

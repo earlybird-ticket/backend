@@ -16,8 +16,8 @@ import java.util.UUID;
 public class ConfirmSeatEvent implements EventPayload {
 
     private List<UUID> seatInstanceList;
-    private UUID reservationId;
     private PassportDto passportDto;
+    private UUID reservationId;
 
     @Builder
     public ConfirmSeatEvent(List<UUID> seatInstanceList,
@@ -25,16 +25,7 @@ public class ConfirmSeatEvent implements EventPayload {
                             PassportDto passportDto) {
         this.seatInstanceList = seatInstanceList;
         this.passportDto = passportDto;
-    }
-
-    public static ConfirmSeatEvent createSeatPreemptPayload(List<UUID> seatInstanceIds,
-                                                            UUID reservationId,
-                                                            PassportDto passportDto) {
-        return ConfirmSeatEvent.builder()
-                               .seatInstanceList(seatInstanceIds)
-                               .reservationId(reservationId)
-                               .passportDto(passportDto)
-                               .build();
+        this.reservationId = reservationId;
     }
 
     @Getter

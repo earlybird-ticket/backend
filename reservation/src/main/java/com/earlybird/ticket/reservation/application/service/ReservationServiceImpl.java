@@ -122,10 +122,10 @@ public class ReservationServiceImpl implements ReservationService {
             }
 
             PreemptSeatEvent payload = PreemptSeatEvent.createSeatPreemptPayload(instanceSeatList,
-                                                                                 userId,
-                                                                                 passportDto);
+                                                                                 passportDto,
+                                                                                 reservation.getId());
 
-            Event<PreemptSeatEvent> event = new Event<>(EventType.SEAT_INSTANCE_PREEMPTION,
+            Event<PreemptSeatEvent> event = new Event<>(EventType.SEAT_PREEMPT,
                                                         payload,
                                                         LocalDateTime.now()
                                                                      .toString());
@@ -138,7 +138,7 @@ public class ReservationServiceImpl implements ReservationService {
             Outbox outbox = Outbox.builder()
                                   .aggregateType(Outbox.AggregateType.RESERVATION)
                                   .aggregateId(reservation.getId())
-                                  .eventType(EventType.SEAT_INSTANCE_PREEMPTION)
+                                  .eventType(EventType.SEAT_PREEMPT)
                                   .payload(payloadJson)
                                   .build();
 
@@ -221,7 +221,7 @@ public class ReservationServiceImpl implements ReservationService {
         outboxRepository.save(couponOutbox);
 
 
-        Event<ReturnSeatEvent> returnSeatPayloadEvent = new Event<>(EventType.SEAT_INSTANCE_RETURN,
+        Event<ReturnSeatEvent> returnSeatPayloadEvent = new Event<>(EventType.SEAT_RETURN,
                                                                     ReturnSeatEvent.builder()
                                                                                    .seatInstanceList(reservationSeatList.stream()
                                                                                                                         .map(ReservationSeat::getId)
@@ -236,7 +236,7 @@ public class ReservationServiceImpl implements ReservationService {
         Outbox seatOutbox = Outbox.builder()
                                   .aggregateId(reservation.getId())
                                   .aggregateType("RESERVATION")
-                                  .eventType(EventType.SEAT_INSTANCE_RETURN)
+                                  .eventType(EventType.SEAT_RETURN)
                                   .payload(payloadRecord)
                                   .build();
 

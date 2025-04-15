@@ -72,5 +72,12 @@ public class KafkaConfig {
                             (short) 3);
     }
 
+    @Bean
+    public NewTopic seatToReservation() {
+        return new NewTopic("SeatToReservation",
+                            1,
+                            (short) 3);
+    }
+
 
 }

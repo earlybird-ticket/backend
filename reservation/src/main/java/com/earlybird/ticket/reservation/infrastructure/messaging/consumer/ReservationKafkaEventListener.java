@@ -19,7 +19,7 @@ import static com.earlybird.ticket.reservation.domain.entity.constant.EventType.
 public class ReservationKafkaEventListener {
     private final EventDispatcher eventDispatcher;
 
-    @KafkaListener(topics = {"SeatToReservationForPreemption.DLT", RESERVATION_TO_COUPON, PAYMENT_TO_RESERVATION, SEAT_TO_RESERVATION_FOR_PREEMPT_TOPIC}, containerFactory = "kafkaListenerContainerFactory")
+    @KafkaListener(topics = {CREATE_RESERVATION_DLT, RESERVATION_TO_COUPON_TOPIC, PAYMENT_TO_RESERVATION_TOPIC, SEAT_TO_RESERVATION_FOR_PREEMPT_TOPIC, SEAT_TO_RESERVATION_TOPIC}, containerFactory = "kafkaListenerContainerFactory")
     public void listen(@Payload String message,
                        Acknowledgment ack) {
         try {
