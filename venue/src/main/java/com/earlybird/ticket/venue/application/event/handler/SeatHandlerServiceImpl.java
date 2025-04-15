@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -134,11 +133,14 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
     @Override
     @Transactional
     public void preemptSeat(SeatPreemptPayload seatPreemptPayload) {
-
         List<UUID> seatInstanceIdList = seatPreemptPayload.seatInstanceIdList();
 
         try {
-            RBucket<String> bucket = checkExpiredReservationTime(seatPreemptPayload.reservationId());
+            if(seatPreemptPayload.reservationId() == null) {
+                throw new IllegalArgumentException("reservationId is null");
+            }
+
+            RBucket<String> bucket = redissonClient.getBucket(timeCachePrefix + seatPreemptPayload.reservationId());
 
             List<Seat> seatList = getSeatList(seatInstanceIdList);
 
@@ -158,7 +160,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                     EventType.SEAT_PREEMPT_SUCCESS
             );
 
-            bucket.set(timeCachePrefix + seatPreemptPayload.reservationId(), Duration.ofMinutes(10));
+            bucket.setIfAbsent(timeCachePrefix + seatPreemptPayload.reservationId(), Duration.ofMinutes(10));
 
         } catch (Exception e) {
             log.error("메시지 처리 실패: {}", e.getMessage());
@@ -173,7 +175,6 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                     EventType.SEAT_PREEMPT_FAIL
             );
         }
-
 
     }
 
@@ -220,14 +221,12 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
         }
     }
 
-    private RBucket<String> checkExpiredReservationTime(UUID reservationId) {
+    private void checkExpiredReservationTime(UUID reservationId) {
         RBucket<String> bucket = redissonClient.getBucket(timeCachePrefix + reservationId);
 
         if(!bucket.isExists()) {
             throw new TimeOutException();
         }
-
-        return bucket;
     }
 
     @Override
