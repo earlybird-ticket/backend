@@ -9,6 +9,5 @@ import java.util.UUID;
 
 @Builder
 public record SeatPreemptSuccessPayload(List<UUID> seatInstanceIdList,
-                                        UUID reservationId,
                                         PassportDto passportDto) implements EventPayload {
 }

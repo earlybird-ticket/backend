@@ -16,24 +16,24 @@ import java.util.UUID;
 public class ConfirmSeatEvent implements EventPayload {
 
     private List<UUID> seatInstanceList;
-    private Passport passportDto;
+    private UUID reservationId;
+    private PassportDto passportDto;
 
     @Builder
     public ConfirmSeatEvent(List<UUID> seatInstanceList,
-                            Long userId,
-                            Role role) {
+                            UUID reservationId,
+                            PassportDto passportDto) {
         this.seatInstanceList = seatInstanceList;
-        this.passportDto = new Passport(userId,
-                                        role);
+        this.passportDto = passportDto;
     }
 
     public static ConfirmSeatEvent createSeatPreemptPayload(List<UUID> seatInstanceIds,
-                                                            Long userId,
+                                                            UUID reservationId,
                                                             PassportDto passportDto) {
         return ConfirmSeatEvent.builder()
                                .seatInstanceList(seatInstanceIds)
-                               .userId(userId)
-                               .role(Role.from(passportDto.getUserRole()))
+                               .reservationId(reservationId)
+                               .passportDto(passportDto)
                                .build();
     }
 

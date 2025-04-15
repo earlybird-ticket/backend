@@ -1,7 +1,6 @@
 package com.earlybird.ticket.reservation.application.handler;
 
 import com.earlybird.ticket.common.entity.PassportDto;
-import com.earlybird.ticket.common.entity.constant.Role;
 import com.earlybird.ticket.reservation.application.dto.response.PaymentSuccessPayload;
 import com.earlybird.ticket.reservation.application.event.EventHandler;
 import com.earlybird.ticket.reservation.common.exception.NotFoundReservationException;
@@ -55,8 +54,8 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
                                                             .seatInstanceList(reservationSeatList.stream()
                                                                                                  .map(ReservationSeat::getId)
                                                                                                  .toList())
-                                                            .userId(passportDto.getUserId())
-                                                            .role(Role.from(passportDto.getUserRole()))
+                                                            .passportDto(passportDto)
+                                                            .reservationId(reservationId)
                                                             .build();
 
         Event<ConfirmSeatEvent> confirmSeatPayloadEvent = new Event<>(EventType.SEAT_INSTANCE_CONFIRM,

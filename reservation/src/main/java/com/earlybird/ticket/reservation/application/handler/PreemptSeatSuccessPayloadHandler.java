@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -27,7 +26,6 @@ public class PreemptSeatSuccessPayloadHandler implements EventHandler<SeatPreemp
     @Transactional
     public void handle(Event<SeatPreemptSuccessPayload> event) {
         SeatPreemptSuccessPayload payload = event.getPayload();
-        UUID reservationId = payload.reservationId();
 
         log.info("payload = {} ",
                  payload);

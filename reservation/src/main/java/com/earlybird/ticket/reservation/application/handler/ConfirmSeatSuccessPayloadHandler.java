@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -27,7 +26,6 @@ public class ConfirmSeatSuccessPayloadHandler implements EventHandler<SeatConfir
     @Transactional
     public void handle(Event<SeatConfirmSuccessPayload> event) {
         SeatConfirmSuccessPayload payload = event.getPayload();
-        UUID reservationId = payload.reservationId();
 
         List<ReservationSeat> seatIntanceList = reservationSeatRepository.findAllBySeatInstaceIdIn(payload.seatInstanceIdList());
         log.info("Received UUID List: {}",

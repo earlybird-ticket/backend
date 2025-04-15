@@ -134,6 +134,7 @@ public class ReservationServiceImpl implements ReservationService {
             payloadJson = new ObjectMapper().writeValueAsString(event);
 
             // 5. Outbox 저장
+            // 동기 처리시에는 Outbox패턴이 아닌 커밋이전에 데이터를 발행하고 응답을 받아오는 방식으로 수행해야 함
             Outbox outbox = Outbox.builder()
                                   .aggregateType(Outbox.AggregateType.RESERVATION)
                                   .aggregateId(reservation.getId())
