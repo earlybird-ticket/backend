@@ -3,6 +3,7 @@ package com.earlybird.ticket.concert.application.event.dto;
 import com.earlybird.ticket.common.entity.EventPayload;
 import com.earlybird.ticket.common.entity.PassportDto;
 import com.earlybird.ticket.concert.domain.Concert;
+import com.earlybird.ticket.concert.domain.ConcertSequence;
 import com.earlybird.ticket.concert.domain.constant.Grade;
 import com.earlybird.ticket.concert.domain.constant.Section;
 import java.util.List;
@@ -25,6 +26,9 @@ public record ConcertCreateSuccessEvent(
                 .concertId(concert.getConcertId())
                 .venueId(concert.getVenueId())
                 .hallId(concert.getHallId())
+                .concertSequenceList(concert.getConcertSequences().stream()
+                                             .map(ConcertSequence::getConcertSequenceId)
+                                             .toList())
                 .seatInstanceInfoList(
                         concert.getSeatInstanceInfo()
                                 .stream()
