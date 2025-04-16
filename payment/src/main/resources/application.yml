@@ -29,7 +29,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   kafka:
-    bootstrap-servers: localhost:29092
+    bootstrap-servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:29091},${KAFKA_HOST:localhost}:${KAFKA_PORT_2:29092},${KAFKA_HOST:localhost}:${KAFKA_PORT_3:29093}
     consumer:
       group-id: order-group
       auto-offset-reset: earliest
