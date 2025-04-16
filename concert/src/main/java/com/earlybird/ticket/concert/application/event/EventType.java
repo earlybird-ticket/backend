@@ -27,7 +27,7 @@ public enum EventType {
 
     private static class Topic {
 
-        public static final String CONCERT_TO_SEAT_TOPIC = "ConcertToVenue";
+        public static final String CONCERT_TO_SEAT_TOPIC = "ConcertToSeat";
 
     }
 }

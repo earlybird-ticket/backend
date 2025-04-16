@@ -44,9 +44,9 @@ public class ConcertServiceImpl implements ConcertService {
         Outbox outbox = Outbox.builder()
                 .aggregateType(Outbox.AggregateType.CONCERT)
                 .aggregateId(concert.getConcertId())
-                .eventType(EventType.CONCERT_CREATE_SUCCESS)
+                .eventType(EventType.SEAT_INSTANCE_CREATE)
                 .payload(Event.of(
-                        EventType.CONCERT_CREATE_SUCCESS,
+                        EventType.SEAT_INSTANCE_CREATE,
                         ConcertCreateSuccessEvent.toPayload(passportDto, concert),
                         LocalDateTime.now().toString()
                 ).toJson())
