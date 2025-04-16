@@ -87,7 +87,7 @@ public class AdminServiceImpl implements AdminService {
     public void registerVenue(String passport, RegisterVenueCommand command) {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         saveOutbox(
-                EventType.CREATE_VENUE, VenueCreateEvent.toPayload(passportDto, command),
+                EventType.VENUE_CREATE, VenueCreateEvent.toPayload(passportDto, command),
                 Outbox.AggregateType.VENUE
         );
     }
@@ -97,7 +97,7 @@ public class AdminServiceImpl implements AdminService {
     public void modifyVenue(String passport, UpdateVenueCommand command) {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         saveOutbox(
-                EventType.UPDATE_VENUE, VenueUpdateEvent.toPayload(passportDto, command),
+                EventType.VENUE_UPDATE, VenueUpdateEvent.toPayload(passportDto, command),
                 Outbox.AggregateType.VENUE
         );
     }
@@ -107,7 +107,7 @@ public class AdminServiceImpl implements AdminService {
     public void withdrawVenue(String passport, DeleteVenueCommand command) {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         saveOutbox(
-                EventType.DELETE_VENUE, VenueDeleteEvent.toPayload(passportDto, command),
+                EventType.VENUE_DELETE, VenueDeleteEvent.toPayload(passportDto, command),
                 Outbox.AggregateType.VENUE
         );
     }
@@ -118,7 +118,7 @@ public class AdminServiceImpl implements AdminService {
             String passport, UpdateSeatInstanceCommand command) {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         saveOutbox(
-                EventType.UPDATE_SEAT_INSTANCE,
+                EventType.SEAT_INSTANCE_UPDATE,
                 SeatInstanceUpdateEvent.toPayload(passportDto, command),
                 Outbox.AggregateType.SEAT
         );
@@ -129,7 +129,7 @@ public class AdminServiceImpl implements AdminService {
     public void registerSeat(String passport, RegisterSeatCommand command) {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         saveOutbox(
-                EventType.CREATE_SEAT,
+                EventType.SEAT_CREATE,
                 SeatCreateEvent.toPayload(passportDto, command),
                 Outbox.AggregateType.SEAT
         );
@@ -141,7 +141,7 @@ public class AdminServiceImpl implements AdminService {
             String passport, DeleteSeatInstanceCommand command) {
         PassportDto passportDto = passportUtil.getPassportDto(passport);
         saveOutbox(
-                EventType.DELETE_SEAT_INSTANCE,
+                EventType.SEAT_INSTANCE_DELETE,
                 SeatInstanceDeleteEvent.toPayload(passportDto, command),
                 Outbox.AggregateType.SEAT
         );
