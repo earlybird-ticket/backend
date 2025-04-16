@@ -22,6 +22,9 @@ public record ConcertCreateSuccessEvent(
     public static ConcertCreateSuccessEvent toPayload(PassportDto passportDto, Concert concert) {
         return ConcertCreateSuccessEvent.builder()
                 .passportDto(passportDto)
+                .concertId(concert.getConcertId())
+                .venueId(concert.getVenueId())
+                .hallId(concert.getHallId())
                 .seatInstanceInfoList(
                         concert.getSeatInstanceInfo()
                                 .stream()

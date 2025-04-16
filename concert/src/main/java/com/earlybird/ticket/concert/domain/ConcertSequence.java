@@ -31,10 +31,6 @@ public class ConcertSequence extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID concertSequenceId;
 
-    private UUID hallId;
-
-    private UUID venueId;
-
     private LocalDateTime sequenceStartDate;
 
     private LocalDateTime sequenceEndDate;
@@ -52,13 +48,11 @@ public class ConcertSequence extends BaseEntity {
 
     @Builder
     public ConcertSequence(
-            UUID hallId, UUID venueId, LocalDateTime sequenceStartDate,
+            LocalDateTime sequenceStartDate,
             LocalDateTime sequenceEndDate, LocalDateTime ticketSaleStartDate,
             LocalDateTime ticketSaleEndDate, ConcertStatus concertStatus,
             Concert concert
     ) {
-        this.hallId = hallId;
-        this.venueId = venueId;
         this.sequenceStartDate = sequenceStartDate;
         this.sequenceEndDate = sequenceEndDate;
         this.ticketSaleStartDate = ticketSaleStartDate;
