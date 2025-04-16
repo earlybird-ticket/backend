@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerInterceptor;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -17,8 +18,13 @@ import org.springframework.kafka.support.ProducerListener;
 @EnableKafka
 public class KafkaProducerConfig {
 
-    //TODO:: Kafka host, port 맞추기
-    private static final String BOOTSTRAP_SERVERS = "localhost:29092";
+    private final String BOOTSTRAP_SERVERS;
+
+    public KafkaProducerConfig(
+        @Value("${spring.kafka.bootstrap-servers}") String BOOTSTRAP_SERVERS
+    ) {
+        this.BOOTSTRAP_SERVERS = BOOTSTRAP_SERVERS;
+    }
 
     @Bean
     public ProducerFactory<String, String> producerFactory() {
@@ -59,8 +65,10 @@ public class KafkaProducerConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, String> kafkaTemplate(ProducerInterceptor<String, String> producerInterceptor,
-                                                       ProducerListener<String, String> producerListener) {
+    public KafkaTemplate<String, String> kafkaTemplate(
+        ProducerInterceptor<String, String> producerInterceptor,
+        ProducerListener<String, String> producerListener
+    ) {
         KafkaTemplate<String, String> kafkaTemplate = new KafkaTemplate<>(producerFactory());
         kafkaTemplate.setProducerInterceptor(producerInterceptor);
         kafkaTemplate.setProducerListener(producerListener);
