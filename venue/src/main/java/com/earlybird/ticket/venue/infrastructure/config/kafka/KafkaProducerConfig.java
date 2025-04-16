@@ -3,6 +3,7 @@ package com.earlybird.ticket.venue.infrastructure.config.kafka;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerInterceptor;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -18,15 +19,15 @@ import java.util.Map;
 @EnableKafka
 public class KafkaProducerConfig {
 
-    //TODO:: Kafka host, port 맞추기
-    private static final String BOOTSTRAP_SERVERS = "localhost:29092";
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
 
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> props = new HashMap<>();
 
         // Kafka 서버 주소 설정
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 
         // Key와 Value 직렬화 설정 (Key는 String, Value는 JSON)
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);

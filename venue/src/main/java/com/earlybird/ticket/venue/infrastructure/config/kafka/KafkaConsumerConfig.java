@@ -4,6 +4,7 @@ import com.earlybird.ticket.venue.common.exception.JsonDeserializationException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,12 +25,14 @@ import java.util.Map;
 @Configuration
 @EnableKafka
 public class KafkaConsumerConfig {
-    private static final String BOOTSTRAP_SERVERS = "localhost:29092"; // TODO : Kafka 서버 host, Port 맞추기
+    @Value("${spring.kafka.bootstrap-servers}")
+    private String bootstrapServers;
+
     Map<String,Object> props = new HashMap<>();
 
     @ConditionalOnMissingBean
     public ConsumerFactory<String, Object> consumerFactory() {
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS); // Kafka 브로커 리스트 설정
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers); // Kafka 브로커 리스트 설정
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class); // 메시지 키 역직렬화 방식 설정
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class); // 메시지 값 역직렬화 방식 설정
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*"); // 신뢰할 수 있는 패키지 설정 (역직렬화 시 필요한 설정)
