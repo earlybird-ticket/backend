@@ -31,8 +31,14 @@ public enum Code {
                 HttpStatus.BAD_REQUEST),
     NOT_FOUND("G04",
               HttpStatus.NOT_FOUND),
-    CONFLICT("G05", HttpStatus.CONFLICT),
-    TIMEOUT("G06", HttpStatus.REQUEST_TIMEOUT),
+    CONFLICT("G05",
+             HttpStatus.CONFLICT),
+    TIMEOUT("G06",
+            HttpStatus.REQUEST_TIMEOUT),
+    RECOVERABLE("G07",
+                HttpStatus.CONFLICT),
+    NON_RECOVERABLE("G08",
+                    HttpStatus.CONFLICT),
 
     // 🔄 Feign 에러
     FEIGN_BAD_REQUEST("F01",
@@ -56,11 +62,11 @@ public enum Code {
 
     // 좌석 서비스 메세지 처리 실패 응답
     SEAT_CONFIRM_FAIL("S01",
-            HttpStatus.CONFLICT),
+                      HttpStatus.CONFLICT),
     SEAT_PREEMPT_FAIL("S02",
-            HttpStatus.CONFLICT),
+                      HttpStatus.CONFLICT),
     SEAT_RETURN_FAIL("S03",
-            HttpStatus.CONFLICT),
+                     HttpStatus.CONFLICT),
     ;
 
     private final String code;
