@@ -57,7 +57,7 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
                                                             .reservationId(reservationId)
                                                             .build();
 
-        Event<ConfirmSeatEvent> confirmSeatPayloadEvent = new Event<>(EventType.SEAT_INSTANCE_CONFIRM,
+        Event<ConfirmSeatEvent> confirmSeatPayloadEvent = new Event<>(EventType.SEAT_CONFIRM,
                                                                       confirmSeatEvent,
                                                                       LocalDateTime.now()
                                                                                    .toString());
@@ -67,7 +67,7 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
         Outbox seatOutbox = Outbox.builder()
                                   .aggregateId(reservation.getId())
                                   .aggregateType(Outbox.AggregateType.RESERVATION)
-                                  .eventType(EventType.SEAT_INSTANCE_CONFIRM)
+                                  .eventType(EventType.SEAT_CONFIRM)
                                   .payload(convertedConfirmSeatPayload)
                                   .build();
 

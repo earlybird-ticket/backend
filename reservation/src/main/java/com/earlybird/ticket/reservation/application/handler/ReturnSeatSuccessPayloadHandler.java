@@ -42,7 +42,7 @@ public class ReturnSeatSuccessPayloadHandler implements EventHandler<SeatReturnS
         seatIntanceList.forEach(ReservationSeat::updateStatusReserveFREE);
         seatIntanceList.forEach(seat -> {
             seat.getReservation()
-                .delete(payload.passport()
+                .delete(payload.passportDto()
                                .getUserId());
         });
 

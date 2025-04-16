@@ -15,20 +15,20 @@ import java.util.UUID;
 public class SuccessCouponEvent implements EventPayload {
 
     private UUID couponId;
-    private PassportDto passport;
+    private PassportDto passportDto;
 
     @Builder
     public SuccessCouponEvent(UUID couponId,
-                              PassportDto passport) {
+                              PassportDto passportDto) {
         this.couponId = couponId;
-        this.passport = passport;
+        this.passportDto = passportDto;
     }
 
     public static SuccessCouponEvent createSeatPreemptPayload(UUID requestCouponId,
                                                               PassportDto passportDto) {
         return SuccessCouponEvent.builder()
                                  .couponId(requestCouponId)
-                                 .passport(passportDto)
+                                 .passportDto(passportDto)
                                  .build();
     }
 

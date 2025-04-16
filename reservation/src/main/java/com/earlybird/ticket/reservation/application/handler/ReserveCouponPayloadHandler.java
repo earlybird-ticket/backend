@@ -136,6 +136,6 @@ public class ReserveCouponPayloadHandler implements EventHandler<CouponReservePa
 
     @Override
     public boolean support(Event<CouponReservePayload> event) {
-        return event.getEventType() == EventType.COUPON_CONFIRM;
+        return event.getEventType() == EventType.COUPON_RESERVE;
     }
 }

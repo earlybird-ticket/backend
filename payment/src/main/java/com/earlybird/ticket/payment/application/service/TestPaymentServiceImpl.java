@@ -8,6 +8,7 @@ import com.earlybird.ticket.payment.application.TemporaryStore;
 import com.earlybird.ticket.payment.application.event.dto.request.PaymentSuccessEvent;
 import com.earlybird.ticket.payment.application.service.dto.command.ConfirmPaymentCommand;
 import com.earlybird.ticket.payment.application.service.dto.command.CreatePaymentCommand;
+import com.earlybird.ticket.payment.application.service.dto.command.UpdatePaymentCommand;
 import com.earlybird.ticket.payment.application.service.dto.query.FindPaymentQuery;
 import com.earlybird.ticket.payment.application.service.exception.PaymentAmountDoesNotMatchException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentNotFoundException;
@@ -17,26 +18,30 @@ import com.earlybird.ticket.payment.common.EventType;
 import com.earlybird.ticket.payment.domain.entity.Event;
 import com.earlybird.ticket.payment.domain.entity.Outbox;
 import com.earlybird.ticket.payment.domain.entity.Payment;
+import com.earlybird.ticket.payment.domain.entity.constant.PaymentMethod;
+import com.earlybird.ticket.payment.domain.entity.constant.PaymentStatus;
 import com.earlybird.ticket.payment.domain.repository.OutboxRepository;
 import com.earlybird.ticket.payment.domain.repository.PaymentRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Random;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
-@Primary
+@Profile("test")
+@Qualifier("testPaymentService")
 @RequiredArgsConstructor
-public class PaymentServiceImpl implements PaymentService {
+public class TestPaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OutboxRepository outboxRepository;
-    private final PaymentClient paymentClient;
     private final EventConverter eventConverter;
     private final TemporaryStore temporaryStore;
 
@@ -60,15 +65,6 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public void confirmPayment(ConfirmPaymentCommand confirmPaymentCommand) {
-        /* TODO:
-            0. PAYMENT:CONFIRM:{RESERVATION_ID}로 결제한 적 있는지 확인
-            1. reservationId로 검색 후 가격 검증 ✅
-            2. Base64로 SecretKey 암호화 후 정보 전달 ✅
-            3. 엔티티 상태 업데이트[결제 방법, 결제 상태 변경] ✅
-            4. 결제 성공 후 PAYMENT:CONFIRM:{RESERVATION_ID}로 레디스 캐싱
-            5. 아웃박스 생성 ✅
-            6. outbox에서 이벤트 발행[결제 성공 이벤트 발행] ✅
-         */
         validateReservationTimedOut(confirmPaymentCommand.reservationId());
 
         Payment payment = paymentRepository.findByReservationId(
@@ -76,11 +72,22 @@ public class PaymentServiceImpl implements PaymentService {
             .orElseThrow(PaymentNotFoundException::new);
 
         validatePaymentAmount(payment, confirmPaymentCommand.amount());
+        Random random = new Random();
+
+        try {
+            // 결제 처리 시간
+            Thread.sleep(random.nextInt(1000));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         // 결제 내역 -> 업데이트용 엔티티 변경
-        Payment receipt = paymentClient.confirmPayment(
-            confirmPaymentCommand, payment.getId()
-        ).toPayment(payment.getUserId());
+        Payment receipt = UpdatePaymentCommand.builder()
+            .paymentKey("tviva" + LocalDateTime.now())
+            .status(PaymentStatus.DONE)
+            .paymentMethod(PaymentMethod.CREDIT_CARD)
+            .build()
+            .toPayment(payment.getUserId());
         // 결제 방법, 상태 반영
         payment.confirmPayment(receipt);
 
@@ -146,5 +153,4 @@ public class PaymentServiceImpl implements PaymentService {
             .payload(eventConverter.serializeEvent(event))
             .build();
     }
-
 }
