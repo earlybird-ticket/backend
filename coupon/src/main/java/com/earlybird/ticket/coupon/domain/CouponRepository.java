@@ -15,5 +15,5 @@ public interface CouponRepository {
 
     Optional<Coupon> findByCouponId(UUID uuid);
 
-    CouponResult findAllByCoupon();
+    CouponResult findAllCoupon();
 }

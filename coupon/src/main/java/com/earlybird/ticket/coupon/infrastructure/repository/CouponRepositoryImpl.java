@@ -33,8 +33,8 @@ public class CouponRepositoryImpl implements CouponRepository {
     }
 
     @Override
-    public CouponResult findAllByCoupon() {
-        return couponQueryDslRepository.findAllByCouponId();
+    public CouponResult findAllCoupon() {
+        return couponQueryDslRepository.findAllCoupons();
     }
 
 }

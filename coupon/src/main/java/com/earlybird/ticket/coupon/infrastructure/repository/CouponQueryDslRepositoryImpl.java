@@ -19,7 +19,6 @@ public class CouponQueryDslRepositoryImpl implements CouponQueryDslRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
 
-
     @Override
     public UserCouponResult findAllByUserId(Long userId) {
 
@@ -43,7 +42,7 @@ public class CouponQueryDslRepositoryImpl implements CouponQueryDslRepository {
     }
 
     @Override
-    public CouponResult findAllByCouponId() {
+    public CouponResult findAllCoupons() {
 
         List<Coupon> result = jpaQueryFactory
                 .select(Projections.constructor(

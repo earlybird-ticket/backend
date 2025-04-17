@@ -7,5 +7,5 @@ public interface CouponQueryDslRepository {
 
     UserCouponResult findAllByUserId(Long userId);
 
-    CouponResult findAllByCouponId();
+    CouponResult findAllCoupons();
 }
