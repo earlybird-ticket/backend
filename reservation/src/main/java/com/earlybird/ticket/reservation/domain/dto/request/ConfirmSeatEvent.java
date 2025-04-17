@@ -15,15 +15,15 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ConfirmSeatEvent implements EventPayload {
 
-    private List<UUID> seatInstanceList;
+    private List<UUID> seatInstanceIdList;
     private PassportDto passportDto;
     private UUID reservationId;
 
     @Builder
-    public ConfirmSeatEvent(List<UUID> seatInstanceList,
+    public ConfirmSeatEvent(List<UUID> seatInstanceIdList,
                             UUID reservationId,
                             PassportDto passportDto) {
-        this.seatInstanceList = seatInstanceList;
+        this.seatInstanceIdList = seatInstanceIdList;
         this.passportDto = passportDto;
         this.reservationId = reservationId;
     }
