@@ -19,16 +19,16 @@ import lombok.extern.slf4j.Slf4j;
 @Getter
 @RequiredArgsConstructor
 public enum EventType {
-    ISSUE_COUPON(CouponIssueEvent.class, Topic.ADMIN_TO_COUPON),
-    CREATE_COUPON(CouponCreateEvent.class, Topic.ADMIN_TO_COUPON),
-    DELETE_COUPON(CouponDeleteEvent.class, Topic.ADMIN_TO_COUPON),
-    UPDATE_COUPON(CouponUpdateEvent.class, Topic.ADMIN_TO_COUPON),
-    CREATE_SEAT(SeatCreateEvent.class, Topic.ADMIN_TO_SEAT),
-    UPDATE_SEAT_INSTANCE(SeatInstanceUpdateEvent.class, Topic.ADMIN_TO_SEAT),
-    DELETE_SEAT_INSTANCE(SeatInstanceDeleteEvent.class, Topic.ADMIN_TO_SEAT),
-    CREATE_VENUE(VenueCreateEvent.class, Topic.ADMIN_TO_VENUE),
-    UPDATE_VENUE(VenueUpdateEvent.class, Topic.ADMIN_TO_VENUE),
-    DELETE_VENUE(VenueDeleteEvent.class, Topic.ADMIN_TO_VENUE);
+    ISSUE_COUPON(CouponIssueEvent.class, Topic.ADMIN_TO_COUPON_TOPIC),
+    CREATE_COUPON(CouponCreateEvent.class, Topic.ADMIN_TO_COUPON_TOPIC),
+    DELETE_COUPON(CouponDeleteEvent.class, Topic.ADMIN_TO_COUPON_TOPIC),
+    UPDATE_COUPON(CouponUpdateEvent.class, Topic.ADMIN_TO_COUPON_TOPIC),
+    SEAT_CREATE(SeatCreateEvent.class, Topic.ADMIN_TO_SEAT_TOPIC),
+    SEAT_INSTANCE_UPDATE(SeatInstanceUpdateEvent.class, Topic.ADMIN_TO_SEAT_TOPIC),
+    SEAT_INSTANCE_DELETE(SeatInstanceDeleteEvent.class, Topic.ADMIN_TO_SEAT_TOPIC),
+    VENUE_CREATE(VenueCreateEvent.class, Topic.ADMIN_TO_VENUE_TOPIC),
+    VENUE_UPDATE(VenueUpdateEvent.class, Topic.ADMIN_TO_VENUE_TOPIC),
+    VENUE_DELETE(VenueDeleteEvent.class, Topic.ADMIN_TO_VENUE_TOPIC);
 
     private final Class<? extends EventPayload> payloadClass;
     private final String topic;
@@ -44,9 +44,9 @@ public enum EventType {
 
     private static class Topic {
 
-        public static final String ADMIN_TO_COUPON = "AdminToCoupon";
-        public static final String ADMIN_TO_VENUE = "AdminToVenue";
-        public static final String ADMIN_TO_SEAT = "AdminToSeat";
+        public static final String ADMIN_TO_COUPON_TOPIC = "AdminToCoupon";
+        public static final String ADMIN_TO_VENUE_TOPIC = "AdminToVenue";
+        public static final String ADMIN_TO_SEAT_TOPIC = "AdminToSeat";
 
     }
 }

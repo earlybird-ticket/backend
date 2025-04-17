@@ -21,12 +21,16 @@ public record RegisterConcertRequest(
         Integer runningTime,
         Long sellerId,
         String priceInfo,
+        UUID hallId,
+        UUID venueId,
         List<SeatInstanceInfoRequest> seatInstanceInfoList,
         List<ConcertSequenceRequest> concertSequences
 ) {
 
     public RegisterConcertCommand toCommand() {
         return RegisterConcertCommand.builder()
+                .hallId(hallId)
+                .venueId(venueId)
                 .concertName(concertName)
                 .entertainerName(entertainerName)
                 .startDate(startDate)
@@ -48,8 +52,6 @@ public record RegisterConcertRequest(
                 .concertSequences(
                         concertSequences.stream()
                                 .map(seq -> ConcertSequenceCommand.builder()
-                                        .hallId(seq.hallId())
-                                        .venueId(seq.venueId())
                                         .sequenceStartDate(seq.sequenceStartDate())
                                         .sequenceEndDate(seq.sequenceEndDate())
                                         .ticketSaleStartDate(seq.ticketSaleStartDate())
@@ -71,8 +73,6 @@ public record RegisterConcertRequest(
     }
 
     public record ConcertSequenceRequest(
-            UUID hallId,
-            UUID venueId,
             LocalDateTime sequenceStartDate,
             LocalDateTime sequenceEndDate,
             LocalDateTime ticketSaleStartDate,
