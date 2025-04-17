@@ -7,13 +7,13 @@ import lombok.Getter;
 @Getter
 public class Event<T extends EventPayload> {
 
-    private EventType type;
+    private EventType eventType;
     private T payload;
     private String timestamp;
 
     public static Event<EventPayload> of(EventType type, EventPayload payload, String timestamp) {
         Event<EventPayload> event = new Event<>();
-        event.type = type;
+        event.eventType = type;
         event.payload = payload;
         event.timestamp = timestamp;
         return event;
@@ -25,8 +25,8 @@ public class Event<T extends EventPayload> {
             return null;
         }
         Event<EventPayload> event = new Event<>();
-        event.type = EventType.from(eventRaw.getType());
-        event.payload = DataUtil.deserialize(eventRaw.getPayload(), event.type.getPayloadClass());
+        event.eventType = EventType.from(eventRaw.getEventType());
+        event.payload = DataUtil.deserialize(eventRaw.getPayload(), event.eventType.getPayloadClass());
         event.timestamp = eventRaw.getTimestamp();
         return event;
     }
@@ -38,7 +38,7 @@ public class Event<T extends EventPayload> {
     @Getter
     private static class EventRaw {
 
-        private String type;
+        private String eventType;
         private Object payload;
         private String timestamp;
     }
