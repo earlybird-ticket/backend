@@ -15,20 +15,20 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReturnSeatEvent implements EventPayload {
 
-    private List<UUID> seatInstanceList;
+    private List<UUID> seatInstanceIdList;
     private PassportDto passportDto;
 
     @Builder
-    public ReturnSeatEvent(List<UUID> seatInstanceList,
+    public ReturnSeatEvent(List<UUID> seatInstanceIdList,
                            PassportDto passportDto) {
-        this.seatInstanceList = seatInstanceList;
+        this.seatInstanceIdList = seatInstanceIdList;
         this.passportDto = passportDto;
     }
 
     public static ReturnSeatEvent createSeatPreemptPayload(List<UUID> seatInstanceIds,
                                                            PassportDto passportDto) {
         return ReturnSeatEvent.builder()
-                              .seatInstanceList(seatInstanceIds)
+                              .seatInstanceIdList(seatInstanceIds)
                               .passportDto(passportDto)
                               .build();
     }

@@ -15,20 +15,20 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PreemptSeatDltEvent implements EventPayload {
 
-    private List<UUID> seatInstanceList;
+    private List<UUID> seatInstanceIdList;
     private PassportDto passportDto;
 
     @Builder
-    public PreemptSeatDltEvent(List<UUID> seatInstanceList,
+    public PreemptSeatDltEvent(List<UUID> seatInstanceIdList,
                                PassportDto passportDto) {
-        this.seatInstanceList = seatInstanceList;
+        this.seatInstanceIdList = seatInstanceIdList;
         this.passportDto = passportDto;
     }
 
     public static PreemptSeatDltEvent createSeatPreemptPayload(List<UUID> seatInstanceIds,
                                                                PassportDto passportDto) {
         return PreemptSeatDltEvent.builder()
-                                  .seatInstanceList(seatInstanceIds)
+                                  .seatInstanceIdList(seatInstanceIds)
                                   .passportDto(passportDto)
                                   .build();
     }

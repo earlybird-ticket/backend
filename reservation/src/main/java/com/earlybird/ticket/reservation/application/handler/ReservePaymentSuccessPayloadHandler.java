@@ -50,7 +50,7 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
 
         //좌석 확정 상태로 변경
         ConfirmSeatEvent confirmSeatEvent = ConfirmSeatEvent.builder()
-                                                            .seatInstanceList(reservationSeatList.stream()
+                                                            .seatInstanceIdList(reservationSeatList.stream()
                                                                                                  .map(ReservationSeat::getId)
                                                                                                  .toList())
                                                             .passportDto(passportDto)
