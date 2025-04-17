@@ -37,5 +37,4 @@ out/
 .vscode/
 
 ## yml
-*.yml
 docker-compose.yml
