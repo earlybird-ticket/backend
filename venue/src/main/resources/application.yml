@@ -2,7 +2,7 @@ server:
   port: 18086
 spring:
   application:
-    name: venue
+    name: venue-service
   config:
     import: optional:file:.env[.properties]
   data:
@@ -66,7 +66,7 @@ management:
     sampling:
       probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
 
-api :
+api:
   connection-timeout: 3000
   read-timeout: 120000
   max-buffer-size-MB: 300
