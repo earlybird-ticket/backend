@@ -1,0 +1,75 @@
+server:
+  port: 18086
+spring:
+  application:
+    name: venue
+  config:
+    import: optional:file:.env[.properties]
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  jpa:
+    hibernate:
+      default_batch_fetch_size: 0
+      query:
+        in_clause_parameter_padding: false
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        default_batch_fetch_size: 1000
+        format_sql: true
+  datasource:
+    hikari:
+      maximum-pool-size: 1000
+      max-lifetime: 177000
+      minimum-idle: 10
+      idle-timeout: 30000
+      connection-timeout: 30000
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_VENUE_PORT:15006}/${POSTGRES_DB}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST}:${KAFKA_PORT}
+
+eureka:
+  instance:
+    metadataMap:
+      prometheus.scrape: "true"
+      prometheus.path: "/actuator/prometheus"
+      prometheus.port: "${server.port}"
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:18080}/eureka
+
+management:
+  endpoints:
+    jmx:
+      exposure:
+        include: prometheus
+    web:
+      exposure:
+        include: refresh,health,beans,busrefresh,info,metrics,prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        all: true
+  zipkin:
+    tracing:
+      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:19411}/api/v2/spans"
+  tracing:
+    sampling:
+      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
+
+api :
+  connection-timeout: 3000
+  read-timeout: 120000
+  max-buffer-size-MB: 300
+
+kafka:
+  bootstrap-servers: ${KAFKA_HOST}:${KAFKA_PORT}
