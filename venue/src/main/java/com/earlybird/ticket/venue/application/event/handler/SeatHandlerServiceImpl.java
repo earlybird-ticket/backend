@@ -47,18 +47,15 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
         //2. row / col for문 돌면서 seatList 생성
         List<Seat> seatList = new ArrayList<>();
 
-        for(SeatCreatePayload.SeatInfo seatInfo : seatCreatePayload.seatList()) {
-            seatList.addAll(
-                    Seat.create(
-                    seatInfo.rowCnt(),
-                    seatInfo.colCnt(),
-                    seatInfo.section(),
-                    seatInfo.floor(),
-                    seatCreatePayload.venueId(),
-                    seatCreatePayload.venueId(),
-                    seatCreatePayload.passportDto().getUserId()
-                    )
-            );
+        for (SeatCreatePayload.SeatInfo seatInfo : seatCreatePayload.seatList()) {
+            seatList.addAll(Seat.create(seatInfo.rowCnt(),
+                                        seatInfo.colCnt(),
+                                        seatInfo.section(),
+                                        seatInfo.floor(),
+                                        seatCreatePayload.venueId(),
+                                        seatCreatePayload.hallId(),
+                                        seatCreatePayload.passportDto()
+                                                         .getUserId()));
         }
         //3. seatList 저장
         seatRepository.saveAll(seatList);
@@ -78,16 +75,16 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
             for (Seat seat : seatList) {
                 for (SeatInstanceCreatePayload.SeatInstanceInfo info : seatInstanceCreatePayload.seatInstanceInfoList()) {
                     //3. 좌석 섹션에 따라 좌석 정보 + Payload 정보로 seatInstance 생성
-                    if (seat.getSection().equals(Section.getByValue(info.section()))) {
-                        seat.createSeatInstance(
-                                info.grade(),
-                                info.price(),
-                                concertSequenceId,
-                                seatInstanceCreatePayload.venueId(),
-                                seatInstanceCreatePayload.concertId(),
-                                seatInstanceCreatePayload.hallId(),
-                                seatInstanceCreatePayload.passportDto().getUserId()
-                        );
+                    if (seat.getSection()
+                            .equals(Section.getByValue(info.section()))) {
+                        seat.createSeatInstance(info.grade(),
+                                                info.price(),
+                                                concertSequenceId,
+                                                seatInstanceCreatePayload.venueId(),
+                                                seatInstanceCreatePayload.concertId(),
+                                                seatInstanceCreatePayload.hallId(),
+                                                seatInstanceCreatePayload.passportDto()
+                                                                         .getUserId());
                     }
                 }
             }
@@ -104,16 +101,15 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
         checkSeatExist(seat);
 
         //2. seatInstance 업데이트
-        seat.updateSeatInstance(
-                seatInstanceUpdatePayload.seatInstanceId(),
-                seatInstanceUpdatePayload.hallId(),
-                seatInstanceUpdatePayload.concertId(),
-                seatInstanceUpdatePayload.concertSequenceId(),
-                seatInstanceUpdatePayload.grade(),
-                seatInstanceUpdatePayload.status(),
-                seatInstanceUpdatePayload.price(),
-                seatInstanceUpdatePayload.passportDto().getUserId()
-        );
+        seat.updateSeatInstance(seatInstanceUpdatePayload.seatInstanceId(),
+                                seatInstanceUpdatePayload.hallId(),
+                                seatInstanceUpdatePayload.concertId(),
+                                seatInstanceUpdatePayload.concertSequenceId(),
+                                seatInstanceUpdatePayload.grade(),
+                                seatInstanceUpdatePayload.status(),
+                                seatInstanceUpdatePayload.price(),
+                                seatInstanceUpdatePayload.passportDto()
+                                                         .getUserId());
         //3. 저장
     }
 
@@ -126,10 +122,9 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
         checkSeatExist(seat);
 
         //2. seatInstance delete 업데이트
-        seat.deleteSeatInstance(
-                seatInstanceDeletePayload.seatInstanceId(),
-                seatInstanceDeletePayload.passportDto().getUserId()
-        );
+        seat.deleteSeatInstance(seatInstanceDeletePayload.seatInstanceId(),
+                                seatInstanceDeletePayload.passportDto()
+                                                         .getUserId());
         //3. 저장
     }
 
@@ -139,7 +134,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
         List<UUID> seatInstanceIdList = seatPreemptPayload.seatInstanceIdList();
 
         try {
-            if(seatPreemptPayload.reservationId() == null) {
+            if (seatPreemptPayload.reservationId() == null) {
                 throw new IllegalArgumentException("reservationId is null");
             }
 
@@ -149,34 +144,35 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
 
             // 3. SeatInstance의 상태확인
             // Free 상태면 Preempt로 update 후 응답
-            for(Seat seat : seatList) {
-                seat.preemptSeat(seatInstanceIdList, seatPreemptPayload.passportDto().getUserId());
+            for (Seat seat : seatList) {
+                seat.preemptSeat(seatInstanceIdList,
+                                 seatPreemptPayload.passportDto()
+                                                   .getUserId());
             }
 
             //4. 저장
             //5. 아웃 박스 저장
             saveOutbox(seatInstanceIdList,
-                    SeatPreemptSuccessEvent.builder()
-                            .passportDto(seatPreemptPayload.passportDto())
-                            .seatInstanceIdList(seatInstanceIdList)
-                            .build(),
-                    EventType.SEAT_PREEMPT_SUCCESS
-            );
+                       SeatPreemptSuccessEvent.builder()
+                                              .passportDto(seatPreemptPayload.passportDto())
+                                              .seatInstanceIdList(seatInstanceIdList)
+                                              .build(),
+                       EventType.SEAT_PREEMPT_SUCCESS);
 
-            bucket.setIfAbsent(timeCachePrefix + seatPreemptPayload.reservationId(), Duration.ofMinutes(10));
+            bucket.setIfAbsent(timeCachePrefix + seatPreemptPayload.reservationId(),
+                               Duration.ofMinutes(10));
 
         } catch (Exception e) {
-            log.error("메시지 처리 실패: {}", e.getMessage());
+            log.error("메시지 처리 실패: {}",
+                      e.getMessage());
 
-            saveOutbox(
-                    seatInstanceIdList,
-                    SeatPreemptFailEvent.builder()
-                            .passportDto(seatPreemptPayload.passportDto())
-                            .seatInstanceIdList(seatInstanceIdList)
-                            .code(Code.SEAT_PREEMPT_FAIL.getCode())
-                            .build(),
-                    EventType.SEAT_PREEMPT_FAIL
-            );
+            saveOutbox(seatInstanceIdList,
+                       SeatPreemptFailEvent.builder()
+                                           .passportDto(seatPreemptPayload.passportDto())
+                                           .seatInstanceIdList(seatInstanceIdList)
+                                           .code(Code.SEAT_PREEMPT_FAIL.getCode())
+                                           .build(),
+                       EventType.SEAT_PREEMPT_FAIL);
         }
 
     }
@@ -187,7 +183,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
 
         List<UUID> seatInstanceIdList = seatConfirmPayload.seatInstanceIdList();
 
-        try{
+        try {
             checkExpiredReservationTime(seatConfirmPayload.reservationId());
 
             //1. seatInstance 가져오기
@@ -195,32 +191,31 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
 
             // 3. SeatInstance의 상태확인
             // Preempt 상태면 Confirm으로 update 후 응답
-            for(Seat seat : seatList) {
-                seat.confirmSeat(seatInstanceIdList, seatConfirmPayload.passportDto().getUserId());
+            for (Seat seat : seatList) {
+                seat.confirmSeat(seatInstanceIdList,
+                                 seatConfirmPayload.passportDto()
+                                                   .getUserId());
             }
             //4. 저장
             //5. 아웃 박스 저장
-            saveOutbox(
-                    seatInstanceIdList,
-                    SeatConfirmSuccessEvent.builder()
-                            .passportDto(seatConfirmPayload.passportDto())
-                            .seatInstanceIdList(seatInstanceIdList)
-                            .build(),
-                    EventType.SEAT_CONFIRM_SUCCESS
-            );
+            saveOutbox(seatInstanceIdList,
+                       SeatConfirmSuccessEvent.builder()
+                                              .passportDto(seatConfirmPayload.passportDto())
+                                              .seatInstanceIdList(seatInstanceIdList)
+                                              .build(),
+                       EventType.SEAT_CONFIRM_SUCCESS);
 
         } catch (Exception e) {
-            log.error("메시지 처리 실패: {}", e.getMessage());
+            log.error("메시지 처리 실패: {}",
+                      e.getMessage());
 
-            saveOutbox(
-                    seatInstanceIdList,
-                    SeatConfirmFailEvent.builder()
-                            .passportDto(seatConfirmPayload.passportDto())
-                            .seatInstanceIdList(seatInstanceIdList)
-                            .code(Code.SEAT_CONFIRM_FAIL.getCode())
-                            .build(),
-                    EventType.SEAT_CONFIRM_FAIL
-            );
+            saveOutbox(seatInstanceIdList,
+                       SeatConfirmFailEvent.builder()
+                                           .passportDto(seatConfirmPayload.passportDto())
+                                           .seatInstanceIdList(seatInstanceIdList)
+                                           .code(Code.SEAT_CONFIRM_FAIL.getCode())
+                                           .build(),
+                       EventType.SEAT_CONFIRM_FAIL);
         }
     }
 
@@ -236,60 +231,56 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
 
             // 3. SeatInstance의 상태확인
             // Free update
-            for(Seat seat : seatList) {
-                seat.returnSeat(seatInstanceIdList, seatReturnPayload.passportDto().getUserId());
+            for (Seat seat : seatList) {
+                seat.returnSeat(seatInstanceIdList,
+                                seatReturnPayload.passportDto()
+                                                 .getUserId());
             }
             //4. 저장
             //5. 아웃 박스 저장
-            saveOutbox(
-                    seatInstanceIdList,
-                    SeatReturnSuccessEvent.builder()
-                            .passportDto(seatReturnPayload.passportDto())
-                            .seatInstanceIdList(seatInstanceIdList)
-                            .build(),
-                    EventType.SEAT_RETURN_SUCCESS
-            );
+            saveOutbox(seatInstanceIdList,
+                       SeatReturnSuccessEvent.builder()
+                                             .passportDto(seatReturnPayload.passportDto())
+                                             .seatInstanceIdList(seatInstanceIdList)
+                                             .build(),
+                       EventType.SEAT_RETURN_SUCCESS);
         } catch (Exception e) {
-            log.error("메시지 처리 실패: {}", e.getMessage());
+            log.error("메시지 처리 실패: {}",
+                      e.getMessage());
 
-            saveOutbox(
-                    seatInstanceIdList,
-                    SeatReturnFailEvent.builder()
-                            .passportDto(seatReturnPayload.passportDto())
-                            .seatInstanceIdList(seatInstanceIdList)
-                            .code(Code.SEAT_RETURN_FAIL.getCode())
-                            .build(),
-                    EventType.SEAT_RETURN_FAIL
-            );
+            saveOutbox(seatInstanceIdList,
+                       SeatReturnFailEvent.builder()
+                                          .passportDto(seatReturnPayload.passportDto())
+                                          .seatInstanceIdList(seatInstanceIdList)
+                                          .code(Code.SEAT_RETURN_FAIL.getCode())
+                                          .build(),
+                       EventType.SEAT_RETURN_FAIL);
         }
 
     }
 
     @Transactional
-    protected <T extends EventPayload> void saveOutbox(
-            List<UUID> seatInstanceIdList,
-            T eventPayload,
-            EventType eventType
-    ) {
+    protected <T extends EventPayload> void saveOutbox(List<UUID> seatInstanceIdList,
+                                                       T eventPayload,
+                                                       EventType eventType) {
         Event<T> event = Event.<T>builder()
-                .eventType(eventType)
-                .payload(eventPayload)
-                .timestamp(CommonUtil.LocalDateTimetoString(LocalDateTime.now()))
-                .build();
+                              .eventType(eventType)
+                              .payload(eventPayload)
+                              .timestamp(CommonUtil.LocalDateTimetoString(LocalDateTime.now()))
+                              .build();
 
         outboxRepository.save(Outbox.builder()
-                .aggregateId(seatInstanceIdList.get(0))
-                .aggregateType(Outbox.AggregateType.SEAT_INSTANCE)
-                .eventType(eventType)
-                .payload(eventConverter.serializeEvent(event))
-                .build()
-        );
+                                    .aggregateId(seatInstanceIdList.get(0))
+                                    .aggregateType(Outbox.AggregateType.SEAT_INSTANCE)
+                                    .eventType(eventType)
+                                    .payload(eventConverter.serializeEvent(event))
+                                    .build());
     }
 
     private void checkExpiredReservationTime(UUID reservationId) {
         RBucket<String> bucket = redissonClient.getBucket(timeCachePrefix + reservationId);
 
-        if(!bucket.isExists()) {
+        if (!bucket.isExists()) {
             throw new TimeOutException();
         }
     }
@@ -299,20 +290,20 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
         List<Seat> seatList = seatRepository.findSeatListWithSeatInstanceInSeatInstanceIdList(seatInstanceIdList);
 
         // 2. seat이 다 존재하는 지 확인
-        if(seatList.size() != seatInstanceIdList.size()) {
+        if (seatList.size() != seatInstanceIdList.size()) {
             throw new SeatNotFoundException();
         }
         return seatList;
     }
 
     private void checkSeatExist(Seat seat) {
-        if(seat == null)  {
+        if (seat == null) {
             throw new SeatNotFoundException();
         }
     }
 
     private void checkSeatListExists(List<Seat> seatList) {
-        if(seatList.isEmpty()) {
+        if (seatList.isEmpty()) {
             throw new SeatNotFoundException();
         }
     }
