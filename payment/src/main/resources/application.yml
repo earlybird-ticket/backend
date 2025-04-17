@@ -45,8 +45,10 @@ spring:
 
 eureka:
   client:
+    initial-instance-info-replication-interval-seconds: 5  # 초기 등록 주기
+    registry-fetch-interval-seconds: 5  # 레지스트리 갱신 주기 (기본 30초)
     service-url:
-      defaultZone: http://${EUREKA_SERVER_HOST:localhost}:${EUREKA_SERVER_PORT:18080}/eureka
+      defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:18080}/eureka
 
 server:
   port: ${PAYMENT_SERVER_PORT:18089}
