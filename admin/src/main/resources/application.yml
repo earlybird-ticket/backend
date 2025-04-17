@@ -2,7 +2,7 @@ spring:
   config:
     import: optional:file:.env[.properties]
   application:
-    name: admin
+    name: admin-service
   kafka:
     bootstrap-servers: ${KAFKA_HOST}:${KAFKA_PORT}
   jpa:
