@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @Profile("test")
-@Qualifier("testPaymentService")
+@Qualifier("paymentService")
 @RequiredArgsConstructor
 public class TestPaymentServiceImpl implements PaymentService {
 
