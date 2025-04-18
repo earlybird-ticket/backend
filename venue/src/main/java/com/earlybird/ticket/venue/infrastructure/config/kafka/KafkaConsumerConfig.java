@@ -31,10 +31,10 @@ public class KafkaConsumerConfig {
     Map<String,Object> props = new HashMap<>();
 
     @ConditionalOnMissingBean
-    public ConsumerFactory<String, Object> consumerFactory() {
+    public ConsumerFactory<String, String> consumerFactory() {
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers); // Kafka 브로커 리스트 설정
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class); // 메시지 키 역직렬화 방식 설정
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class); // 메시지 값 역직렬화 방식 설정
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class); // 메시지 값 역직렬화 방식 설정
         props.put(JsonDeserializer.TRUSTED_PACKAGES, "*"); // 신뢰할 수 있는 패키지 설정 (역직렬화 시 필요한 설정)
 
         // Consumer 그룹 ID 설정 (여러 Consumer가 같은 그룹에서 동일한 메시지를 처리하지 않도록 함)
@@ -58,14 +58,14 @@ public class KafkaConsumerConfig {
         // Consumer가 장애로 인해 응답하지 않을 경우 제거되는 시간 (세션 타임아웃)
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 60000);
 
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(Object.class));
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new StringDeserializer());
     }
 
     @Bean(name = "kafkaListenerContainerFactory")
-    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory(
+    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory(
             DefaultErrorHandler defaultErrorHandler
     ) {
-        ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
 
         // 메시지 처리 완료 즉시 커밋 (중복 방지)
