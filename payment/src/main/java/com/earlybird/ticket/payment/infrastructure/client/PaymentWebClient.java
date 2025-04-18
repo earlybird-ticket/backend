@@ -3,12 +3,16 @@ package com.earlybird.ticket.payment.infrastructure.client;
 
 import com.earlybird.ticket.payment.application.service.PaymentClient;
 import com.earlybird.ticket.payment.application.service.dto.command.ConfirmPaymentCommand;
+import com.earlybird.ticket.payment.application.service.dto.command.UpdatePaymentCancelCommand;
 import com.earlybird.ticket.payment.application.service.dto.command.UpdatePaymentCommand;
 import com.earlybird.ticket.payment.application.service.exception.PaymentAbortException;
-import com.earlybird.ticket.payment.infrastructure.client.dto.response.ConfirmPaymentMethodClientResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.earlybird.ticket.payment.application.service.exception.PaymentCancelException;
+import com.earlybird.ticket.payment.infrastructure.client.dto.response.ProcessPaymentCancelClientResponse;
+import com.earlybird.ticket.payment.infrastructure.client.dto.response.ProcessPaymentConfirmClientResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +26,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class PaymentWebClient implements PaymentClient {
 
     private static final String IDEMPOTENCY_KEY = "Idempotency-key";
+
+    private static final String TOSS_PAYMENT_URI_PREFIX = "https://api.tosspayments.com/v1/payments";
 
     private final String tossClientSecret;
 
@@ -38,19 +44,17 @@ public class PaymentWebClient implements PaymentClient {
     @Override
     public UpdatePaymentCommand confirmPayment(ConfirmPaymentCommand command,
         UUID paymentId) {
-        ObjectMapper objectMapper = new ObjectMapper();
-
         log.info("토스페이 결제 요청 보냄");
-        ConfirmPaymentMethodClientResponse receipt = webClient.post()
-            .uri("https://api.tosspayments.com/v1/payments/confirm")
+        ProcessPaymentConfirmClientResponse receipt = webClient.post()
+            .uri(TOSS_PAYMENT_URI_PREFIX + "/confirm")
             .headers(httpHeaders -> {
                 httpHeaders.add(HttpHeaders.AUTHORIZATION, getAuthorizationValue());
                 httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-                //httpHeaders.add(IDEMPOTENCY_KEY, command.reservationId().toString());
+                httpHeaders.add(IDEMPOTENCY_KEY, command.reservationId().toString());
             })
             .bodyValue(command)
             .retrieve()
-            .bodyToMono(ConfirmPaymentMethodClientResponse.class)
+            .bodyToMono(ProcessPaymentConfirmClientResponse.class)
             .block();
 
         log.info("토스페이 결제 성공 = {}", receipt);
@@ -70,5 +74,30 @@ public class PaymentWebClient implements PaymentClient {
                 (tossClientSecret + ":").getBytes(StandardCharsets.UTF_8)
             );
         return "Basic " + new String(encodedAuth);
+    }
+
+    @Override
+    public UpdatePaymentCancelCommand cancelPayment(String paymentKey, UUID reservationId) {
+        log.info("토스페이 결제 취소 요청");
+
+        ProcessPaymentCancelClientResponse result = webClient.post()
+            .uri(TOSS_PAYMENT_URI_PREFIX + "/{paymentKey}/cancel", paymentKey)
+            .headers(httpHeaders -> {
+                httpHeaders.add(HttpHeaders.AUTHORIZATION, getAuthorizationValue());
+                httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+                httpHeaders.add(IDEMPOTENCY_KEY, reservationId.toString());
+            })
+            .bodyValue(Map.of("cancelReason", "예약취소"))
+            .retrieve()
+            .bodyToMono(ProcessPaymentCancelClientResponse.class)
+            .block();
+
+        log.info("토스페이 취소 = {}", result);
+
+        if (result.reservationId() == null || !result.reservationId().equals(reservationId)) {
+            throw new PaymentCancelException();
+        }
+
+        return result.toUpdatePaymentCancelCommand();
     }
 }

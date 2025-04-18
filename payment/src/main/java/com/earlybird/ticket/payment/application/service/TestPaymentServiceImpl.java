@@ -115,9 +115,24 @@ public class TestPaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public void cancelPayment(UUID paymentId) {
-        // TODO : 결제 취소 요청
-        // paymentClient.cancelPayment();
+        Payment payment = paymentRepository.findByPaymentId(paymentId)
+            .orElseThrow(PaymentNotFoundException::new);
+
+        Random random = new Random();
+        // WebClient 호출 시간 모방
+        try {
+            Thread.sleep(random.nextInt(1000));
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        Payment mockDelete = Payment.builder()
+            .reservationId(payment.getReservationId())
+            .status(PaymentStatus.CANCELED)
+            .build();
+
+        payment.cancelPayment(mockDelete);
     }
 
     private void validatePaymentAmount(Payment payment, BigDecimal amount) {

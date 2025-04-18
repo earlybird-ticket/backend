@@ -6,7 +6,7 @@ import com.earlybird.ticket.payment.domain.entity.constant.PaymentStatus;
 import lombok.Builder;
 
 @Builder
-public record ConfirmPaymentMethodClientResponse(
+public record ProcessPaymentConfirmClientResponse(
     String method,
     String status,
     String paymentKey
