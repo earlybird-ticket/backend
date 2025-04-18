@@ -4,9 +4,8 @@ import static com.earlybird.ticket.coupon.domain.entity.QCoupon.coupon;
 import static com.earlybird.ticket.coupon.domain.entity.QUserCoupon.userCoupon;
 
 import com.earlybird.ticket.coupon.domain.dto.CouponResult;
-import com.earlybird.ticket.coupon.domain.dto.UserCouponResult;
-import com.earlybird.ticket.coupon.domain.entity.Coupon;
-import com.earlybird.ticket.coupon.domain.entity.UserCoupon;
+import com.earlybird.ticket.coupon.domain.dto.UserCouponResults;
+import com.earlybird.ticket.coupon.domain.dto.UserCouponResults.UserCoupons;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
@@ -20,17 +19,16 @@ public class CouponQueryDslRepositoryImpl implements CouponQueryDslRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public UserCouponResult findAllByUserId(Long userId) {
+    public UserCouponResults findAllByUserId(Long userId) {
 
-        List<UserCoupon> result = jpaQueryFactory
+        List<UserCouponResults.UserCoupons> result = jpaQueryFactory
                 .select(Projections.constructor(
-                        UserCoupon.class,
+                        UserCoupons.class,
+                        userCoupon.coupon.couponId,
                         userCoupon.userCouponId,
-                        userCoupon.coupon,
-                        userCoupon.userId,
+                        userCoupon.couponName,
                         userCoupon.couponType,
                         userCoupon.discountRate,
-                        userCoupon.couponName,
                         userCoupon.usageStatus
                 ))
                 .from(userCoupon)
@@ -38,24 +36,22 @@ public class CouponQueryDslRepositoryImpl implements CouponQueryDslRepository {
                 .where(userCoupon.userId.eq(userId))
                 .fetch();
 
-        return UserCouponResult.of(result);
+        return UserCouponResults.of(result);
     }
 
     @Override
-    public CouponResult findAllCoupons() {
+    public List<CouponResult> findAllCoupons() {
 
-        List<Coupon> result = jpaQueryFactory
+        return jpaQueryFactory
                 .select(Projections.constructor(
-                        Coupon.class,
+                        CouponResult.class,
                         coupon.couponId,
+                        coupon.couponName,
                         coupon.couponType,
-                        coupon.discountRate,
-                        coupon.couponName
+                        coupon.discountRate
                 ))
                 .from(coupon)
                 .where(coupon.deletedAt.isNull())
                 .fetch();
-
-        return CouponResult.of(result);
     }
 }
