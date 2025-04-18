@@ -4,10 +4,8 @@ import com.earlybird.ticket.common.entity.PassportDto;
 import com.earlybird.ticket.common.util.PassportUtil;
 import com.earlybird.ticket.concert.application.dto.DeleteConcertCommand;
 import com.earlybird.ticket.concert.application.dto.DeleteConcertSequenceCommand;
-import com.earlybird.ticket.concert.application.dto.ProcessConcertDetailsCommand;
 import com.earlybird.ticket.concert.application.dto.ProcessConcertDetailsQuery;
 import com.earlybird.ticket.concert.application.dto.ProcessConcertQuery;
-import com.earlybird.ticket.concert.application.dto.ProcessConcertsCommand;
 import com.earlybird.ticket.concert.application.dto.RegisterConcertCommand;
 import com.earlybird.ticket.concert.application.dto.UpdateConcertCommand;
 import com.earlybird.ticket.concert.application.dto.UpdateConcertSequenceCommand;
@@ -20,7 +18,11 @@ import com.earlybird.ticket.concert.domain.Concert;
 import com.earlybird.ticket.concert.domain.ConcertRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,20 +89,26 @@ public class ConcertServiceImpl implements ConcertService {
     @Transactional(readOnly = true)
     @Override
     public ProcessConcertDetailsQuery processConcertDetail(
-            String passport, ProcessConcertDetailsCommand command) {
-        Concert concert = concertRepository.findByConcertId(command.concertId())
+            String passport, UUID concertId
+    ) {
+        Concert concert = concertRepository.findByConcertId(concertId)
                 .orElseThrow(() -> new EntityNotFoundException("Concert not found"));
 
-        return ProcessConcertDetailsQuery.of(concert);
+        return ProcessConcertDetailsQuery.of(concert.getConcertSequences());
     }
 
+    // 콘서트는 범위 및 조건 검색이 가능하다
     @Transactional(readOnly = true)
     @Override
-    public ProcessConcertQuery processConcerts(String passport, ProcessConcertsCommand command) {
-        Concert concert = concertRepository.findByConcertId(command.concertId())
-                .orElseThrow(() -> new EntityNotFoundException("Concert not found"));
+    public Page<ProcessConcertQuery> search(
+            String passport, Integer page, Integer size, String sort, String q, String orderBy) {
 
-        return ProcessConcertQuery.of(concert);
+        Sort.Direction direction = sort.equals("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, orderBy));
+
+        Page<Concert> concertPage = concertRepository.searchConcert(q, sort, orderBy, pageRequest);
+
+        return concertPage.map(ProcessConcertQuery::of);
     }
 
     @Transactional
