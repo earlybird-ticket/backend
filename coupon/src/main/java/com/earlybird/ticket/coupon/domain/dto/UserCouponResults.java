@@ -13,23 +13,7 @@ public record UserCouponResults(
     public static UserCouponResults of(
             List<UserCoupons> result
     ) {
-        return new UserCouponResults(
-                result.stream().map((userCoupons) ->
-                                            UserCoupons.builder()
-                                                    .couponId(
-                                                            userCoupons.couponId())
-                                                    .userCouponId(
-                                                            userCoupons.userCouponId())
-                                                    .couponName(
-                                                            userCoupons.couponName())
-                                                    .couponType(
-                                                            userCoupons.couponType())
-                                                    .discountRate(
-                                                            userCoupons.discountRate())
-                                                    .usageStatus(
-                                                            userCoupons.usageStatus())
-                                                    .build()
-                ).toList());
+        return new UserCouponResults(result);
     }
 
     @Builder
