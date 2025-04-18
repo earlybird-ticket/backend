@@ -1,0 +1,11 @@
+@baseUrl= http://localhost:18087
+
+### 쿠폰 조회
+GET {{baseUrl}}/api/v1/external/coupons
+Content-Type: application/json
+X-User-Passport: {"userId":1,"userRole":"ADMIN"}
+
+### 유저 쿠폰 조회
+GET {{baseUrl}}/api/v1/external/coupons/users
+Content-Type: application/json
+X-User-Passport: {"userId":1,"userRole":"ADMIN"}
