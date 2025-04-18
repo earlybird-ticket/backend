@@ -108,13 +108,8 @@ public class ConcertServiceImpl implements ConcertService {
 
         Page<Concert> concertPage = concertRepository.searchConcert(q, sort, orderBy, pageRequest);
 
-        // concertPage → ProcessConcertQuery로 매핑
-        Page<ProcessConcertQuery> resultPage = concertPage.map(ProcessConcertQuery::of
-        );
-
-        return resultPage;
+        return concertPage.map(ProcessConcertQuery::of);
     }
-
 
     @Transactional
     @Override

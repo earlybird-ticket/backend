@@ -34,6 +34,6 @@ public class ConcertRepositoryImpl implements ConcertRepository {
             PageRequest pageRequest
     ) {
         return concertQueryDslRepository.search(
-                pageRequest, sort, q, orderBy);
+                q, sort, orderBy, pageRequest);
     }
 }

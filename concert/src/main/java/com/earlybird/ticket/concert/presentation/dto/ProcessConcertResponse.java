@@ -3,19 +3,18 @@ package com.earlybird.ticket.concert.presentation.dto;
 import com.earlybird.ticket.concert.application.dto.ProcessConcertQuery;
 import com.earlybird.ticket.concert.domain.constant.Genre;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
 
 @Builder
 public record ProcessConcertResponse(
-        List<ConcertResponse> responses
+        ConcertResponse responses
 ) {
 
 
     public static ProcessConcertResponse of(ProcessConcertQuery processConcertQuery) {
         return ProcessConcertResponse.builder()
-                .responses(List.of(ConcertResponse.of(processConcertQuery)))
+                .responses(ConcertResponse.of(processConcertQuery))
                 .build();
     }
 

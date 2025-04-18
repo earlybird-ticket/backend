@@ -73,10 +73,10 @@ public class ConcertController {
         ProcessConcertDetailsQuery processConcertDetailsQuery = concertService.processConcertDetail(
                 passport, concertId);
 
-        ProcessConcertDetailsResponse reponse = ProcessConcertDetailsResponse.of(
+        ProcessConcertDetailsResponse response = ProcessConcertDetailsResponse.of(
                 processConcertDetailsQuery);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(CommonDto.ok(reponse, "콘서트 상세 조회 성공"));
+                .body(CommonDto.ok(response, "콘서트 상세 조회 성공"));
     }
 
     @PutMapping("/")

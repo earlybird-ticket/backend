@@ -6,5 +6,5 @@ import org.springframework.data.domain.PageRequest;
 
 public interface ConcertQueryDslRepository {
 
-    Page<Concert> search(PageRequest pageRequest, String sort, String q, String orderBy);
+    Page<Concert> search(String q, String sort, String orderBy, PageRequest pageRequest);
 }

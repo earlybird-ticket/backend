@@ -21,7 +21,7 @@ public class ConcertQueryDslRepositoryImpl implements ConcertQueryDslRepository 
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<Concert> search(PageRequest pageRequest, String sort, String q, String orderBy) {
+    public Page<Concert> search(String q, String sort, String orderBy, PageRequest pageRequest) {
         BooleanBuilder builder = new BooleanBuilder();
 
         if (q != null && !q.isEmpty()) {
