@@ -27,7 +27,7 @@ public class ConfirmSeatFailPayloadHandler implements EventHandler<SeatConfirmFa
 
 
         List<ReservationSeat> seatIntanceList = reservationSeatRepository.findAllBySeatInstaceIdIn(payload.seatInstanceIdList());
-        PassportDto passport = payload.passport();
+        PassportDto passport = payload.passportDto();
         seatIntanceList.forEach(reservationSeat -> {
             reservationSeat.getReservation()
                            .delete(passport.getUserId());
@@ -36,7 +36,8 @@ public class ConfirmSeatFailPayloadHandler implements EventHandler<SeatConfirmFa
             reservationSeat.updateStatusReserveFREE();
             reservationSeat.delete(passport.getUserId());
 
-
+            //TODO:: 좌석 반환 요청
+            //TODO:: 결제 취소 요청
             //TODO:: 실패 알람 처리
             //Code를 가지고 내용 보내기
         });
