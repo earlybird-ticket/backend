@@ -9,6 +9,7 @@ import com.earlybird.ticket.coupon.domain.entity.Coupon;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -16,6 +17,7 @@ public class CouponConfirmEventHandler implements EventHandler<CouponConfirmPayl
 
     private final CouponRepository couponRepository;
 
+    @Transactional
     @Override
     public void handle(Event<CouponConfirmPayload> event) {
         CouponConfirmPayload payload = event.getPayload();
