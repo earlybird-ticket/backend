@@ -3,8 +3,9 @@ package com.earlybird.ticket.coupon.infrastructure.repository;
 import com.earlybird.ticket.coupon.application.event.dto.CouponCreatePayload;
 import com.earlybird.ticket.coupon.domain.CouponRepository;
 import com.earlybird.ticket.coupon.domain.dto.CouponResult;
-import com.earlybird.ticket.coupon.domain.dto.UserCouponResult;
+import com.earlybird.ticket.coupon.domain.dto.UserCouponResults;
 import com.earlybird.ticket.coupon.domain.entity.Coupon;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,7 @@ public class CouponRepositoryImpl implements CouponRepository {
     private final CouponJpaRepository couponJpaRepository;
 
     @Override
-    public UserCouponResult findByUserId(Long userId) {
+    public UserCouponResults findAllUserCouponByUserId(Long userId) {
         return couponQueryDslRepository.findAllByUserId(userId);
     }
 
@@ -33,7 +34,7 @@ public class CouponRepositoryImpl implements CouponRepository {
     }
 
     @Override
-    public CouponResult findAllCoupon() {
+    public List<CouponResult> findAllCoupon() {
         return couponQueryDslRepository.findAllCoupons();
     }
 
