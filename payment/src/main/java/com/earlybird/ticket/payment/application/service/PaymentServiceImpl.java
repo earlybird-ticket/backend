@@ -8,6 +8,7 @@ import com.earlybird.ticket.payment.application.TemporaryStore;
 import com.earlybird.ticket.payment.application.event.dto.request.PaymentSuccessEvent;
 import com.earlybird.ticket.payment.application.service.dto.command.ConfirmPaymentCommand;
 import com.earlybird.ticket.payment.application.service.dto.command.CreatePaymentCommand;
+import com.earlybird.ticket.payment.application.service.dto.command.UpdatePaymentCancelCommand;
 import com.earlybird.ticket.payment.application.service.dto.query.FindPaymentQuery;
 import com.earlybird.ticket.payment.application.service.exception.PaymentAmountDoesNotMatchException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentNotFoundException;
@@ -110,9 +111,17 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public void cancelPayment(UUID paymentId) {
         // TODO : 결제 취소 요청
-        // paymentClient.cancelPayment();
+        Payment payment = paymentRepository.findByPaymentId(paymentId)
+            .orElseThrow(PaymentNotFoundException::new);
+
+        Payment cancelPayment = paymentClient.cancelPayment(
+                payment.getPaymentKey(), payment.getReservationId())
+            .toCancelPayment();
+
+        payment.cancelPayment(cancelPayment);
     }
 
     private void validatePaymentAmount(Payment payment, BigDecimal amount) {
