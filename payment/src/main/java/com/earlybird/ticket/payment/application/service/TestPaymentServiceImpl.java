@@ -85,7 +85,7 @@ public class TestPaymentServiceImpl implements PaymentService {
         Payment receipt = UpdatePaymentCommand.builder()
             .paymentKey("tviva" + LocalDateTime.now())
             .status(PaymentStatus.DONE)
-            .paymentMethod(PaymentMethod.CREDIT_CARD)
+            .paymentMethod(PaymentMethod.CARD)
             .build()
             .toPayment(payment.getUserId());
         // 결제 방법, 상태 반영
