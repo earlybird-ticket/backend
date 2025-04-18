@@ -11,7 +11,9 @@ public enum PaymentStatus {
     WAIT_FOR_DEPOSIT(Status.WAITING_FOR_DEPOSIT),
     DONE(Status.DONE),
     ABORTED(Status.ABORTED),
-    EXPIRED(Status.EXPIRED);
+    EXPIRED(Status.EXPIRED),
+    CANCELED(Status.CANCELED),
+    ;
 
     private final String value;
 
@@ -32,5 +34,7 @@ public enum PaymentStatus {
         public static final String ABORTED = "ABORTED";
         // 10분 이후에는 좌석 반환과 함께 결제 실패
         public static final String EXPIRED = "EXPIRED";
+
+        public static final String CANCELED = "CANCELED";
     }
 }

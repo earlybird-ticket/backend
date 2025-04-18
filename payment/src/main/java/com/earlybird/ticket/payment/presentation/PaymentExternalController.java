@@ -11,6 +11,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +41,6 @@ public class PaymentExternalController {
     public ResponseEntity<CommonDto<FindPaymentResponse>> findPayment(
         @PathVariable(name = "paymentId") UUID paymentId
     ) {
-        // TODO : Redis 결제 타임아웃 검증
         FindPaymentQuery payment = paymentService.findPayment(paymentId);
         return ResponseEntity.ok(CommonDto.ok(FindPaymentResponse.of(payment), "조회 성공"));
     }
@@ -49,10 +49,18 @@ public class PaymentExternalController {
     public ResponseEntity<CommonDto<Void>> confirmPayment(
         @RequestBody ConfirmPaymentRequest paymentRequest
     ) {
-        // TODO : Redis 결제 타임아웃 검증
         log.info("confirmPayment = {}", paymentRequest);
         paymentService.confirmPayment(paymentRequest.toConfirmPaymentCommand());
 
         return ResponseEntity.ok(CommonDto.ok(null, "결제 확정 성공"));
+    }
+
+    // event로 변경 예정
+    @DeleteMapping("/{paymentId}")
+    public ResponseEntity<CommonDto<Void>> cancelPayment(
+        @PathVariable(name = "paymentId") UUID paymentId
+    ) {
+        paymentService.cancelPayment(paymentId);
+        return ResponseEntity.ok(CommonDto.ok(null, "결제 취소 성공"));
     }
 }

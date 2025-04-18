@@ -1,6 +1,7 @@
 package com.earlybird.ticket.payment.domain.entity;
 
 import com.earlybird.ticket.common.entity.BaseEntity;
+import com.earlybird.ticket.payment.application.service.exception.PaymentNotFoundException;
 import com.earlybird.ticket.payment.domain.entity.constant.PaymentMethod;
 import com.earlybird.ticket.payment.domain.entity.constant.PaymentStatus;
 import jakarta.persistence.*;
@@ -90,6 +91,14 @@ public class Payment extends BaseEntity {
         this.method = receipt.method;
         this.status = receipt.status;
         this.update(this.userId);
+    }
+
+    public void cancelPayment(Payment canceled) {
+        if (!this.getReservationId().equals(canceled.reservationId)) {
+            throw new PaymentNotFoundException();
+        }
+        this.status = canceled.status;
+        this.delete(this.userId);
     }
 
 }
