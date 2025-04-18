@@ -9,7 +9,7 @@ public record CouponReservePayload(UUID couponId,
                                    String couponName,
                                    CouponType couponType,
                                    UUID reservationId,
-                                   PassportDto passport) implements EventPayload {
+                                   PassportDto passportDto) implements EventPayload {
 
 
 }

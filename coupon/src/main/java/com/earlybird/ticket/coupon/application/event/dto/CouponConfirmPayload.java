@@ -7,7 +7,7 @@ import java.util.UUID;
 public record CouponConfirmPayload(
 
         UUID couponId,
-        PassportDto passport
+        PassportDto passportDto
 ) implements EventPayload {
 
 }

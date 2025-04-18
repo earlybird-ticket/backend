@@ -6,7 +6,7 @@ import com.earlybird.ticket.coupon.domain.constant.CouponType;
 import com.earlybird.ticket.coupon.domain.entity.Coupon;
 
 public record CouponCreatePayload(
-        PassportDto passport,
+        PassportDto passportDto,
         String couponName,
         Integer discountRate,
         CouponType couponType

@@ -5,7 +5,7 @@ import com.earlybird.ticket.common.entity.PassportDto;
 import java.util.UUID;
 
 public record CouponDeletePayload(
-        PassportDto passport,
+        PassportDto passportDto,
         UUID couponId
 ) implements EventPayload {
 

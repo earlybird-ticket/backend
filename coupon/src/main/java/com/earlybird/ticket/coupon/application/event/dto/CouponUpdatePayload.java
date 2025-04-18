@@ -6,7 +6,7 @@ import com.earlybird.ticket.coupon.domain.constant.CouponType;
 import java.util.UUID;
 
 public record CouponUpdatePayload(
-        PassportDto passport,
+        PassportDto passportDto,
         UUID couponId,
         String couponName,
         Integer discountRate,
