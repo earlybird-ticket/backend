@@ -29,8 +29,7 @@ public record RegisterConcertCommand(
 ) {
 
     public Concert toEntity() {
-
-        return Concert.builder()
+        Concert concert = Concert.builder()
                 .hallId(hallId)
                 .venueId(venueId)
                 .concertName(concertName())
@@ -41,30 +40,34 @@ public record RegisterConcertCommand(
                 .runningTime(runningTime())
                 .sellerId(sellerId())
                 .priceInfo(priceInfo())
-                .concertSequences(concertSequences()
-                                          .stream()
-                                          .map(seq -> ConcertSequence.builder()
-                                                  .sequenceStartDate(seq.sequenceStartDate())
-                                                  .sequenceEndDate(seq.sequenceEndDate())
-                                                  .ticketSaleStartDate(seq.ticketSaleStartDate())
-                                                  .ticketSaleEndDate(seq.ticketSaleEndDate())
-                                                  .concertStatus(seq.status())
-                                                  .build()
-                                          )
-                                          .toList()
-                )
-                .seatInstanceInfo(seatInstanceInfoList()
-                                          .stream()
-                                          .map(info -> SeatInstanceInfo.builder()
-                                                  .section(info.section())
-                                                  .grade(info.grade())
-                                                  .price(info.price())
-                                                  .build()
-                                          )
-                                          .toList()
-                )
                 .build();
+
+        List<ConcertSequence> sequences = concertSequences().stream()
+                .map(seq -> ConcertSequence.builder()
+                        .sequenceStartDate(seq.sequenceStartDate())
+                        .sequenceEndDate(seq.sequenceEndDate())
+                        .ticketSaleStartDate(seq.ticketSaleStartDate())
+                        .ticketSaleEndDate(seq.ticketSaleEndDate())
+                        .concertStatus(seq.status())
+                        .concert(concert)
+                        .build())
+                .toList();
+
+        List<SeatInstanceInfo> seats = seatInstanceInfoList().stream()
+                .map(info -> SeatInstanceInfo.builder()
+                        .concert(concert)
+                        .section(info.section())
+                        .grade(info.grade())
+                        .price(info.price())
+                        .build())
+                .toList();
+
+        concert.addConcertSequences(sequences);
+        concert.addSeatInstanceInfo(seats);
+
+        return concert;
     }
+
 
     @Builder
     public record SeatInstanceInfoCommand(

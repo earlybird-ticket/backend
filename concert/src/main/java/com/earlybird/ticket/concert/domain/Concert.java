@@ -142,4 +142,12 @@ public class Concert extends BaseEntity {
                 })
                 .forEach(concertSequences::add);
     }
+
+    public void addSeatInstanceInfo(List<SeatInstanceInfo> seats) {
+        this.seatInstanceInfo.addAll(seats);
+    }
+
+    public void addConcertSequences(List<ConcertSequence> sequences) {
+        this.concertSequences.addAll(sequences);
+    }
 }
