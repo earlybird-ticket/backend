@@ -2,24 +2,31 @@ package com.earlybird.ticket.concert.presentation;
 
 import com.earlybird.ticket.common.entity.CommonDto;
 import com.earlybird.ticket.concert.application.ConcertService;
+import com.earlybird.ticket.concert.application.dto.ProcessConcertDetailsQuery;
+import com.earlybird.ticket.concert.application.dto.ProcessConcertQuery;
 import com.earlybird.ticket.concert.presentation.dto.DeleteConcertRequest;
 import com.earlybird.ticket.concert.presentation.dto.DeleteConcertSequenceRequest;
-import com.earlybird.ticket.concert.presentation.dto.ProcessConcertDetailsRequest;
-import com.earlybird.ticket.concert.presentation.dto.ProcessConcertRequest;
+import com.earlybird.ticket.concert.presentation.dto.ProcessConcertDetailsResponse;
+import com.earlybird.ticket.concert.presentation.dto.ProcessConcertResponse;
 import com.earlybird.ticket.concert.presentation.dto.RegisterConcertRequest;
 import com.earlybird.ticket.concert.presentation.dto.UpdateConcertRequest;
 import com.earlybird.ticket.concert.presentation.dto.UpdateConcertSequenceRequest;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -39,22 +46,37 @@ public class ConcertController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<CommonDto<Void>> processConcerts(
+    public ResponseEntity<CommonDto<PagedModel<ProcessConcertResponse>>> processConcerts(
             @RequestHeader("X-User-Passport") String passport,
-            @RequestBody @Valid ProcessConcertRequest request
+            @RequestParam(name = "page", defaultValue = "0") Integer page,
+            @RequestParam(name = "size", defaultValue = "10") Integer size,
+            @RequestParam(name = "sort", defaultValue = "desc") String sort,
+            @RequestParam(name = "q", defaultValue = "") String q,
+            @RequestParam(name = "orderBy", defaultValue = "createdAt") String orderBy
     ) {
-        concertService.processConcerts(passport, request.toCommand());
-        return ResponseEntity.status(HttpStatus.OK).body(CommonDto.ok(null, "콘서트 조회 성공"));
+        Page<ProcessConcertQuery> queryPage =
+                concertService.search(passport, page, size, sort, q, orderBy);
+
+        Page<ProcessConcertResponse> responsePage =
+                queryPage.map(ProcessConcertResponse::of);
+
+        return ResponseEntity
+                .ok(CommonDto.ok(new PagedModel<>(responsePage), "콘서트 조회 성공"));
     }
 
-    @GetMapping("/detail")
-    public ResponseEntity<CommonDto<Void>> processConcertDetail(
+
+    @GetMapping("/detail/{concertId}")
+    public ResponseEntity<CommonDto<ProcessConcertDetailsResponse>> processConcertDetail(
             @RequestHeader("X-User-Passport") String passport,
-            @RequestBody @Valid ProcessConcertDetailsRequest request
+            @PathVariable("concertId") UUID concertId
     ) {
-        concertService.processConcertDetail(passport, request.toCommand());
+        ProcessConcertDetailsQuery processConcertDetailsQuery = concertService.processConcertDetail(
+                passport, concertId);
+
+        ProcessConcertDetailsResponse reponse = ProcessConcertDetailsResponse.of(
+                processConcertDetailsQuery);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(CommonDto.ok(null, "콘서트 상세 조회 성공"));
+                .body(CommonDto.ok(reponse, "콘서트 상세 조회 성공"));
     }
 
     @PutMapping("/")
