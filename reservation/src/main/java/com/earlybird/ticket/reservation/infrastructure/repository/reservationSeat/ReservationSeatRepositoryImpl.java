@@ -58,7 +58,7 @@ public class ReservationSeatRepositoryImpl implements ReservationSeatRepository 
     }
 
     @Override
-    public List<ReservationSeat> findByIdIn(List<UUID> uuids) {
+    public List<ReservationSeat> findAllByIdIn(List<UUID> uuids) {
         return reservationSeatJpaRepository.findAllByIdIn(uuids);
     }
 
