@@ -20,7 +20,7 @@ public class CouponCreateEventHandler implements EventHandler<CouponCreatePayloa
     @Override
     public void handle(Event<CouponCreatePayload> event) {
         CouponCreatePayload payload = event.getPayload();
-        PassportDto passportDto = payload.passport();
+        PassportDto passportDto = payload.passportDto();
         Coupon coupon = couponRepository.save(event.getPayload());
         coupon.createCoupon(passportDto.getUserId());
     }
