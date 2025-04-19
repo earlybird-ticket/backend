@@ -51,8 +51,8 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
         //좌석 확정 상태로 변경
         ConfirmSeatEvent confirmSeatEvent = ConfirmSeatEvent.builder()
                                                             .seatInstanceIdList(reservationSeatList.stream()
-                                                                                                 .map(ReservationSeat::getId)
-                                                                                                 .toList())
+                                                                                                   .map(ReservationSeat::getSeatInstanceId)
+                                                                                                   .toList())
                                                             .passportDto(passportDto)
                                                             .reservationId(reservationId)
                                                             .build();
@@ -75,7 +75,7 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
 
 
         //쿠폰 확정 상태로 변경
-        if(reservation.getCouponId() == null) {
+        if (reservation.getCouponId() == null) {
             return;
         }
         ConfirmCouponEvent confirmCouponEvent = ConfirmCouponEvent.createSeatPreemptPayload(reservation.getCouponId(),
