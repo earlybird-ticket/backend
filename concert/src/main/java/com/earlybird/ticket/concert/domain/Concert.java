@@ -3,24 +3,17 @@ package com.earlybird.ticket.concert.domain;
 import com.earlybird.ticket.common.entity.BaseEntity;
 import com.earlybird.ticket.concert.domain.constant.ConcertStatus;
 import com.earlybird.ticket.concert.domain.constant.Genre;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLRestriction;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Entity
@@ -61,13 +54,18 @@ public class Concert extends BaseEntity {
     private List<SeatInstanceInfo> seatInstanceInfo = new ArrayList<>();
 
     @Builder
-    public Concert(
-            String concertName, String entertainerName, LocalDateTime startDate,
-            LocalDateTime endDate, Genre genre, Integer runningTime, Long sellerId,
-            String priceInfo,
-            List<SeatInstanceInfo> seatInstanceInfo,
-            List<ConcertSequence> concertSequences, UUID hallId, UUID venueId
-    ) {
+    public Concert(String concertName,
+                   String entertainerName,
+                   LocalDateTime startDate,
+                   LocalDateTime endDate,
+                   Genre genre,
+                   Integer runningTime,
+                   Long sellerId,
+                   String priceInfo,
+                   List<SeatInstanceInfo> seatInstanceInfo,
+                   List<ConcertSequence> concertSequences,
+                   UUID hallId,
+                   UUID venueId) {
         this.concertName = concertName;
         this.entertainerName = entertainerName;
         this.startDate = startDate;
@@ -82,27 +80,23 @@ public class Concert extends BaseEntity {
         this.venueId = venueId;
     }
 
-    public void deleteConcertSequence(
-            Long userId,
-            UUID concertSequenceId
-    ) {
+    public void deleteConcertSequence(Long userId,
+                                      UUID concertSequenceId) {
         for (ConcertSequence concertSequence : this.concertSequences) {
             if (concertSequence.getDeletedAt() == null && concertSequence.getConcertSequenceId()
-                    .equals(concertSequenceId)) {
+                                                                         .equals(concertSequenceId)) {
                 concertSequence.delete(userId);
             }
         }
     }
 
-    public void updateConcert(
-            String concertName,
-            String entertainerName,
-            LocalDateTime startDate,
-            LocalDateTime endDate,
-            Genre genre,
-            Integer runningTime,
-            String priceInfo
-    ) {
+    public void updateConcert(String concertName,
+                              String entertainerName,
+                              LocalDateTime startDate,
+                              LocalDateTime endDate,
+                              Genre genre,
+                              Integer runningTime,
+                              String priceInfo) {
         this.concertName = concertName;
         this.entertainerName = entertainerName;
         this.startDate = startDate;
@@ -117,37 +111,39 @@ public class Concert extends BaseEntity {
     }
 
     @Builder(builderMethodName = "updateConcertSequenceBuilder")
-    public void updateConcertSequence(
-            UUID concertSequenceId,
-            LocalDateTime sequenceStartDate,
-            LocalDateTime sequenceEndDate,
-            LocalDateTime ticketSaleStartDate,
-            LocalDateTime ticketSaleEndDate,
-            ConcertStatus status
-    ) {
+    public void updateConcertSequence(UUID concertSequenceId,
+                                      LocalDateTime sequenceStartDate,
+                                      LocalDateTime sequenceEndDate,
+                                      LocalDateTime ticketSaleStartDate,
+                                      LocalDateTime ticketSaleEndDate,
+                                      ConcertStatus status) {
 
         concertSequences.stream()
-                .map(concertSequence -> {
-                    if (concertSequence.getConcertSequenceId()
-                            .equals(concertSequenceId)) {
-                        concertSequence.update(
-                                sequenceStartDate,
-                                sequenceEndDate,
-                                ticketSaleStartDate,
-                                ticketSaleEndDate,
-                                status
-                        );
-                    }
-                    return concertSequence;
-                })
-                .forEach(concertSequences::add);
-    }
-
-    public void addSeatInstanceInfo(List<SeatInstanceInfo> seats) {
-        this.seatInstanceInfo.addAll(seats);
+                        .map(concertSequence -> {
+                            if (concertSequence.getConcertSequenceId()
+                                               .equals(concertSequenceId)) {
+                                concertSequence.update(sequenceStartDate,
+                                                       sequenceEndDate,
+                                                       ticketSaleStartDate,
+                                                       ticketSaleEndDate,
+                                                       status);
+                            }
+                            return concertSequence;
+                        })
+                        .forEach(concertSequences::add);
     }
 
     public void addConcertSequences(List<ConcertSequence> sequences) {
+        if (this.concertSequences == null) {
+            this.concertSequences = new ArrayList<>();
+        }
         this.concertSequences.addAll(sequences);
+    }
+
+    public void addSeatInstanceInfo(List<SeatInstanceInfo> seats) {
+        if (this.seatInstanceInfo == null) {
+            this.seatInstanceInfo = new ArrayList<>();
+        }
+        this.seatInstanceInfo.addAll(seats);
     }
 }
