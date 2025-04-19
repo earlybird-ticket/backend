@@ -184,8 +184,6 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
         List<UUID> seatInstanceIdList = seatConfirmPayload.seatInstanceIdList();
 
         try {
-            checkExpiredReservationTime(seatConfirmPayload.reservationId());
-
             //1. seatInstance 가져오기
             List<Seat> seatList = getSeatList(seatInstanceIdList);
 
