@@ -16,4 +16,5 @@ public interface ReservationSeatJpaRepository extends JpaRepository<ReservationS
 
     List<ReservationSeat> findByReservation(Reservation reservation);
 
+    List<ReservationSeat> findAllByIdIn(List<UUID> uuids);
 }

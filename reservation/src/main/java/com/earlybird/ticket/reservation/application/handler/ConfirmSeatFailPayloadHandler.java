@@ -26,7 +26,7 @@ public class ConfirmSeatFailPayloadHandler implements EventHandler<SeatConfirmFa
         SeatConfirmFailPayload payload = event.getPayload();
 
 
-        List<ReservationSeat> seatIntanceList = reservationSeatRepository.findAllBySeatInstaceIdIn(payload.seatInstanceIdList());
+        List<ReservationSeat> seatIntanceList = reservationSeatRepository.findAllByIdIn(payload.seatInstanceIdList());
         PassportDto passport = payload.passportDto();
         seatIntanceList.forEach(reservationSeat -> {
             reservationSeat.getReservation()

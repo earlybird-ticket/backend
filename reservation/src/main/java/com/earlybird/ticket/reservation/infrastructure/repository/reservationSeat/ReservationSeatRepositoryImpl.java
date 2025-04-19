@@ -57,5 +57,10 @@ public class ReservationSeatRepositoryImpl implements ReservationSeatRepository 
                                                                 passportDto);
     }
 
+    @Override
+    public List<ReservationSeat> findByIdIn(List<UUID> uuids) {
+        return reservationSeatJpaRepository.findAllByIdIn(uuids);
+    }
+
 
 }
