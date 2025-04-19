@@ -16,11 +16,16 @@ public class PaymentRedisTemporaryStore implements TemporaryStore {
 
     private final RedissonClient redissonClient;
 
+    /**
+     * 예약 쪽 TTL을 확인 -> 현재 버킷이 없다면 이미 TTL 만료
+     * @param reservationId
+     * @return
+     */
     @Override
     public boolean isTimedOut(UUID reservationId) {
         String key = RESERVATION_KEY + reservationId;
         log.info("예약 생성 시간 검증 = {}", key);
-        return redissonClient.getBucket(key).isExists();
+        return !redissonClient.getBucket(key).isExists();
     }
 
 }
