@@ -35,6 +35,7 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
     private final OutboxRepository outboxRepository;
 
     @Override
+    @Transactional
     public void handle(Event<PaymentSuccessPayload> event) {
         PaymentSuccessPayload payload = event.getPayload();
         UUID reservationId = payload.reservationId();
