@@ -21,9 +21,9 @@ public class CouponDeleteEventHandler implements EventHandler<CouponDeletePayloa
     @Override
     public void handle(Event<CouponDeletePayload> event) {
         CouponDeletePayload payload = event.getPayload();
-        PassportDto passportDto = payload.passport();
+        PassportDto passportDto = payload.passportDto();
         Coupon coupon = couponRepository.findByCouponId(payload.couponId())
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 쿠폰입니다."));
+                                        .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 쿠폰입니다."));
         coupon.deleteCoupon(passportDto.getUserId());
     }
 

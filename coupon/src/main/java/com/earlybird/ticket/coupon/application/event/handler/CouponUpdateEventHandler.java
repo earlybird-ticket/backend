@@ -21,15 +21,15 @@ public class CouponUpdateEventHandler implements EventHandler<CouponUpdatePayloa
     @Override
     public void handle(Event<CouponUpdatePayload> event) {
         CouponUpdatePayload payload = event.getPayload();
-        PassportDto passportDto = payload.passport();
+        PassportDto passportDto = payload.passportDto();
 
         Coupon coupon = couponRepository.findByCouponId(payload.couponId())
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 쿠폰입니다."));
+                                        .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 쿠폰입니다."));
 
-        coupon.updateCoupon(
-                passportDto.getUserId(), payload.couponName(), payload.discountRate(),
-                payload.couponType()
-        );
+        coupon.updateCoupon(passportDto.getUserId(),
+                            payload.couponName(),
+                            payload.discountRate(),
+                            payload.couponType());
     }
 
     @Override
