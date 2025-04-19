@@ -8,7 +8,6 @@ import com.earlybird.ticket.reservation.domain.entity.constant.EventType;
 import com.earlybird.ticket.reservation.domain.repository.ReservationSeatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +19,6 @@ import java.util.List;
 public class ConfirmSeatSuccessPayloadHandler implements EventHandler<SeatConfirmSuccessPayload> {
 
     private final ReservationSeatRepository reservationSeatRepository;
-    private final RedissonClient redissonClient;
 
     @Override
     @Transactional
@@ -36,7 +34,7 @@ public class ConfirmSeatSuccessPayloadHandler implements EventHandler<SeatConfir
         seatIntanceList.forEach(seat -> {
             log.info("수정 전 상태: {}",
                      seat.getStatus());
-            seat.updateStatusReserveSuccess();
+            seat.updateStatusConfirmSuccess();
             log.info("수정 후 상태: {}",
                      seat.getStatus());
             seatIntanceList.forEach(ReservationSeat::updateStatusConfirmSuccess);
