@@ -29,4 +29,5 @@ public interface ReservationSeatRepository {
                                                      Pageable pageable,
                                                      PassportDto passportDto);
 
+    List<ReservationSeat> findAllByInstanceIdIn(List<UUID> uuids);
 }
