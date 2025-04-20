@@ -1,9 +1,9 @@
 package com.earlybird.ticket.reservation.application.handler;
 
-import com.earlybird.ticket.common.entity.PassportDto;
 import com.earlybird.ticket.reservation.application.dto.response.SeatPreemptFailPayload;
 import com.earlybird.ticket.reservation.application.event.EventHandler;
 import com.earlybird.ticket.reservation.domain.entity.Event;
+import com.earlybird.ticket.reservation.domain.entity.Reservation;
 import com.earlybird.ticket.reservation.domain.entity.ReservationSeat;
 import com.earlybird.ticket.reservation.domain.entity.constant.EventType;
 import com.earlybird.ticket.reservation.domain.repository.ReservationSeatRepository;
@@ -27,14 +27,14 @@ public class PreemptSeatFailPayloadHandler implements EventHandler<SeatPreemptFa
 
 
         List<ReservationSeat> seatIntanceList = reservationSeatRepository.findAllBySeatInstaceIdIn(payload.seatInstanceIdList());
-        PassportDto passport = payload.passportDto();
+        Long userId = payload.passportDto()
+                             .getUserId();
         seatIntanceList.forEach(reservationSeat -> {
-            reservationSeat.getReservation()
-                           .delete(passport.getUserId());
+            Reservation reservation = reservationSeat.getReservation();
+            reservation.updateStatusCancelled(userId);
 
             //예약 좌석 상태 FREE로 수정
-            reservationSeat.updateStatusReserveFREE();
-            reservationSeat.delete(passport.getUserId());
+            reservationSeat.updateStatusFREE(userId);
 
             //TODO:: 실패 알람 처리
             //Code를 가지고 내용 보내기

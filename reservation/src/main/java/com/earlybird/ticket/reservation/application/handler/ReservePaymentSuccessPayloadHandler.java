@@ -45,11 +45,10 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
         Reservation reservation = reservationRepository.findById(reservationId)
                                                        .orElseThrow(NotFoundReservationException::new);
         List<ReservationSeat> reservationSeatList = reservationSeatRepository.findByReservation(reservation);
-        //결제정보 업데이트 , 예약 확정상태
+        log.info("Reservation Update Payment Information");
         reservation.updatePaymentInfo(payload);
-        reservationSeatList.forEach(ReservationSeat::updateStatusConfirmSuccess);
 
-        //좌석 확정 상태로 변경
+        log.info("Create ConfirmSeat Event");
         ConfirmSeatEvent confirmSeatEvent = ConfirmSeatEvent.builder()
                                                             .seatInstanceIdList(reservationSeatList.stream()
                                                                                                    .map(ReservationSeat::getSeatInstanceId)
@@ -65,6 +64,7 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
 
         String convertedConfirmSeatPayload = eventPayloadConverter.serializePayload(confirmSeatPayloadEvent);
 
+        log.info("ReservationSeat Outbox 발행");
         Outbox seatOutbox = Outbox.builder()
                                   .aggregateId(reservation.getId())
                                   .aggregateType(Outbox.AggregateType.RESERVATION)
@@ -75,7 +75,7 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
         outboxRepository.save(seatOutbox);
 
 
-        //쿠폰 확정 상태로 변경
+        log.info("Create Coupon Confirm Event");
         if (reservation.getCouponId() == null) {
             return;
         }
@@ -89,6 +89,7 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
 
         String convertedConfirmCouponPayload = eventPayloadConverter.serializePayload(confirmCouponPayloadEvent);
 
+        log.info(" Save Coupon Outbox ");
         Outbox couponOutbox = Outbox.builder()
                                     .aggregateId(reservation.getId())
                                     .aggregateType(Outbox.AggregateType.RESERVATION)

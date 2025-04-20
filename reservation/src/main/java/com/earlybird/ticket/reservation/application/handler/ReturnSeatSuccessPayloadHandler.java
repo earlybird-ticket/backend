@@ -3,6 +3,7 @@ package com.earlybird.ticket.reservation.application.handler;
 import com.earlybird.ticket.reservation.application.dto.response.SeatReturnSuccessPayload;
 import com.earlybird.ticket.reservation.application.event.EventHandler;
 import com.earlybird.ticket.reservation.domain.entity.Event;
+import com.earlybird.ticket.reservation.domain.entity.Reservation;
 import com.earlybird.ticket.reservation.domain.entity.ReservationSeat;
 import com.earlybird.ticket.reservation.domain.entity.constant.EventType;
 import com.earlybird.ticket.reservation.domain.repository.ReservationSeatRepository;
@@ -24,26 +25,25 @@ public class ReturnSeatSuccessPayloadHandler implements EventHandler<SeatReturnS
     @Transactional
     public void handle(Event<SeatReturnSuccessPayload> event) {
         SeatReturnSuccessPayload payload = event.getPayload();
+        Long userId = payload.passportDto()
+                             .getUserId();
 
         List<ReservationSeat> seatIntanceList = reservationSeatRepository.findAllBySeatInstaceIdIn(payload.seatInstanceIdList());
-        log.info("Received UUID List: {}",
-                 payload.seatInstanceIdList());
 
         log.info("조회된 seatInstanceList 개수: {}",
                  seatIntanceList.size());
         seatIntanceList.forEach(seat -> {
             log.info("수정 전 상태: {}",
                      seat.getStatus());
-            seat.updateStatusReserveSuccess();
+            seat.updateStatusFREE(userId);
             log.info("수정 후 상태: {}",
                      seat.getStatus());
         });
 
-        seatIntanceList.forEach(ReservationSeat::updateStatusReserveFREE);
+        seatIntanceList.forEach(reservationSeat -> reservationSeat.updateStatusFREE(userId));
         seatIntanceList.forEach(seat -> {
-            seat.getReservation()
-                .delete(payload.passportDto()
-                               .getUserId());
+            Reservation reservation = seat.getReservation();
+            reservation.updateStatusCancelled(userId);
         });
 
         seatIntanceList.forEach(seat -> log.info("업데이트 후 상태 확인: id={}, status={}",
