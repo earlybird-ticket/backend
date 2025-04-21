@@ -199,16 +199,6 @@ public class Reservation extends BaseEntity {
                           .build();
     }
 
-
-    public void cancelReservation(Long userId) {
-        this.delete(userId);
-    }
-
-    public void updateStatusPending(Long userId) {
-        this.delete(userId);
-        this.reservationStatus = ReservationStatus.CANCELLED;
-    }
-
     public void updateCouponData(CouponReservePayload payload) {
         validateCouponData(payload);
         this.couponId = payload.couponId();
@@ -228,8 +218,22 @@ public class Reservation extends BaseEntity {
         this.paymentId = payload.paymentId();
         this.paymentTotalPrice = payload.totalPrice();
         this.paymentStatus = payload.paymentStatus();
-        this.reservationStatus = ReservationStatus.CONFIRMED;
         update(payload.passportDto()
                       .getUserId());
+    }
+
+    public void updateStatusConfirm(Long userId) {
+        this.reservationStatus = ReservationStatus.CONFIRMED;
+        update(userId);
+    }
+
+    public void updateStatusPaying(Long userId) {
+        this.reservationStatus = ReservationStatus.PAYING;
+        update(userId);
+    }
+
+    public void updateStatusCancelled(Long userId) {
+        this.reservationStatus = ReservationStatus.CANCELLED;
+        this.delete(userId);
     }
 }

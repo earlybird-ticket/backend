@@ -23,7 +23,7 @@ public class ReservationKafkaOutboxProducer {
     private final OutboxRepository outboxRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    @Scheduled(fixedDelay = 3000)
+    @Scheduled(fixedDelay = 7000)
     @Transactional
     public void publishPendingOutboxMessages() {
         List<Outbox> pendingOutboxes = outboxRepository.findTOP100ByOrderByCreatedAtAsc();

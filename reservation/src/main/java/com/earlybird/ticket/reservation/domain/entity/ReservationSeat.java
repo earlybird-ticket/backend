@@ -92,15 +92,18 @@ public class ReservationSeat extends BaseEntity {
                               .build();
     }
 
-    public void updateStatusReserveSuccess() {
-        this.status = SeatStatus.PREEMPTED;
-    }
-
-    public void updateStatusReserveFREE() {
+    public void updateStatusFREE(Long userId) {
         this.status = SeatStatus.FREE;
+        delete(userId);
     }
 
-    public void updateStatusConfirmSuccess() {
+    public void updateStatusPreempted(Long userId) {
+        this.status = SeatStatus.PREEMPTED;
+        update(userId);
+    }
+
+    public void updateStatusConfirm(Long userId) {
         this.status = SeatStatus.CONFIRMED;
+        update(userId);
     }
 }

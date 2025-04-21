@@ -3,6 +3,7 @@ package com.earlybird.ticket.reservation.application.handler;
 import com.earlybird.ticket.reservation.application.dto.response.SeatPreemptSuccessPayload;
 import com.earlybird.ticket.reservation.application.event.EventHandler;
 import com.earlybird.ticket.reservation.domain.entity.Event;
+import com.earlybird.ticket.reservation.domain.entity.Reservation;
 import com.earlybird.ticket.reservation.domain.entity.ReservationSeat;
 import com.earlybird.ticket.reservation.domain.entity.constant.EventType;
 import com.earlybird.ticket.reservation.domain.repository.ReservationSeatRepository;
@@ -26,29 +27,27 @@ public class PreemptSeatSuccessPayloadHandler implements EventHandler<SeatPreemp
     @Transactional
     public void handle(Event<SeatPreemptSuccessPayload> event) {
         SeatPreemptSuccessPayload payload = event.getPayload();
+        Long userId = payload.passportDto()
+                             .getUserId();
 
         log.info("payload = {} ",
                  payload);
 
-        List<ReservationSeat> seatIntanceList = reservationSeatRepository.findAllBySeatInstaceIdIn(payload.seatInstanceIdList());
+        List<ReservationSeat> seatInstanceList = reservationSeatRepository.findAllBySeatInstaceIdIn(payload.seatInstanceIdList());
         log.info("Received UUID List: {}",
                  payload.seatInstanceIdList());
+        Reservation reservation = seatInstanceList.get(0)
+                                                  .getReservation();
 
-        log.info("조회된 seatInstanceList 개수: {}",
-                 seatIntanceList.size());
-        seatIntanceList.forEach(seat -> {
-            log.info("수정 전 상태: {}",
-                     seat.getStatus());
-            seat.updateStatusReserveSuccess();
-            log.info("수정 후 상태: {}",
+        reservation.updateStatusPaying(userId);
+        log.info("Reservation Status ={}",
+                 reservation.getReservationStatus());
+
+        seatInstanceList.forEach(seat -> {
+            seat.updateStatusPreempted(userId);
+            log.info("ReservationStatus Status = {}",
                      seat.getStatus());
         });
-
-        seatIntanceList.forEach(ReservationSeat::updateStatusReserveSuccess);
-
-        seatIntanceList.forEach(seat -> log.info("업데이트 후 상태 확인: id={}, status={}",
-                                                 seat.getSeatInstanceId(),
-                                                 seat.getStatus()));
 
     }
 
