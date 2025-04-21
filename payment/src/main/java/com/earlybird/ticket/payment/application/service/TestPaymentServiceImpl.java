@@ -11,6 +11,7 @@ import com.earlybird.ticket.payment.application.service.dto.command.CreatePaymen
 import com.earlybird.ticket.payment.application.service.dto.command.UpdatePaymentCommand;
 import com.earlybird.ticket.payment.application.service.dto.query.FindPaymentQuery;
 import com.earlybird.ticket.payment.application.service.exception.PaymentAmountDoesNotMatchException;
+import com.earlybird.ticket.payment.application.service.exception.PaymentDuplicatedException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentNotFoundException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentTimeoutException;
 import com.earlybird.ticket.payment.common.EventConverter;
@@ -47,9 +48,9 @@ public class TestPaymentServiceImpl implements PaymentService {
 
     @Override
     public UUID createPayment(CreatePaymentCommand paymentRequest) {
+        log.info("createPayment = {}", paymentRequest);
         validateReservationTimedOut(paymentRequest.reservationId());
 
-        log.info("createPayment = {}", paymentRequest);
         Payment save = paymentRepository.save(paymentRequest.toPayment());
         return save.getId();
     }
@@ -65,10 +66,12 @@ public class TestPaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public void confirmPayment(ConfirmPaymentCommand confirmPaymentCommand) {
-        validateReservationTimedOut(confirmPaymentCommand.reservationId());
+        log.info("confirmPayment = {}", confirmPaymentCommand);
+        UUID reservationId = confirmPaymentCommand.reservationId();
+        validateReservationTimedOut(reservationId);
+        validateDuplicatePayment(reservationId);
 
-        Payment payment = paymentRepository.findByReservationId(
-                confirmPaymentCommand.reservationId())
+        Payment payment = paymentRepository.findByReservationId(reservationId)
             .orElseThrow(PaymentNotFoundException::new);
 
         validatePaymentAmount(payment, confirmPaymentCommand.amount());
@@ -77,6 +80,8 @@ public class TestPaymentServiceImpl implements PaymentService {
         try {
             // 결제 처리 시간
             Thread.sleep(random.nextInt(1000));
+            // 결제 내역 캐싱
+            temporaryStore.cacheConfirmedPayment(reservationId);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -146,6 +151,13 @@ public class TestPaymentServiceImpl implements PaymentService {
     private void validateReservationTimedOut(UUID reservationId) {
         if (temporaryStore.isTimedOut(reservationId)) {
             throw new PaymentTimeoutException();
+        }
+    }
+
+    private void validateDuplicatePayment(UUID reservationId) {
+        // 결제 내역 검증
+        if (temporaryStore.isAlreadyProcessed(reservationId)) {
+            throw new PaymentDuplicatedException(reservationId);
         }
     }
 
