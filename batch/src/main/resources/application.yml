@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: batch
+    jpa:
+      database: postgresql
+  batch:
+    jdbc:
+      initialize-schema: always
+      schema: classpath:/org/springframework/batch/core/schema-postgresql.sql
+    job:
+      name: comparisonJob
+      enabled: false
+  datasource-meta:
+    driver-class-name: org.postgresql.Driver
+    jdbc-url: jdbc:postgresql://localhost:15432/metadata
+    username: postgres
+    password: postgres
+  datasource-data:
+    driver-class-name: org.postgresql.Driver
+    jdbc-url: jdbc:postgresql://localhost:15432/data-db1
+    username: postgres
+    password: postgres
+  jpa:
+    defer-datasource-initialization: true
+logging:
+  level:
+    org.springframework.batch.core.launch.support.SimpleJobOperator: ERROR
+    org.springframework.batch.core.job.SimpleStepHandler: ERROR
+server:
+  port: 18091
