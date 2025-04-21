@@ -1,4 +1,4 @@
-package com.earlybird.ticket.payment.infrastructure.messaging;
+package com.earlybird.ticket.payment.infrastructure.messaging.consumer;
 
 import org.springframework.stereotype.Component;
 
