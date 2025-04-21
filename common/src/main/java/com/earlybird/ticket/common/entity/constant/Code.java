@@ -67,7 +67,9 @@ public enum Code {
                       HttpStatus.CONFLICT),
     SEAT_RETURN_FAIL("S03",
                      HttpStatus.CONFLICT),
-    ;
+
+    RESERVATION_CREATE_FAIL("R01",
+                            HttpStatus.CONFLICT);
 
     private final String code;
     private final HttpStatus httpStatus;

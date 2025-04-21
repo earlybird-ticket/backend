@@ -9,7 +9,6 @@ import com.earlybird.ticket.reservation.domain.entity.Event;
 import com.earlybird.ticket.reservation.domain.entity.Outbox;
 import com.earlybird.ticket.reservation.domain.entity.Reservation;
 import com.earlybird.ticket.reservation.domain.entity.ReservationSeat;
-import com.earlybird.ticket.reservation.domain.entity.constant.EventType;
 import com.earlybird.ticket.reservation.domain.repository.OutboxRepository;
 import com.earlybird.ticket.reservation.domain.repository.ReservationRepository;
 import com.earlybird.ticket.reservation.domain.repository.ReservationSeatRepository;
@@ -23,6 +22,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static com.earlybird.ticket.reservation.domain.entity.Outbox.AggregateType.RESERVATION;
+import static com.earlybird.ticket.reservation.domain.entity.constant.EventType.RESERVATION_CREATE_FAIL;
+import static com.earlybird.ticket.reservation.domain.entity.constant.EventType.SEAT_RESERVATION_CREATE;
+import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 @Component
 @RequiredArgsConstructor
@@ -50,9 +54,9 @@ public class CreateReservationRequestHandler implements EventHandler<CreateReser
                                                 String serializedFailEventPayload) {
         return Outbox.builder()
                      .aggregateId(reservationId)
-                     .aggregateType("Reservation")
+                     .aggregateType(RESERVATION)
                      .payload(serializedFailEventPayload)
-                     .eventType(EventType.RESERVATION_CREATE_FAIL)
+                     .eventType(RESERVATION_CREATE_FAIL)
                      .build();
     }
 
@@ -75,36 +79,18 @@ public class CreateReservationRequestHandler implements EventHandler<CreateReser
     }
 
     @Override
-    @Transactional
     public void handle(Event<CreateReservationEvent> event) {
         CreateReservationEvent payload = event.getPayload();
         List<UUID> instanceSeatIdList = new ArrayList<>();
 
         int maxRetry = 3;
         int retryCount = 0;
-        boolean success = false;
 
         while (retryCount < maxRetry) {
             try {
-                log.info("[CreateReservationRequestHandler] 예약 생성 시도 ({}회)",
-                         retryCount + 1);
-
-                Reservation reservation = createReservation(payload);
-                reservation = reservationRepository.save(reservation);
-
-                for (CreateReservationEvent.SeatRequest seat : payload.getSeatList()) {
-                    instanceSeatIdList.add(seat.getSeatInstanceId());
-
-                    ReservationSeat reservationSeat = createReservationSeat(seat,
-                                                                            payload,
-                                                                            reservation);
-
-                    reservationSeatRepository.save(reservationSeat);
-                }
-
-                success = true;
-                break;
-
+                performReservationTransaction(payload,
+                                              instanceSeatIdList);
+                return;
             } catch (Exception e) {
                 retryCount++;
                 log.warn("[CreateReservationRequestHandler] 예약 생성 실패 ({}회): {}",
@@ -120,7 +106,7 @@ public class CreateReservationRequestHandler implements EventHandler<CreateReser
                                                                          .code(Code.RESERVATION_CREATE_FAIL.getCode())
                                                                          .build();
 
-                    Event<ReservationFailEvent> failEventWrapper = new Event<>(EventType.RESERVATION_CREATE_FAIL,
+                    Event<ReservationFailEvent> failEventWrapper = new Event<>(RESERVATION_CREATE_FAIL,
                                                                                failEvent,
                                                                                LocalDateTime.now()
                                                                                             .toString());
@@ -135,9 +121,23 @@ public class CreateReservationRequestHandler implements EventHandler<CreateReser
         }
     }
 
-    @Override
+    @Transactional(propagation = REQUIRES_NEW)
+    public void performReservationTransaction(CreateReservationEvent payload,
+                                              List<UUID> instanceSeatIdList) {
+        Reservation reservation = createReservation(payload);
+        reservation = reservationRepository.save(reservation);
 
+        for (CreateReservationEvent.SeatRequest seat : payload.getSeatList()) {
+            instanceSeatIdList.add(seat.getSeatInstanceId());
+            ReservationSeat reservationSeat = createReservationSeat(seat,
+                                                                    payload,
+                                                                    reservation);
+            reservationSeatRepository.save(reservationSeat);
+        }
+    }
+
+    @Override
     public boolean support(Event<CreateReservationEvent> event) {
-        return event.getEventType() == EventType.SEAT_RESERVATION_CREATE;
+        return event.getEventType() == SEAT_RESERVATION_CREATE;
     }
 }
