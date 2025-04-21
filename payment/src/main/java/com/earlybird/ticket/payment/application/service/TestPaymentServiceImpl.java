@@ -121,7 +121,7 @@ public class TestPaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public void cancelPayment(UUID paymentId) {
+    public void cancelPayment(UUID paymentId, PassportDto passportDto) {
         Payment payment = paymentRepository.findByPaymentId(paymentId)
             .orElseThrow(PaymentNotFoundException::new);
 

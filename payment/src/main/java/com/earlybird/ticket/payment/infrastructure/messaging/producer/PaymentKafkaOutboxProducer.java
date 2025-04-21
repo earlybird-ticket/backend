@@ -1,4 +1,4 @@
-package com.earlybird.ticket.payment.infrastructure.messaging;
+package com.earlybird.ticket.payment.infrastructure.messaging.producer;
 
 import com.earlybird.ticket.payment.domain.entity.Outbox;
 import com.earlybird.ticket.payment.domain.repository.OutboxRepository;
@@ -29,10 +29,7 @@ public class PaymentKafkaOutboxProducer {
         List<CompletableFuture<Outbox>> futures = outboxes.stream()
             .map(outbox -> {
                 log.info("Outbox 발행] id = {}, payload = {}", outbox.getId(), outbox.getPayload());
-                // 실패 테스트
-//                CompletableFuture<Object> failed = new CompletableFuture<>();
-//                failed.completeExceptionally(new RuntimeException("테스트"));
-//                return failed
+
                 return paymentKafkaTemplate.send(
                         outbox.getEventType().getTopic(),
                         outbox.getPayload()

@@ -1,4 +1,4 @@
-package com.earlybird.ticket.payment.infrastructure.config;
+package com.earlybird.ticket.payment.infrastructure.messaging.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
