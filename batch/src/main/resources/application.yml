@@ -1,4 +1,8 @@
 spring:
+  config:
+    import:
+      - classpath:application-source-db.yml
+
   application:
     name: batch
     jpa:
@@ -10,18 +14,22 @@ spring:
     job:
       name: comparisonJob
       enabled: false
+
   datasource-meta:
     driver-class-name: org.postgresql.Driver
-    jdbc-url: jdbc:postgresql://localhost:15432/metadata
+    url: jdbc:postgresql://localhost:15432/metadata
     username: postgres
     password: postgres
-  datasource-data:
+
+  datasource-sink:
     driver-class-name: org.postgresql.Driver
-    jdbc-url: jdbc:postgresql://localhost:15432/data-db1
+    url: jdbc:postgresql://localhost:15432/data-db1
     username: postgres
     password: postgres
+
   jpa:
     defer-datasource-initialization: true
+
 logging:
   level:
     org.springframework.batch.core.launch.support.SimpleJobOperator: ERROR
