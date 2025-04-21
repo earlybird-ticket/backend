@@ -30,4 +30,6 @@ public interface ReservationSeatRepository {
                                                      PassportDto passportDto);
 
     List<ReservationSeat> findAllByInstanceIdIn(List<UUID> uuids);
+
+    ReservationSeat save(ReservationSeat reservationSeat);
 }
