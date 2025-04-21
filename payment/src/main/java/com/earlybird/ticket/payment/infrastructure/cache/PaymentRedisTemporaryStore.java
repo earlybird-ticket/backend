@@ -3,6 +3,9 @@ package com.earlybird.ticket.payment.infrastructure.cache;
 import com.earlybird.ticket.payment.application.TemporaryStore;
 import java.time.Duration;
 import java.time.temporal.TemporalUnit;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,5 +51,18 @@ public class PaymentRedisTemporaryStore implements TemporaryStore {
         if (!paymentConfirm.isExists()) {
             paymentConfirm.setIfAbsent(key, Duration.ofMinutes(10L));
         }
+    }
+
+    @Override
+    public LocalDateTime getExpireDate(UUID reservationId) {
+        String key = RESERVATION_KEY + reservationId;
+
+        RBucket<Object> bucket = redissonClient.getBucket(key);
+
+        return Instant
+            .now()
+            .atZone(ZoneId.systemDefault())
+            .plusSeconds(bucket.getExpireTime())
+            .toLocalDateTime();
     }
 }

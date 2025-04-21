@@ -20,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
@@ -53,18 +54,28 @@ public class PaymentWebClient implements PaymentClient {
                 httpHeaders.add(IDEMPOTENCY_KEY, command.reservationId().toString());
             })
             .bodyValue(command)
-            .retrieve()
-            .bodyToMono(ProcessPaymentConfirmClientResponse.class)
-            .block();
+            .exchangeToMono(response -> {
+                if (response.statusCode().is2xxSuccessful()) {
+                    return response.bodyToMono(ProcessPaymentConfirmClientResponse.class);
+                }
 
+                if (response.statusCode().is4xxClientError()) {
+                    return response.bodyToMono(String.class)
+                        .flatMap(errorBody -> {
+                            log.error("결제 승인 클라이언트 에러 : {}", errorBody);
+                            return Mono.error(new PaymentAbortException());
+                        });
+                }
+                // 이제는 토스 서버 문제
+                return response.bodyToMono(String.class)
+                    .flatMap(errorBody -> {
+                        log.error("결제 승인 서버 에러 : {}", errorBody);
+                        return Mono.error(new PaymentAbortException());
+                    });
+            })
+            .block();
         log.info("토스페이 결제 성공 = {}", receipt);
 
-        if (receipt == null) {
-            log.error("결제 실패 = {}", paymentId);
-            throw new PaymentAbortException();
-        }
-
-        // TODO: 추후 가상계좌의 경우 만료기간 까지 입금 X시, 취소 처리
         return receipt.toCommand();
     }
 
@@ -88,8 +99,23 @@ public class PaymentWebClient implements PaymentClient {
                 httpHeaders.add(IDEMPOTENCY_KEY, reservationId.toString());
             })
             .bodyValue(Map.of("cancelReason", "예약취소"))
-            .retrieve()
-            .bodyToMono(ProcessPaymentCancelClientResponse.class)
+            .exchangeToMono(response -> {
+                if (response.statusCode().is2xxSuccessful()) {
+                    return response.bodyToMono(ProcessPaymentCancelClientResponse.class);
+                } else if (response.statusCode().is4xxClientError()) {
+                    return response.bodyToMono(String.class)
+                        .flatMap(errorBody -> {
+                            log.error("토스페이 결제 취소 클라이언트 에러: {}", errorBody);
+                            return Mono.error(new PaymentCancelException());
+                        });
+                } else {
+                    return response.bodyToMono(String.class)
+                        .flatMap(errorBody -> {
+                            log.error("토스페이 결제 취소 서버 에러: {}", errorBody);
+                            return Mono.error(new PaymentCancelException());
+                        });
+                }
+            })
             .block();
 
         log.info("토스페이 취소 = {}", result);
