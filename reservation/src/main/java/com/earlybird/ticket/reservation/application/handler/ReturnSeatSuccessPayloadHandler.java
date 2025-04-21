@@ -40,9 +40,9 @@ public class ReturnSeatSuccessPayloadHandler implements EventHandler<SeatReturnS
                      seat.getStatus());
         });
 
-        seatIntanceList.forEach(reservationSeat -> reservationSeat.updateStatusFREE(userId));
-        seatIntanceList.forEach(seat -> {
-            Reservation reservation = seat.getReservation();
+        seatIntanceList.forEach(reservationSeat -> {
+            reservationSeat.updateStatusFREE(userId);
+            Reservation reservation = reservationSeat.getReservation();
             reservation.updateStatusCancelled(userId);
         });
 
