@@ -8,9 +8,9 @@ import com.earlybird.ticket.payment.application.TemporaryStore;
 import com.earlybird.ticket.payment.application.event.dto.request.PaymentSuccessEvent;
 import com.earlybird.ticket.payment.application.service.dto.command.ConfirmPaymentCommand;
 import com.earlybird.ticket.payment.application.service.dto.command.CreatePaymentCommand;
-import com.earlybird.ticket.payment.application.service.dto.command.UpdatePaymentCancelCommand;
 import com.earlybird.ticket.payment.application.service.dto.query.FindPaymentQuery;
 import com.earlybird.ticket.payment.application.service.exception.PaymentAmountDoesNotMatchException;
+import com.earlybird.ticket.payment.application.service.exception.PaymentDuplicatedException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentNotFoundException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentTimeoutException;
 import com.earlybird.ticket.payment.common.EventConverter;
@@ -63,17 +63,8 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public void confirmPayment(ConfirmPaymentCommand confirmPaymentCommand) {
-        /* TODO:
-            0. PAYMENT:CONFIRM:{RESERVATION_ID}로 결제한 적 있는지 확인
-            1. reservationId로 검색 후 가격 검증 ✅
-            2. Base64로 SecretKey 암호화 후 정보 전달 ✅
-            3. 엔티티 상태 업데이트[결제 방법, 결제 상태 변경] ✅
-            4. 결제 성공 후 PAYMENT:CONFIRM:{RESERVATION_ID}로 레디스 캐싱
-            5. 아웃박스 생성 ✅
-            6. outbox에서 이벤트 발행[결제 성공 이벤트 발행] ✅
-         */
         validateReservationTimedOut(confirmPaymentCommand.reservationId());
-
+        validateDuplicatePayment(confirmPaymentCommand.reservationId());
         Payment payment = paymentRepository.findByReservationId(
                 confirmPaymentCommand.reservationId())
             .orElseThrow(PaymentNotFoundException::new);
@@ -86,6 +77,8 @@ public class PaymentServiceImpl implements PaymentService {
         ).toPayment(payment.getUserId());
         // 결제 방법, 상태 반영
         payment.confirmPayment(receipt);
+
+        temporaryStore.cacheConfirmedPayment(payment.getReservationId());
 
         // 임시 passport 생성
         PassportDto passport = PassportDto.builder()
@@ -135,6 +128,13 @@ public class PaymentServiceImpl implements PaymentService {
     private void validateReservationTimedOut(UUID reservationId) {
         if (temporaryStore.isTimedOut(reservationId)) {
             throw new PaymentTimeoutException();
+        }
+    }
+
+    private void validateDuplicatePayment(UUID reservationId) {
+        // 결제 내역 검증
+        if (temporaryStore.isAlreadyProcessed(reservationId)) {
+            throw new PaymentDuplicatedException(reservationId);
         }
     }
 
