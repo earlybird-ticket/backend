@@ -74,6 +74,7 @@ public class PaymentWebClient implements PaymentClient {
                     });
             })
             .block();
+
         log.info("토스페이 결제 성공 = {}", receipt);
 
         return receipt.toCommand();

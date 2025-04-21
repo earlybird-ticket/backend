@@ -3,6 +3,7 @@ package com.earlybird.ticket.payment.common;
 import com.earlybird.ticket.common.entity.EventPayload;
 import com.earlybird.ticket.payment.application.event.dto.request.PaymentSuccessEvent;
 import com.earlybird.ticket.payment.application.event.dto.request.PaymentFailEvent;
+import com.earlybird.ticket.payment.application.event.dto.response.ReservationCancelPayload;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 public enum EventType {
     PAYMENT_SUCCESS(PaymentSuccessEvent.class, Topic.PAYMENT_TO_RESERVATION_TOPIC),
     PAYMENT_FAIL(PaymentFailEvent.class, Topic.PAYMENT_TO_RESERVATION_TOPIC),
+//    PAYMENT_CANCEL(PaymentSuccessEvent.class, Topic.PAYMENT_TO_PAYMENT_TOPIC),
+    RESERVATION_CANCEL(ReservationCancelPayload.class, Topic.RESERVATION_TO_PAYMENT_TOPIC)
     ;
-    
+
     private final Class<? extends EventPayload> payloadClass;
     private final String topic;
 
@@ -30,5 +33,8 @@ public enum EventType {
     public static class Topic {
 
         public static final String PAYMENT_TO_RESERVATION_TOPIC = "PaymentToReservation";
+        public static final String RESERVATION_TO_PAYMENT_TOPIC = "ReservationToPayment";
+//        public static final String PAYMENT_TO_PAYMENT_TOPIC = "PaymentToPayment";
+
     }
 }

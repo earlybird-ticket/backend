@@ -11,6 +11,7 @@ import com.earlybird.ticket.payment.application.service.dto.command.CreatePaymen
 import com.earlybird.ticket.payment.application.service.dto.query.FindPaymentQuery;
 import com.earlybird.ticket.payment.application.service.exception.PaymentAmountDoesNotMatchException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentDuplicatedException;
+import com.earlybird.ticket.payment.application.service.exception.PaymentInformationDoesNotMatchException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentNotFoundException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentTimeoutException;
 import com.earlybird.ticket.payment.common.EventConverter;
@@ -105,16 +106,24 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public void cancelPayment(UUID paymentId) {
-        // TODO : 결제 취소 요청
+    public void cancelPayment(UUID paymentId, PassportDto passportDto) {
         Payment payment = paymentRepository.findByPaymentId(paymentId)
             .orElseThrow(PaymentNotFoundException::new);
+
+        validateIsUserMatches(passportDto, payment);
 
         Payment cancelPayment = paymentClient.cancelPayment(
                 payment.getPaymentKey(), payment.getReservationId())
             .toCancelPayment();
 
         payment.cancelPayment(cancelPayment);
+    }
+
+    private static void validateIsUserMatches(PassportDto passportDto, Payment payment) {
+        // 사용자 정보 검증
+        if (!payment.getUserId().equals(passportDto.getUserId())) {
+            throw new PaymentInformationDoesNotMatchException();
+        }
     }
 
     private void validatePaymentAmount(Payment payment, BigDecimal amount) {

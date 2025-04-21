@@ -54,13 +54,4 @@ public class PaymentExternalController {
 
         return ResponseEntity.ok(CommonDto.ok(null, "결제 확정 성공"));
     }
-
-    // event로 변경 예정
-    @DeleteMapping("/{paymentId}")
-    public ResponseEntity<CommonDto<Void>> cancelPayment(
-        @PathVariable(name = "paymentId") UUID paymentId
-    ) {
-        paymentService.cancelPayment(paymentId);
-        return ResponseEntity.ok(CommonDto.ok(null, "결제 취소 성공"));
-    }
 }
