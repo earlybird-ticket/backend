@@ -97,7 +97,7 @@ public class SeatServiceImpl implements SeatService {
                 .toList();
 
         //Lua 파라미터 준비
-        String seatInstancePrefix = "SEAT_INSTANCE:" + seatPreemptCommand.concertSequenceId();
+        String seatInstancePrefix = "SEAT_INSTANCE:" + seatPreemptCommand.concertSequenceId() + ":";
 
         List<String> seatKeys = seatInstanceIdList.stream()
                 .map(seatId -> seatInstancePrefix + seatId)
@@ -126,12 +126,12 @@ public class SeatServiceImpl implements SeatService {
                             .build(),
                     EventType.RESERVATION_CREATE);
 
-        } else if (Long.valueOf(0).equals(result)) {
+        } else if (result instanceof Number && ((Number) result).longValue() == 0) {
             // 직접 return 0 한 경우 (이미 선점 존재 등)
             log.warn("이미 선점된 좌석입니다.");
             throw new SeatUnavailableException();
 
-        } else if (result == null) {
+        } else {
             // nil 반환 (SET 실패 등)
             log.error("redis set error");
             throw new RedisException();

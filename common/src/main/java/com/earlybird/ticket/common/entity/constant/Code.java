@@ -67,7 +67,7 @@ public enum Code {
             HttpStatus.CONFLICT),
     SEAT_RETURN_FAIL("S03",
             HttpStatus.CONFLICT),
-    REDIS_SCRIPT_ERROR("R01",
+    REDIS_SCRIPT_ERROR("RD01",
             HttpStatus.CONFLICT),
 
     // 예약 생성 실패 응답
