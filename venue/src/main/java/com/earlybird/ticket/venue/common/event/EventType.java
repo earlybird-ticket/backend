@@ -22,16 +22,17 @@ public enum EventType {
 
     SEAT_INSTANCE_CREATE(SeatInstanceCreatePayload.class, Topic.CONCERT_TO_SEAT_TOPIC),
 
-    SEAT_PREEMPT(SeatPreemptPayload.class, Topic.RESERVATION_TO_SEAT_FOR_PREEMPT_TOPIC),
     SEAT_CONFIRM(SeatConfirmPayload.class, Topic.RESERVATION_TO_SEAT_TOPIC),
     SEAT_RETURN(SeatReturnPayload.class, Topic.RESERVATION_TO_SEAT_TOPIC),
 
+    RESERVATION_CREATE_FAIL(ReservationCreateFailPayload.class, Topic.RESERVATION_TO_SEAT_TOPIC),
+
     //produce
-    SEAT_PREEMPT_SUCCESS(SeatPreemptSuccessEvent.class, Topic.SEAT_TO_RESERVATION_FOR_PREEMPT_TOPIC),
+    RESERVATION_CREATE(ReservationCreateEvent.class, Topic.SEAT_TO_RESERVATION_FOR_PREEMPT_TOPIC),
+
     SEAT_RETURN_SUCCESS(SeatReturnSuccessEvent.class, Topic.SEAT_TO_RESERVATION_TOPIC),
     SEAT_CONFIRM_SUCCESS(SeatConfirmSuccessEvent.class, Topic.SEAT_TO_RESERVATION_TOPIC),
 
-    SEAT_PREEMPT_FAIL(SeatPreemptFailEvent.class, Topic.SEAT_TO_RESERVATION_FOR_PREEMPT_TOPIC),
     SEAT_RETURN_FAIL(SeatReturnFailEvent.class, Topic.SEAT_TO_RESERVATION_TOPIC),
     SEAT_CONFIRM_FAIL(SeatConfirmFailEvent.class, Topic.SEAT_TO_RESERVATION_TOPIC)
     ;

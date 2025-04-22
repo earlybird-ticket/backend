@@ -13,8 +13,6 @@ public interface SeatHandlerService {
 
     void deleteSeatInstance(SeatInstanceDeletePayload seatInstanceDeletePayload);
 
-    void preemptSeat(SeatPreemptPayload seatPreemptPayload);
-
     void confirmSeat(SeatConfirmPayload seatConfirmPayload);
 
     void returnSeat(SeatReturnPayload seatReturnPayload);

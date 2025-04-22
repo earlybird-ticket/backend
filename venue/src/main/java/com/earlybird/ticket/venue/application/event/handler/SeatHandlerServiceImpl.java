@@ -111,6 +111,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                                 seatInstanceUpdatePayload.passportDto()
                                                          .getUserId());
         //3. 저장
+        // TODO : redis에서 해당하는 좌석이 있다면 정보 update
     }
 
     @Override
@@ -126,55 +127,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                                 seatInstanceDeletePayload.passportDto()
                                                          .getUserId());
         //3. 저장
-    }
-
-    @Override
-    @Transactional
-    public void preemptSeat(SeatPreemptPayload seatPreemptPayload) {
-        List<UUID> seatInstanceIdList = seatPreemptPayload.seatInstanceIdList();
-
-        try {
-            if (seatPreemptPayload.reservationId() == null) {
-                throw new IllegalArgumentException("reservationId is null");
-            }
-
-            RBucket<String> bucket = redissonClient.getBucket(timeCachePrefix + seatPreemptPayload.reservationId());
-
-            List<Seat> seatList = getSeatList(seatInstanceIdList);
-
-            // 3. SeatInstance의 상태확인
-            // Free 상태면 Preempt로 update 후 응답
-            for (Seat seat : seatList) {
-                seat.preemptSeat(seatInstanceIdList,
-                                 seatPreemptPayload.passportDto()
-                                                   .getUserId());
-            }
-
-            //4. 저장
-            //5. 아웃 박스 저장
-            saveOutbox(seatInstanceIdList,
-                       SeatPreemptSuccessEvent.builder()
-                                              .passportDto(seatPreemptPayload.passportDto())
-                                              .seatInstanceIdList(seatInstanceIdList)
-                                              .build(),
-                       EventType.SEAT_PREEMPT_SUCCESS);
-
-            bucket.setIfAbsent(timeCachePrefix + seatPreemptPayload.reservationId(),
-                               Duration.ofMinutes(10));
-
-        } catch (Exception e) {
-            log.error("메시지 처리 실패: {}",
-                      e.getMessage());
-
-            saveOutbox(seatInstanceIdList,
-                       SeatPreemptFailEvent.builder()
-                                           .passportDto(seatPreemptPayload.passportDto())
-                                           .seatInstanceIdList(seatInstanceIdList)
-                                           .code(Code.SEAT_PREEMPT_FAIL.getCode())
-                                           .build(),
-                       EventType.SEAT_PREEMPT_FAIL);
-        }
-
+        // TODO : redis에서 해당하는 좌석이 있다면 delete
     }
 
     @Override
@@ -184,6 +137,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
         List<UUID> seatInstanceIdList = seatConfirmPayload.seatInstanceIdList();
 
         try {
+            //TODO : redis에 해당 좌석 상태 update
             //1. seatInstance 가져오기
             List<Seat> seatList = getSeatList(seatInstanceIdList);
 
@@ -224,6 +178,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
         List<UUID> seatInstanceIdList = seatReturnPayload.seatInstanceIdList();
 
         try {
+            //TODO : redis에 해당 좌석 상태 update
             //1. seatInstance 가져오기
             List<Seat> seatList = getSeatList(seatInstanceIdList);
 
