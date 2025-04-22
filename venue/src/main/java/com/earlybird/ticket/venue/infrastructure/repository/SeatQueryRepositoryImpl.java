@@ -165,4 +165,18 @@ public class SeatQueryRepositoryImpl implements SeatQueryRepository {
                 )
                 .fetch();
     }
+
+    @Override
+    public List<Seat> findSeatListWithSeatInstanceInConcertSequenceIdList(List<UUID> concertSequenceIdList) {
+        return queryFactory
+                .selectDistinct(seat)
+                .from(seat)
+                .join(seat.seatInstances, seatInstance).fetchJoin()
+                .where(
+                        seatInstance.concertSequenceId.in(concertSequenceIdList),
+                        seatInstance.deletedAt.isNull(),
+                        seat.deletedAt.isNull()
+                )
+                .fetch();
+    }
 }

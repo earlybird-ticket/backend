@@ -67,7 +67,7 @@ public class SeatController {
         );
     }
 
-    @PostMapping
+    @PostMapping("/preempt")
     public ResponseEntity<CommonDto<String>> preemptSeat(
             @RequestHeader("X-User-Passport") String passport,
             @RequestBody @Valid SeatPreemptRequest seatPreemptRequest
