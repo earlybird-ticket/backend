@@ -92,6 +92,25 @@ public class ReservationSeat extends BaseEntity {
                               .build();
     }
 
+    public static ReservationSeat create(UUID seatInstanceId,
+                                         UUID concertId,
+                                         int col,
+                                         int row,
+                                         BigDecimal price,
+                                         SeatGrade grade,
+                                         Reservation reservation) {
+        return ReservationSeat.builder()
+                              .seatInstanceId(seatInstanceId)
+                              .concertId(concertId)
+                              .col(col)
+                              .row(row)
+                              .price(price)
+                              .grade(grade)
+                              .status(SeatStatus.RESERVED)
+                              .reservation(reservation)
+                              .build();
+    }
+
     public void updateStatusFREE(Long userId) {
         this.status = SeatStatus.FREE;
         delete(userId);
