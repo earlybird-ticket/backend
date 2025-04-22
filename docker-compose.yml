@@ -1,0 +1,210 @@
+# docker-compose up -d
+services:
+
+  eureka:
+    image: challduck/earlybird-server:latest
+    container_name: eureka
+    environment:
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+    ports:
+      - "18080:18080"
+    restart: on-failure:3
+    networks:
+      - earlybird_network
+
+  gateway:
+    image: challduck/earlybird-gateway:latest
+    container_name: gateway
+    environment:
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - GATEWAY_SERVER_PORT=${GATEWAY_SERVER_PORT}
+      - AUTH_JWT_SECRET=${AUTH_JWT_SECRET}
+    restart: on-failure:3
+    depends_on:
+      - eureka
+    ports:
+      - "18081:18081"
+    networks:
+      - earlybird_network
+
+  auth-service:
+    image: challduck/earlybird-auth:latest
+    container_name: auth-service
+    environment:
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - AUTH_JWT_SECRET=${AUTH_JWT_SECRET}
+      - AUTH_JWT_ACCESS_EXP=${AUTH_JWT_ACCESS_EXP}
+      - AUTH_JWT_REFRESH_EXP=${AUTH_JWT_REFRESH_EXP}
+    restart: on-failure:3
+    depends_on:
+      - eureka
+    ports:
+      - "18082:18082"
+    networks:
+      - earlybird_network
+
+  user-service:
+    image: challduck/earlybird-user:latest
+    container_name: user-service
+    environment:
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_USER_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - AUTH_JWT_SECRET=${AUTH_JWT_SECRET}
+      - AUTH_JWT_ACCESS_EXP=${AUTH_JWT_ACCESS_EXP}
+      - AUTH_JWT_REFRESH_EXP=${AUTH_JWT_REFRESH_EXP}
+    restart: on-failure:3
+    depends_on:
+      - eureka
+    ports:
+      - "18084:18084"
+    networks:
+      - earlybird_network
+
+  concert-service:
+    image: challduck/earlybird-concert:latest
+    container_name: concert-service
+    environment:
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_USER_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: on-failure:3
+    depends_on:
+      - eureka
+    ports:
+      - "18085:18085"
+    networks:
+      - earlybird_network
+
+  admin-service:
+    image: challduck/earlybird-admin:latest
+    container_name: admin-service
+    environment:
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_USER_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: on-failure:3
+    depends_on:
+      - eureka
+    ports:
+      - "18083:18083"
+    networks:
+      - earlybird_network
+
+  coupon-service:
+    image: challduck/earlybird-coupon:latest
+    container_name: coupon-service
+    environment:
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_USER_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: on-failure:3
+    depends_on:
+      - eureka
+    ports:
+      - "18087:18087"
+    networks:
+      - earlybird_network
+
+  reservation-service:
+    image: challduck/earlybird-reservation:latest
+    container_name: reservation-service
+    environment:
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_USER_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: on-failure:3
+    depends_on:
+      - eureka
+    ports:
+      - "18088:18088"
+    networks:
+      - earlybird_network
+
+  payment-service:
+    image: challduck/earlybird-payment:latest
+    container_name: payment-service
+    environment:
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_USER_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - TOSS_CLIENT_KEY=${TOSS_CLIENT_KEY}
+      - TOSS_SECRET_KEY=${TOSS_SECRET_KEY}
+      - TOSS_SUCCESS_URL=${TOSS_SUCCESS_URL}
+      - TOSS_FAIL_URL=${TOSS_FAIL_URL}
+    restart: on-failure:3
+    depends_on:
+      - eureka
+    ports:
+      - "18089:18089"
+    networks:
+      - earlybird_network
+
+  venue-service:
+    image: challduck/earlybird-venue:latest
+    container_name: venue-service
+    environment:
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_USER_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: on-failure:3
+    depends_on:
+      - eureka
+    ports:
+      - "18086:18086"
+    networks:
+      - earlybird_network
+
+  alarm-service:
+    image: challduck/earlybird-alarm:latest
+    container_name: alarm-service
+    environment:
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_USER_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: on-failure:3
+    depends_on:
+      - eureka
+    ports:
+      - "18092:18092"
+    networks:
+      - earlybird_network
+
+networks:
+  earlybird_network:
+    driver: bridge

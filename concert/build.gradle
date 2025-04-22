@@ -83,11 +83,6 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-tasks.register("prepareKotlinBuildScriptModel") {
-    doLast {
-        println()
-    }
-}
 // Querydsl 설정부
 def generated = "${buildDir}/generated" // product 모듈 내부의 build/generated로 설정
 
