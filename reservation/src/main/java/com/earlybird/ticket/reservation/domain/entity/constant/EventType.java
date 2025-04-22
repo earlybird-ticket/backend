@@ -12,10 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public enum EventType {
     //produce
-
-    //좌석 선점 요청(Reservation -> Venue)
-    SEAT_PREEMPT(PreemptSeatEvent.class,
-                 Topic.RESERVATION_TO_SEAT_FOR_PREEMPTION_TOPIC),
+    //Seat -> Reservation(예약 실패)
+    RESERVATION_CREATE_FAIL(ReservationFailEvent.class,
+                            Topic.SEAT_TO_RESERVATION_FOR_PREEMPT_TOPIC),
 
     //좌석 확정 요청(Reservation -> Venue)
     SEAT_CONFIRM(ConfirmSeatEvent.class,
@@ -40,14 +39,10 @@ public enum EventType {
     //쿠폰 반환 요청(Reservation -> Coupon)
     COUPON_RETURN(ReturnCouponEvent.class,
                   Topic.RESERVATION_TO_COUPON_TOPIC),
-    //consume,
 
-    //Seat -> Reservation(선점 성공)
-    SEAT_PREEMPT_SUCCESS(SeatPreemptSuccessPayload.class,
-                         Topic.SEAT_TO_RESERVATION_FOR_PREEMPT_TOPIC),
-    //Seat -> Reservation(선점 실패)
-    SEAT_PREEMPT_FAIL(SeatPreemptFailPayload.class,
-                      Topic.SEAT_TO_RESERVATION_FOR_PREEMPT_TOPIC),
+    //CONSUME,
+    SEAT_RESERVATION_CREATE(CreateReservationEvent.class,
+                            Topic.SEAT_TO_RESERVATION_TOPIC),
 
     //Seat -> Reservation(확정 성공)
     SEAT_CONFIRM_SUCCESS(SeatConfirmSuccessPayload.class,

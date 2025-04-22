@@ -62,5 +62,10 @@ public class ReservationSeatRepositoryImpl implements ReservationSeatRepository 
         return reservationSeatJpaRepository.findAllBySeatInstanceIdIn(uuids);
     }
 
+    @Override
+    public ReservationSeat save(ReservationSeat reservationSeat) {
+        return reservationSeatJpaRepository.save(reservationSeat);
+    }
+
 
 }

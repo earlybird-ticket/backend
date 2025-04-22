@@ -5,9 +5,7 @@ import com.earlybird.ticket.common.util.PageUtil;
 import com.earlybird.ticket.reservation.application.dto.response.FindReservationQuery;
 import com.earlybird.ticket.reservation.application.service.ReservationService;
 import com.earlybird.ticket.reservation.domain.dto.response.ReservationSearchResult;
-import com.earlybird.ticket.reservation.presentation.dto.request.CreateReservationRequest;
 import com.earlybird.ticket.reservation.presentation.dto.response.FindReservationResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,18 +22,18 @@ import java.util.UUID;
 public class ReservationExternalController {
 
     private final ReservationService reservationService;
-
-    @PostMapping
-    public ResponseEntity<CommonDto<String>> createReservation(@RequestHeader("X-User-Passport") String passport,
-                                                               @RequestBody @Valid CreateReservationRequest createReservationRequest) {
-
-        String reservationId = reservationService.createReservation(CreateReservationRequest.toCreateReservationCommand(createReservationRequest),
-                                                                    passport);
-
-        return ResponseEntity.status(HttpStatus.CREATED)
-                             .body(CommonDto.created(reservationId,
-                                                     "예약 생성 성공"));
-    }
+    //
+    //    @PostMapping
+    //    public ResponseEntity<CommonDto<String>> createReservation(@RequestHeader("X-User-Passport") String passport,
+    //                                                               @RequestBody @Valid CreateReservationRequest createReservationRequest) {
+    //
+    //        String reservationId = reservationService.createReservation(CreateReservationRequest.toCreateReservationCommand(createReservationRequest),
+    //                                                                    passport);
+    //
+    //        return ResponseEntity.status(HttpStatus.CREATED)
+    //                             .body(CommonDto.created(reservationId,
+    //                                                     "예약 생성 성공"));
+    //    }
 
     @DeleteMapping("/{reservationId}")
     public ResponseEntity<CommonDto<Void>> cancelReservation(@PathVariable UUID reservationId,

@@ -17,10 +17,11 @@ import java.util.UUID;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "p_reservation")
 @SQLRestriction("deleted_at is null")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "reservation_id")
@@ -167,11 +168,6 @@ public class Reservation extends BaseEntity {
                                                 UUID venueId,
                                                 String venueArea,
                                                 String venueLocation,
-                                                String content,
-                                                UUID couponId,
-                                                CouponType couponType,
-                                                String couponName,
-                                                CouponStatus couponStatus,
                                                 UUID hallId,
                                                 String hallName,
                                                 Integer hallFloor) {
@@ -188,11 +184,6 @@ public class Reservation extends BaseEntity {
                           .venueId(venueId)
                           .venueArea(venueArea)
                           .venueLocation(venueLocation)
-                          .content(content)
-                          .couponId(couponId)
-                          .couponType(couponType)
-                          .couponName(couponName)
-                          .couponStatus(couponStatus)
                           .hallId(hallId)
                           .hallName(hallName)
                           .hallFloor(hallFloor)
@@ -236,4 +227,6 @@ public class Reservation extends BaseEntity {
         this.reservationStatus = ReservationStatus.CANCELLED;
         this.delete(userId);
     }
+
+
 }

@@ -69,6 +69,10 @@ public enum Code {
             HttpStatus.CONFLICT),
     REDIS_SCRIPT_ERROR("R01",
             HttpStatus.CONFLICT),
+
+    // 예약 생성 실패 응답
+    RESERVATION_CREATE_FAIL("R01",
+            HttpStatus.CONFLICT)
     ;
 
     private final String code;
