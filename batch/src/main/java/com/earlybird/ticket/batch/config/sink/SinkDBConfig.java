@@ -1,9 +1,13 @@
 package com.earlybird.ticket.batch.config.sink;
 
-import com.zaxxer.hikari.HikariDataSource;
 import java.util.HashMap;
+import java.util.Map;
 import javax.sql.DataSource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +23,13 @@ import org.springframework.transaction.PlatformTransactionManager;
     entityManagerFactoryRef = "sinkEntityManagerFactory",
     transactionManagerRef = "sinkTransactionManager"
 )
+@RequiredArgsConstructor
 public class SinkDBConfig {
+
+    // Spring이 제공하는 기본 JPA 설정 읽어옴
+    private final JpaProperties jpaProperties;
+
+    private final HibernateProperties hibernateProperties;
 
     @Bean
     @ConfigurationProperties("spring.datasource-sink")
@@ -28,7 +38,7 @@ public class SinkDBConfig {
     }
 
     @Bean
-    public DataSource dataDBSource() {
+    public DataSource sinkDataSource() {
         return sinkDataSourceProperties()
             .initializeDataSourceBuilder()
             .build();
@@ -39,16 +49,18 @@ public class SinkDBConfig {
     public LocalContainerEntityManagerFactoryBean sinkEntityManagerFactory() {
 
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(dataDBSource());
+
+        // spring.jpa.* 설정값 가져옴.
+        Map<String, String> properties = jpaProperties.getProperties();
+
+        // Hibernate가 제공하는 기본 SpringPhysicalNamingStrategy 사용(CamelCase -> snake_case) vice versa
+        Map<String, Object> finalProps = hibernateProperties.determineHibernateProperties(
+            properties, new HibernateSettings());
+
+        em.setDataSource(sinkDataSource());
         em.setPackagesToScan("com.earlybird.ticket.batch.domain.entity");
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-
-        HashMap<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.hbm2ddl.auto", "update");
-        properties.put("hibernate.show_sql", "true");
-        properties.put("hibernate.format_sql", "true");
-//        properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-        em.setJpaPropertyMap(properties);
+        em.setJpaPropertyMap(finalProps);
         return em;
     }
 
