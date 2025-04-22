@@ -12,14 +12,14 @@ public class KafkaConfig {
     @Bean
     public NewTopic reservationToSeatForPreemption() {
         return new NewTopic("ReservationToSeatForPreemption",
-                            1,
+                            3,
                             (short) 3);
     }
 
     @Bean
     public NewTopic reservationToSeat() {
         return new NewTopic("ReservationToSeat",
-                            1,
+                            3,
                             (short) 3);
     }
 
@@ -75,6 +75,13 @@ public class KafkaConfig {
     @Bean
     public NewTopic seatToReservation() {
         return new NewTopic("SeatToReservation",
+                            3,
+                            (short) 3);
+    }
+
+    @Bean
+    public NewTopic testTopic() {
+        return new NewTopic("TestTopic",
                             1,
                             (short) 3);
     }

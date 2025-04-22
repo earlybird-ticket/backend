@@ -9,20 +9,29 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EventDispatcherImpl implements EventDispatcher {
 
     private final List<EventHandler<? extends EventPayload>> handlerList;
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void handle(Event<? extends EventPayload> event) {
+    public <T extends EventPayload> void handle(Event<T> event) {
         handlerList.stream()
-                   .filter(handler -> ((EventHandler) handler).support(event))
+                   .filter(handler -> supports(handler,
+                                               event))
+                   .map(handler -> (EventHandler<T>) handler)
                    .findFirst()
-                   .ifPresentOrElse(handler -> ((EventHandler) handler).handle(event),
-                                    () -> log.error("No handler found for event: {}",
+                   .ifPresentOrElse(handler -> handler.handle(event),
+                                    () -> log.error("No handler found for event type: {}",
                                                     event.getEventType()));
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends EventPayload> boolean supports(EventHandler<?> handler,
+                                                      Event<T> event) {
+        return ((EventHandler<T>) handler).support(event);
     }
 }

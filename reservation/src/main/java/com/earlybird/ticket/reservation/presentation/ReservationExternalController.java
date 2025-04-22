@@ -87,5 +87,14 @@ public class ReservationExternalController {
                                                 "예약 검색 성공"));
     }
 
+    @GetMapping("/test")
+    public ResponseEntity<CommonDto<Void>> test() {
+        reservationService.test();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                             .body(CommonDto.ok(null,
+                                                "test"));
+    }
+
 
 }
