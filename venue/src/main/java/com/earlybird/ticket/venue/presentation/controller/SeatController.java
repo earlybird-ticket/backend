@@ -6,11 +6,13 @@ import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.service.SeatService;
 import com.earlybird.ticket.venue.presentation.dto.request.ProcessSeatCheckRequest;
+import com.earlybird.ticket.venue.presentation.dto.request.SeatPreemptRequest;
 import com.earlybird.ticket.venue.presentation.dto.response.ProcessSeatCheckResponse;
 import com.earlybird.ticket.venue.presentation.dto.response.SeatListResponse;
 import com.earlybird.ticket.venue.presentation.dto.response.SectionListResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,6 +65,22 @@ public class SeatController {
                         "좌석 확인 완료"
                 )
         );
+    }
+
+    @PostMapping
+    public ResponseEntity<CommonDto<String>> preemptSeat(
+            @RequestHeader("X-User-Passport") String passport,
+            @RequestBody @Valid SeatPreemptRequest seatPreemptRequest
+    ) {
+
+        String reservationId = seatService.preemptSeat(
+                seatPreemptRequest.toSeatPreemptCommand(),
+                passport
+        );
+
+        return ResponseEntity.ok().body(
+                CommonDto.ok(reservationId,
+                        "좌석 선점 성공"));
     }
 
 }

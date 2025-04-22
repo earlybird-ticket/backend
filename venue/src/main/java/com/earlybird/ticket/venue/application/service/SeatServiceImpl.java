@@ -1,25 +1,55 @@
 package com.earlybird.ticket.venue.application.service;
 
+import com.earlybird.ticket.common.entity.EventPayload;
+import com.earlybird.ticket.common.entity.PassportDto;
+import com.earlybird.ticket.common.util.CommonUtil;
+import com.earlybird.ticket.common.util.PassportUtil;
 import com.earlybird.ticket.venue.application.dto.request.ProcessSeatCheckCommand;
+import com.earlybird.ticket.venue.application.dto.request.SeatPreemptCommand;
 import com.earlybird.ticket.venue.application.dto.response.ProcessSeatCheckQuery;
 import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
+import com.earlybird.ticket.venue.application.event.dto.response.ReservationCreateEvent;
+import com.earlybird.ticket.venue.common.event.EventType;
+import com.earlybird.ticket.venue.common.event.util.EventConverter;
+import com.earlybird.ticket.venue.common.exception.RedisException;
 import com.earlybird.ticket.venue.common.exception.SeatNotFoundException;
+import com.earlybird.ticket.venue.common.exception.SeatUnavailableException;
+import com.earlybird.ticket.venue.common.exception.TimeOutException;
+import com.earlybird.ticket.venue.domain.entity.Event;
+import com.earlybird.ticket.venue.domain.entity.Outbox;
 import com.earlybird.ticket.venue.domain.entity.Seat;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.domain.entity.constant.Status;
+import com.earlybird.ticket.venue.domain.repository.OutboxRepository;
 import com.earlybird.ticket.venue.domain.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SeatServiceImpl implements SeatService {
 
     private final SeatRepository seatRepository;
+    private final PassportUtil passportUtil;
+    private final OutboxRepository outboxRepository;
+    private final EventConverter eventConverter;
+    private final RedissonClient redissonClient;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisScript<Object> seatPreemptScript;
 
     @Override
     public SectionListQuery findSectionList(UUID concertSequenceId) {
@@ -54,5 +84,77 @@ public class SeatServiceImpl implements SeatService {
 
         //3. Free면 Id와 status응답
         return ProcessSeatCheckQuery.from(seatInstanceIdList, true);
+    }
+
+    @Transactional
+    public String preemptSeat(SeatPreemptCommand seatPreemptCommand, String passport) {
+
+        PassportDto passportDto = passportUtil.getPassportDto(passport);
+        Long userId = passportDto.getUserId();
+
+        List<UUID> seatInstanceIdList = seatPreemptCommand.seatList().stream()
+                .map(SeatPreemptCommand.SeatRequest::seatInstanceId)
+                .toList();
+
+        //Lua 파라미터 준비
+        String seatInstancePrefix = "SEAT_INSTANCE:" + seatPreemptCommand.concertSequenceId() + ":";
+
+        List<String> seatKeys = seatInstanceIdList.stream()
+                .map(seatId -> seatInstancePrefix + seatId)
+                .collect(Collectors.toList());
+
+        UUID reservationId = UUID.randomUUID();
+        long ttlMs = Duration.ofMinutes(10).toMillis();
+
+        //Lua Script 실행
+        Object result = redisTemplate.execute(
+                seatPreemptScript,
+                seatKeys,
+                userId.toString(),
+                reservationId.toString(),
+                String.valueOf(ttlMs),
+                LocalDateTime.now().toString()
+        );
+
+        if ("OK".equals(result)) {
+            // 선점 성공 -> outbox 메세지 저장
+            saveOutbox(seatInstanceIdList,
+                    ReservationCreateEvent.builder()
+                            .passportDto(passportDto)
+                            .userName(seatPreemptCommand.userName())
+                            .reservationId(reservationId)
+                            .build(),
+                    EventType.RESERVATION_CREATE);
+
+        } else if (result instanceof Number && ((Number) result).longValue() == 0) {
+            // 직접 return 0 한 경우 (이미 선점 존재 등)
+            log.warn("이미 선점된 좌석입니다.");
+            throw new SeatUnavailableException();
+
+        } else {
+            // nil 반환 (SET 실패 등)
+            log.error("redis set error");
+            throw new RedisException();
+        }
+
+        return reservationId.toString();
+    }
+
+    @Transactional
+    protected <T extends EventPayload> void saveOutbox(List<UUID> seatInstanceIdList,
+                                                       T eventPayload,
+                                                       EventType eventType) {
+        Event<T> event = Event.<T>builder()
+                .eventType(eventType)
+                .payload(eventPayload)
+                .timestamp(CommonUtil.LocalDateTimetoString(LocalDateTime.now()))
+                .build();
+
+        outboxRepository.save(Outbox.builder()
+                .aggregateId(seatInstanceIdList.get(0))
+                .aggregateType(Outbox.AggregateType.SEAT_INSTANCE)
+                .eventType(eventType)
+                .payload(eventConverter.serializeEvent(event))
+                .build());
     }
 }

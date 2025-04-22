@@ -36,22 +36,6 @@ public class SeatKafkaEventListener {
     }
 
     @KafkaListener(topics = {
-            EventType.Topic.RESERVATION_TO_SEAT_FOR_PREEMPT_TOPIC
-    }, containerFactory = "kafkaListenerContainerFactory", groupId = "test-group-id")
-    public void listenReservationToSeatForPreemptTopic(@Payload String message, Acknowledgment ack) {
-
-        try{
-            Event<? extends EventPayload> event = Event.fromJson(message);
-            eventDispatcher.handle(event);
-            ack.acknowledge();
-
-        } catch (Exception e) {
-            log.error("메시지 처리 실패: {}", e.getMessage());
-            throw e;
-        }
-    }
-
-    @KafkaListener(topics = {
             EventType.Topic.RESERVATION_TO_SEAT_TOPIC,
     }, containerFactory = "kafkaListenerContainerFactory", groupId = "test-group-id")
     public void listenReservationToSeatTopic(@Payload String message, Acknowledgment ack) {

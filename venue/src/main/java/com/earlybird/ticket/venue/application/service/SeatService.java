@@ -1,6 +1,7 @@
 package com.earlybird.ticket.venue.application.service;
 
 import com.earlybird.ticket.venue.application.dto.request.ProcessSeatCheckCommand;
+import com.earlybird.ticket.venue.application.dto.request.SeatPreemptCommand;
 import com.earlybird.ticket.venue.application.dto.response.ProcessSeatCheckQuery;
 import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
@@ -17,4 +18,5 @@ public interface SeatService {
 
     ProcessSeatCheckQuery checkSeat(ProcessSeatCheckCommand processSeatCheckCommand);
 
+    String preemptSeat(SeatPreemptCommand seatPreemptCommand, String passport);
 }

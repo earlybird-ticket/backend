@@ -62,14 +62,18 @@ public enum Code {
 
     // 좌석 서비스 메세지 처리 실패 응답
     SEAT_CONFIRM_FAIL("S01",
-                      HttpStatus.CONFLICT),
+            HttpStatus.CONFLICT),
     SEAT_PREEMPT_FAIL("S02",
-                      HttpStatus.CONFLICT),
+            HttpStatus.CONFLICT),
     SEAT_RETURN_FAIL("S03",
-                     HttpStatus.CONFLICT),
+            HttpStatus.CONFLICT),
+    REDIS_SCRIPT_ERROR("RD01",
+            HttpStatus.CONFLICT),
 
+    // 예약 생성 실패 응답
     RESERVATION_CREATE_FAIL("R01",
-                            HttpStatus.CONFLICT);
+            HttpStatus.CONFLICT)
+    ;
 
     private final String code;
     private final HttpStatus httpStatus;
