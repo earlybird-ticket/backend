@@ -11,6 +11,7 @@ import com.earlybird.ticket.reservation.domain.dto.request.PreemptSeatDltEvent;
 import com.earlybird.ticket.reservation.domain.dto.request.ReturnCouponEvent;
 import com.earlybird.ticket.reservation.domain.dto.request.ReturnSeatEvent;
 import com.earlybird.ticket.reservation.domain.dto.response.ReservationSearchResult;
+import com.earlybird.ticket.reservation.domain.dto.response.TestPayload;
 import com.earlybird.ticket.reservation.domain.entity.Event;
 import com.earlybird.ticket.reservation.domain.entity.Outbox;
 import com.earlybird.ticket.reservation.domain.entity.Reservation;
@@ -22,15 +23,17 @@ import com.earlybird.ticket.reservation.domain.repository.ReservationRepository;
 import com.earlybird.ticket.reservation.domain.repository.ReservationSeatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import static com.earlybird.ticket.reservation.domain.entity.Outbox.AggregateType.RESERVATION;
 
 @Service
 @RequiredArgsConstructor
@@ -42,8 +45,7 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationSeatRepository reservationSeatRepository;
     private final OutboxRepository outboxRepository;
     private final EventPayloadConverter eventPayloadConverter;
-    private final RedissonClient redissonClient;
-
+    private final KafkaTemplate<String, String> kafkaTemplate;
     //
     //    //TODO::validateReservationCommandsSeatInstanceId(createReservationCommands)을 삭제하고 Redis캐싱을 통해 이미 선점된 좌석인지 체크하고 락 획득
     //    @Override
@@ -170,7 +172,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         Outbox dltOutbox = Outbox.builder()
                                  .aggregateId(instanceSeatList.get(0))
-                                 .aggregateType("DLT")
+                                 .aggregateType(Outbox.AggregateType.DLT)
                                  .eventType(EventType.RESERVATION_LOCK_FAIL)
                                  .payload(payload)
                                  .build();
@@ -211,7 +213,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         Outbox couponOutbox = Outbox.builder()
                                     .aggregateId(reservation.getId())
-                                    .aggregateType("RESERVATION")
+                                    .aggregateType(RESERVATION)
                                     .eventType(EventType.COUPON_RETURN)
                                     .payload(couponRecord)
                                     .build();
@@ -271,6 +273,28 @@ public class ReservationServiceImpl implements ReservationService {
                                                             pageable,
                                                             passportDto);
 
+    }
+
+    @Override
+    public void test() {
+        TestPayload testPayload = TestPayload.builder()
+                                             .test("test")
+                                             .build();
+
+        Event<TestPayload> event = new Event<>(EventType.TEST_TOPIC,
+                                               testPayload,
+                                               LocalDateTime.now()
+                                                            .toString());
+
+        String serializedPayload = eventPayloadConverter.serializePayload(event);
+
+        Outbox outbox = Outbox.builder()
+                              .aggregateId(UUID.randomUUID())
+                              .aggregateType("RESERVATION")
+                              .eventType(EventType.TEST_TOPIC)
+                              .payload(serializedPayload)
+                              .build();
+        outboxRepository.save(outbox);
     }
 
     private List<ReservationSeat> createReservationSeat(CreateReservationCommand createReservationCommand,
