@@ -15,7 +15,6 @@ import com.earlybird.ticket.venue.common.event.util.EventConverter;
 import com.earlybird.ticket.venue.common.exception.RedisException;
 import com.earlybird.ticket.venue.common.exception.SeatNotFoundException;
 import com.earlybird.ticket.venue.common.exception.SeatUnavailableException;
-import com.earlybird.ticket.venue.common.exception.TimeOutException;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.domain.entity.Outbox;
 import com.earlybird.ticket.venue.domain.entity.Seat;
@@ -26,7 +25,6 @@ import com.earlybird.ticket.venue.domain.repository.OutboxRepository;
 import com.earlybird.ticket.venue.domain.repository.SeatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
@@ -53,7 +51,6 @@ public class SeatServiceImpl implements SeatService {
     private final EventConverter eventConverter;
     private final RedissonClient redissonClient;
     private final StringRedisTemplate stringRedisTemplate;
-    private final RedisTemplate<String, Object> redisTemplate;
     private final RedisScript<Object> seatPreemptScript;
 
     @Override
@@ -142,8 +139,10 @@ public class SeatServiceImpl implements SeatService {
         UUID reservationId = UUID.randomUUID();
         long ttlMs = Duration.ofMinutes(10).toMillis();
 
+        log.info("Lua Script 실행");
+
         //Lua Script 실행
-        Object result = redisTemplate.execute(
+        Object result = stringRedisTemplate.execute(
                 seatPreemptScript,
                 seatKeys,
                 userId.toString(),
@@ -154,6 +153,7 @@ public class SeatServiceImpl implements SeatService {
 
         if ("OK".equals(result)) {
             // 선점 성공 -> outbox 메세지 저장
+            log.info("preempt seat successful");
             saveOutbox(seatInstanceIdList,
                     ReservationCreateEvent.builder()
                             .passportDto(passportDto)

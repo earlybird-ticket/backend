@@ -51,7 +51,8 @@ public class SecurityWebConfig {
                 "api/v1/reservations/**",
                 "api/v1/concerts/**",
                 "api/v1/concertsequence/**",
-                "api/v1/coupons/**"
+                "api/v1/coupons/**",
+                "api/v1/seats/**"
             )
         );
 
