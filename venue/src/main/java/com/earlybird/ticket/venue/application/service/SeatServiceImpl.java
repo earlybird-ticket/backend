@@ -60,10 +60,17 @@ public class SeatServiceImpl implements SeatService {
 
         List<String> keys = redisKeyScanner.scanKeys("SECTION_LIST:*:" + concertSequenceId + ":*", 1000);
 
+        if (keys.isEmpty()) {
+            return SectionListQuery.from(
+                    null,
+                    concertSequenceId,
+                    Collections.emptyList());
+        }
+
         List<Object> results = stringRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
             StringRedisConnection stringConn = (StringRedisConnection) connection;
 
-            for(String key : keys) {
+            for (String key : keys) {
                 stringConn.hGetAll(key);
             }
             return null;
@@ -73,7 +80,7 @@ public class SeatServiceImpl implements SeatService {
         List<SectionListQuery.SectionQuery> sectionQueryList = new ArrayList<>();
 
         int index = 0;
-        for(String key : keys) {
+        for (String key : keys) {
             Map<String, String> map = (Map<String, String>) results.get(index++);
 
             String section = key.split(":")[3];
@@ -95,16 +102,28 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public SeatListQuery findSeatList(UUID concertSequenceId, String section) {
 
-        List<String> keys = stringRedisTemplate.opsForZSet()
-                .range("SEAT_INDEX:"+ concertSequenceId + ":" + section, 0,-1)
+        List<String> keys = Optional.ofNullable(stringRedisTemplate.opsForZSet()
+                .range("SEAT_INDEX:" + concertSequenceId + ":" + section, 0, -1))
+                .orElse(Collections.emptySet())
                 .stream()
                 .map(id -> "SEAT_INSTANCE:" + concertSequenceId + ":" + id)
-                .collect(Collectors.toList());
+                .toList();
+
+        if(keys.isEmpty()) {
+            return SeatListQuery.from(
+                    null,
+                    concertSequenceId,
+                    section,
+                    null,
+                    null,
+                    Collections.emptyList()
+            );
+        }
 
         List<Object> results = stringRedisTemplate.executePipelined((RedisCallback<Object>) connect -> {
             StringRedisConnection stringConn = (StringRedisConnection) connect;
 
-            for(String seatInstanceId : keys) {
+            for (String seatInstanceId : keys) {
                 stringConn.hGetAll(seatInstanceId);
             }
 
@@ -115,7 +134,7 @@ public class SeatServiceImpl implements SeatService {
         List<SeatListQuery.SeatQuery> seatQueryList = new ArrayList<>();
 
         int index = 0;
-        for(String key : keys) {
+        for (String key : keys) {
             Map<String, String> map = (Map<String, String>) results.get(index++);
 
             String seatInstanceId = key.split(":")[2];
@@ -153,12 +172,12 @@ public class SeatServiceImpl implements SeatService {
         List<Seat> seatList = seatRepository.findSeatListWithSeatInstanceInSeatInstanceIdList(seatInstanceIdList);
 
         // 2. seat이 다 존재하는 지 확인
-        if(seatList.size() != seatInstanceIdList.size() && seatList.get(0).getSeatInstances().size() != seatInstanceIdList.size()) {
+        if (seatList.size() != seatInstanceIdList.size() && seatList.get(0).getSeatInstances().size() != seatInstanceIdList.size()) {
             throw new SeatNotFoundException();
         }
 
         // 3. SeatInstance의 상태확인
-        for(Seat seat : seatList) {
+        for (Seat seat : seatList) {
             seat.checkSeatStatus(seatInstanceIdList, Status.FREE);
         }
 
@@ -205,7 +224,7 @@ public class SeatServiceImpl implements SeatService {
                     stringConn.hSet(sectionKey, "price", seatInstance.getPrice().toString());
 
                     String seatIndexKey = "SEAT_INDEX:" + seatInstance.getConcertSequenceId() + ":" + seat.getSection().getValue();
-                    stringConn.zAdd(seatIndexKey, seat.getRow() * 100 + seat.getCol(), String.valueOf(seatInstance.getId()));
+                    stringConn.zAdd(seatIndexKey, seat.getRow() * 10000 + seat.getCol(), String.valueOf(seatInstance.getId()));
                 }
             }
 
