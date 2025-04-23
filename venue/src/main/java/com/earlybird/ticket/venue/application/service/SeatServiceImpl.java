@@ -11,10 +11,11 @@ import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.event.dto.response.ReservationCreateEvent;
 import com.earlybird.ticket.venue.common.event.EventType;
-import com.earlybird.ticket.venue.common.event.util.EventConverter;
 import com.earlybird.ticket.venue.common.exception.RedisException;
 import com.earlybird.ticket.venue.common.exception.SeatNotFoundException;
 import com.earlybird.ticket.venue.common.exception.SeatUnavailableException;
+import com.earlybird.ticket.venue.common.util.EventConverter;
+import com.earlybird.ticket.venue.common.util.RedisKeyScanner;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.domain.entity.Outbox;
 import com.earlybird.ticket.venue.domain.entity.Seat;
@@ -28,13 +29,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -46,26 +47,122 @@ import java.util.stream.Collectors;
 public class SeatServiceImpl implements SeatService {
 
     private final SeatRepository seatRepository;
-    private final PassportUtil passportUtil;
     private final OutboxRepository outboxRepository;
+    private final PassportUtil passportUtil;
     private final EventConverter eventConverter;
     private final RedissonClient redissonClient;
     private final StringRedisTemplate stringRedisTemplate;
     private final RedisScript<Object> seatPreemptScript;
+    private final RedisKeyScanner redisKeyScanner;
 
     @Override
     public SectionListQuery findSectionList(UUID concertSequenceId) {
-        return SectionListQuery
-                .from(seatRepository.findSectionList(concertSequenceId));
+
+        List<String> keys = redisKeyScanner.scanKeys("SECTION_LIST:*:" + concertSequenceId + ":*", 1000);
+
+        if (keys.isEmpty()) {
+            return SectionListQuery.from(
+                    null,
+                    concertSequenceId,
+                    Collections.emptyList());
+        }
+
+        List<Object> results = stringRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            StringRedisConnection stringConn = (StringRedisConnection) connection;
+
+            for (String key : keys) {
+                stringConn.hGetAll(key);
+            }
+            return null;
+        });
+
+        //DTO 변환
+        List<SectionListQuery.SectionQuery> sectionQueryList = new ArrayList<>();
+
+        int index = 0;
+        for (String key : keys) {
+            Map<String, String> map = (Map<String, String>) results.get(index++);
+
+            String section = key.split(":")[3];
+
+            sectionQueryList.add(SectionListQuery.SectionQuery.from(
+                    section,
+                    Long.parseLong(map.get("remainingSeat")),
+                    Integer.parseInt(map.get("floor")),
+                    map.get("grade"),
+                    new BigDecimal(map.get("price"))
+            ));
+        }
+
+        String concertId = keys.get(0).split(":")[1];
+
+        return SectionListQuery.from(UUID.fromString(concertId), concertSequenceId, sectionQueryList);
     }
 
     @Override
     public SeatListQuery findSeatList(UUID concertSequenceId, String section) {
-        return SeatListQuery
-                .from(seatRepository.findSeatList(
-                        concertSequenceId,
-                        Section.getByValue(section)
-                ));
+
+        List<String> keys = Optional.ofNullable(stringRedisTemplate.opsForZSet()
+                .range("SEAT_INDEX:" + concertSequenceId + ":" + section, 0, -1))
+                .orElse(Collections.emptySet())
+                .stream()
+                .map(id -> "SEAT_INSTANCE:" + concertSequenceId + ":" + id)
+                .toList();
+
+        if(keys.isEmpty()) {
+            return SeatListQuery.from(
+                    null,
+                    concertSequenceId,
+                    section,
+                    null,
+                    null,
+                    Collections.emptyList()
+            );
+        }
+
+        List<Object> results = stringRedisTemplate.executePipelined((RedisCallback<Object>) connect -> {
+            StringRedisConnection stringConn = (StringRedisConnection) connect;
+
+            for (String seatInstanceId : keys) {
+                stringConn.hGetAll(seatInstanceId);
+            }
+
+            return null;
+        });
+
+        //DTO 변환
+        List<SeatListQuery.SeatQuery> seatQueryList = new ArrayList<>();
+
+        int index = 0;
+        for (String key : keys) {
+            Map<String, String> map = (Map<String, String>) results.get(index++);
+
+            String seatInstanceId = key.split(":")[2];
+
+            seatQueryList.add(SeatListQuery.SeatQuery.from(
+                    UUID.fromString(seatInstanceId),
+                    Integer.parseInt(map.get("row")),
+                    Integer.parseInt(map.get("col")),
+                    map.get("status"),
+                    new BigDecimal(map.get("price"))
+            ));
+        }
+
+        Map<String, String> firstMap = (Map<String, String>) results.get(0);
+
+        UUID concertId = UUID.fromString(firstMap.get("concertId"));
+        String grade = firstMap.get("grade");
+        Integer floor = Integer.parseInt(firstMap.get("floor"));
+
+        return SeatListQuery.from(
+                concertId,
+                concertSequenceId,
+                section,
+                grade,
+                floor,
+                seatQueryList
+        );
+
     }
 
     @Override
@@ -75,12 +172,12 @@ public class SeatServiceImpl implements SeatService {
         List<Seat> seatList = seatRepository.findSeatListWithSeatInstanceInSeatInstanceIdList(seatInstanceIdList);
 
         // 2. seat이 다 존재하는 지 확인
-        if(seatList.size() != seatInstanceIdList.size() && seatList.get(0).getSeatInstances().size() != seatInstanceIdList.size()) {
+        if (seatList.size() != seatInstanceIdList.size() && seatList.get(0).getSeatInstances().size() != seatInstanceIdList.size()) {
             throw new SeatNotFoundException();
         }
 
         // 3. SeatInstance의 상태확인
-        for(Seat seat : seatList) {
+        for (Seat seat : seatList) {
             seat.checkSeatStatus(seatInstanceIdList, Status.FREE);
         }
 
@@ -89,7 +186,7 @@ public class SeatServiceImpl implements SeatService {
     }
 
     // TODO : 추후 배치로 고도화 고려 vs Kafka Consumer
-    @Scheduled(cron = "0 05 19 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 42 12 * * *", zone = "Asia/Seoul")
     public void warmUpSeatInstance() {
 
         //Mock Data
@@ -106,12 +203,28 @@ public class SeatServiceImpl implements SeatService {
 
             for (Seat seat : seats) {
                 for (SeatInstance seatInstance : seat.getSeatInstances()) {
-                    String key = "SEAT_INSTANCE:" + seatInstance.getConcertSequenceId() + ":" + seatInstance.getId();
-                    stringConn.hSet(key, "status", seatInstance.getStatus().getValue());
-                    stringConn.hSet(key, "userId", "");
-                    stringConn.hSet(key, "reservationId", "");
-                    stringConn.hSet(key, "expireAt", CommonUtil.LocalDateTimetoString(todayTicketOpen.get(seatInstance.getConcertSequenceId())));
-                    stringConn.hSet(key, "updatedAt", "");
+                    String basicKey = "SEAT_INSTANCE:" + seatInstance.getConcertSequenceId() + ":" + seatInstance.getId();
+                    stringConn.hSet(basicKey, "status", seatInstance.getStatus().getValue());
+                    stringConn.hSet(basicKey, "userId", "");
+                    stringConn.hSet(basicKey, "reservationId", "");
+                    stringConn.hSet(basicKey, "concertId", seatInstance.getConcertId().toString());
+                    stringConn.hSet(basicKey, "col", seat.getCol().toString());
+                    stringConn.hSet(basicKey, "row", seat.getRow().toString());
+                    stringConn.hSet(basicKey, "section", seat.getSection().getValue());
+                    stringConn.hSet(basicKey, "floor", seat.getFloor().toString());
+                    stringConn.hSet(basicKey, "grade", seatInstance.getGrade().getValue());
+                    stringConn.hSet(basicKey, "price", seatInstance.getPrice().toString());
+                    stringConn.hSet(basicKey, "expireAt", CommonUtil.LocalDateTimetoString(todayTicketOpen.get(seatInstance.getConcertSequenceId())));
+                    stringConn.hSet(basicKey, "updatedAt", "");
+
+                    String sectionKey = "SECTION_LIST:" + seatInstance.getConcertId() + ":" + seatInstance.getConcertSequenceId() + ":" + seat.getSection().getValue();
+                    stringConn.hIncrBy(sectionKey, "remainingSeat", 1);
+                    stringConn.hSet(sectionKey, "floor", seat.getFloor().toString());
+                    stringConn.hSet(sectionKey, "grade", seatInstance.getGrade().getValue());
+                    stringConn.hSet(sectionKey, "price", seatInstance.getPrice().toString());
+
+                    String seatIndexKey = "SEAT_INDEX:" + seatInstance.getConcertSequenceId() + ":" + seat.getSection().getValue();
+                    stringConn.zAdd(seatIndexKey, seat.getRow() * 10000 + seat.getCol(), String.valueOf(seatInstance.getId()));
                 }
             }
 
@@ -141,6 +254,7 @@ public class SeatServiceImpl implements SeatService {
 
         log.info("Lua Script 실행");
 
+        //TODO : 조회 관련된 인덱스 작업 2개 추가 (ZSET, SEATLIST)
         //Lua Script 실행
         Object result = stringRedisTemplate.execute(
                 seatPreemptScript,

@@ -1,4 +1,4 @@
-package com.earlybird.ticket.venue.common.event.util;
+package com.earlybird.ticket.venue.common.util;
 
 import com.earlybird.ticket.common.entity.EventPayload;
 import com.earlybird.ticket.venue.domain.entity.Event;

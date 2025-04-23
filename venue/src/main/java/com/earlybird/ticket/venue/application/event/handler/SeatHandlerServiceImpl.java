@@ -6,7 +6,7 @@ import com.earlybird.ticket.common.util.CommonUtil;
 import com.earlybird.ticket.venue.application.event.dto.request.*;
 import com.earlybird.ticket.venue.application.event.dto.response.*;
 import com.earlybird.ticket.venue.common.event.EventType;
-import com.earlybird.ticket.venue.common.event.util.EventConverter;
+import com.earlybird.ticket.venue.common.util.EventConverter;
 import com.earlybird.ticket.venue.common.exception.SeatNotFoundException;
 import com.earlybird.ticket.venue.common.exception.TimeOutException;
 import com.earlybird.ticket.venue.domain.entity.Event;
@@ -22,7 +22,6 @@ import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
