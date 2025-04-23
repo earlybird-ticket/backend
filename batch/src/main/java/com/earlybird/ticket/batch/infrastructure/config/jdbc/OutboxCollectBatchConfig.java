@@ -53,14 +53,14 @@ public class OutboxCollectBatchConfig {
         SqlPagingQueryProviderFactoryBean queryProvider = new SqlPagingQueryProviderFactoryBean();
         queryProvider.setDataSource(dataSource);
         queryProvider.setSelectClause("""
-            SELECT o.aggregate_type, o.aggregate_id, o.event_type, o.payload, o.retry_count,
+            SELECT o.id, o.aggregate_type, o.aggregate_id, o.event_type, o.payload, o.retry_count,
             o.success, o.created_at, o.sent_at
             """);
         queryProvider.setFromClause("FROM p_outbox o");
         queryProvider.setWhereClause(
-            "WHERE o.success = true or (o.retry_count >= 3 and o.success = false)");
+            "WHERE o.success = true or (o.success = false and o.retry_count >= 3)");
         queryProvider.setSortKeys(Map.of(
-            "created_at", Order.ASCENDING,
+            "id", Order.ASCENDING,
             "sent_at", Order.ASCENDING
         ));
         return queryProvider.getObject();
