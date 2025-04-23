@@ -20,4 +20,6 @@ public interface ReservationService {
                                                      String startTime,
                                                      String endTime,
                                                      String passport);
+
+    void test();
 }

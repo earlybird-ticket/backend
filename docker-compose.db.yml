@@ -124,19 +124,19 @@ services:
     networks:
       - earlybird_network
 
-  earlybird-seat-postgres:
+  earlybird-alarm-postgres:
     image: postgis/postgis:latest
-    container_name: earlybird-seat-postgres
+    container_name: earlybird-alarm-postgres
     restart: always
     platform: linux/amd64
     ports:
-      - "${POSTGRES_SEAT_PORT}:5432"
+      - "${POSTGRES_ALARM_PORT}:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - earlybird_seat_postgres_data:/var/lib/postgresql/data
+      - earlybird_alarm_postgres_data:/var/lib/postgresql/data
     networks:
       - earlybird_network
 
@@ -148,7 +148,7 @@ volumes:
   earlybird_reservation_postgres_data:
   earlybird_payment_postgres_data:
   earlybird_venue_postgres_data:
-  earlybird_seat_postgres_data:
+  earlybird_alarm_postgres_data:
   earlybird-redis_data:
 networks:
   earlybird_network:

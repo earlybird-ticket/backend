@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.earlybird.ticket.reservation.domain.entity.Outbox.AggregateType.RESERVATION;
+import static com.earlybird.ticket.reservation.domain.entity.constant.EventType.RESERVATION_CREATE;
 import static com.earlybird.ticket.reservation.domain.entity.constant.EventType.RESERVATION_CREATE_FAIL;
-import static com.earlybird.ticket.reservation.domain.entity.constant.EventType.SEAT_RESERVATION_CREATE;
 import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 @Component
@@ -138,6 +138,6 @@ public class CreateReservationRequestHandler implements EventHandler<CreateReser
 
     @Override
     public boolean support(Event<CreateReservationEvent> event) {
-        return event.getEventType() == SEAT_RESERVATION_CREATE;
+        return event.getEventType() == RESERVATION_CREATE;
     }
 }
