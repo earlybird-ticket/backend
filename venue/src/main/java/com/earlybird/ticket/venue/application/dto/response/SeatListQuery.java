@@ -24,7 +24,21 @@ public record SeatListQuery(
             String status,
             BigDecimal price
     ) {
-
+        public static SeatQuery from(
+                UUID seatInstanceId,
+                Integer row,
+                Integer col,
+                String status,
+                BigDecimal price
+        ) {
+            return SeatQuery.builder()
+                    .seatInstanceId(seatInstanceId)
+                    .row(row)
+                    .col(col)
+                    .status(status)
+                    .price(price)
+                    .build();
+        }
     }
 
     public static SeatListQuery from(SeatListResult seatListResult) {
@@ -49,4 +63,21 @@ public record SeatListQuery(
                 .build();
     }
 
+    public static SeatListQuery from(
+            UUID concertId,
+            UUID concertSequenceId,
+            String section,
+            String grade,
+            Integer floor,
+            List<SeatQuery> seatList
+    ) {
+        return SeatListQuery.builder()
+                .concertId(concertId)
+                .concertSequenceId(concertSequenceId)
+                .section(section)
+                .grade(grade)
+                .floor(floor)
+                .seatList(seatList)
+                .build();
+    }
 }

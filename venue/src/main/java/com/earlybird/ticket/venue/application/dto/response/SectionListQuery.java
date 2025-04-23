@@ -21,6 +21,21 @@ public record SectionListQuery(
             String grade,
             BigDecimal price
     ) {
+        public static SectionQuery from(
+                String section,
+                long remainingNumberOfSeats,
+                int floor,
+                String grade,
+                BigDecimal price
+        ) {
+            return SectionQuery.builder()
+                    .section(section)
+                    .remainingNumberOfSeats(remainingNumberOfSeats)
+                    .floor(floor)
+                    .grade(grade)
+                    .price(price)
+                    .build();
+        }
 
     }
 
@@ -41,6 +56,18 @@ public record SectionListQuery(
                         )
                         .toList()
                 )
+                .build();
+    }
+
+    public static SectionListQuery from(
+            UUID concertId,
+            UUID concertSequenceId,
+            List<SectionQuery> sectionList
+    ) {
+        return SectionListQuery.builder()
+                .concertId(concertId)
+                .concertSequenceId(concertSequenceId)
+                .sectionList(sectionList)
                 .build();
     }
 }
