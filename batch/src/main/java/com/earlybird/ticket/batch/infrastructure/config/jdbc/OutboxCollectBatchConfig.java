@@ -2,7 +2,6 @@ package com.earlybird.ticket.batch.infrastructure.config.jdbc;
 
 import com.earlybird.ticket.batch.domain.entity.Outbox;
 import com.earlybird.ticket.batch.infrastructure.dto.response.OutboxMessage;
-import jakarta.persistence.EntityManagerFactory;
 import java.util.Map;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
@@ -13,13 +12,15 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
-import org.springframework.batch.item.database.JpaItemWriter;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.PagingQueryProvider;
+import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
-import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
+import org.springframework.batch.item.support.CompositeItemWriter;
+import org.springframework.batch.item.support.builder.CompositeItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,15 +61,15 @@ public class OutboxCollectBatchConfig {
         queryProvider.setWhereClause(
             "WHERE o.success = true or (o.success = false and o.retry_count >= 3)");
         queryProvider.setSortKeys(Map.of(
-            "id", Order.ASCENDING,
-            "sent_at", Order.ASCENDING
+            "id", Order.ASCENDING
         ));
         return queryProvider.getObject();
     }
 
     @Bean
     public ItemProcessor<OutboxMessage, Outbox> paymentOutboxProcessor() {
-        return outboxMessage -> Outbox.builder()
+        return outboxMessage -> Outbox.withoutId()
+            .orgId(outboxMessage.id())
             .aggregateType(outboxMessage.aggregateType())
             .aggregateId(outboxMessage.aggregateId())
             .payload(outboxMessage.payload())
@@ -82,9 +83,35 @@ public class OutboxCollectBatchConfig {
 
 
     @Bean
-    public JpaItemWriter<Outbox> paymentOutboxJpaWriter(EntityManagerFactory emf) {
-        return new JpaItemWriterBuilder<Outbox>()
-            .entityManagerFactory(emf)
+    public CompositeItemWriter<Outbox> paymentOutboxMigrateWriter(
+        DataSource sinkDataSource,
+        DataSource paymentDataSource
+    ) {
+
+        OutboxItemSqlParameterSourceProvider outboxParameterSource = new OutboxItemSqlParameterSourceProvider();
+        // payment -> sink로 복사
+        JdbcBatchItemWriter<Outbox> writeToSink = new JdbcBatchItemWriterBuilder<Outbox>()
+            .dataSource(sinkDataSource)
+            .sql("""
+                INSERT INTO p_outbox(id, aggregate_type, aggregate_id, event_type, payload, retry_count, success, created_at, sent_at, org_id)
+                VALUES (nextval('p_outbox_seq'), :aggregateType, :aggregateId, :eventType, :payload, :retryCount, :success, :createdAt, :sentAt, :orgId)
+                """)
+            .itemSqlParameterSourceProvider(outboxParameterSource)
+            .build();
+        writeToSink.afterPropertiesSet();
+
+        // payment에서 삭제
+        JdbcBatchItemWriter<Outbox> deletePayment = new JdbcBatchItemWriterBuilder<Outbox>()
+            .dataSource(paymentDataSource)
+            .sql("""
+                DELETE FROM p_outbox where id = :orgId
+                """)
+            .itemSqlParameterSourceProvider(outboxParameterSource)
+            .build();
+        deletePayment.afterPropertiesSet();
+
+        return new CompositeItemWriterBuilder<Outbox>()
+            .delegates(writeToSink, deletePayment)
             .build();
     }
 
@@ -93,13 +120,13 @@ public class OutboxCollectBatchConfig {
         JobRepository jobRepository,
         @Qualifier("sinkTransactionManager") PlatformTransactionManager transactionManager,
         @Qualifier("paymentDataSource") DataSource paymentDataSource,
-        @Qualifier("sinkEntityManagerFactory") EntityManagerFactory emf
+        @Qualifier("sinkDataSource") DataSource sinkDataSource
     ) throws Exception {
         return new StepBuilder("paymentOutboxCollectStep", jobRepository)
             .<OutboxMessage, Outbox>chunk(CHUNK_SIZE, transactionManager)
             .reader(paymentOutboxReader(paymentDataSource))
             .processor(paymentOutboxProcessor())
-            .writer(paymentOutboxJpaWriter(emf))
+            .writer(paymentOutboxMigrateWriter(sinkDataSource, paymentDataSource))
             .build();
     }
 

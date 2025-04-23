@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -19,11 +20,20 @@ import org.hibernate.annotations.SQLRestriction;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SQLRestriction("success is false")
+@SequenceGenerator(
+    name = "OUTBOX_SEQ_GENERATOR",
+    sequenceName = "P_OUTBOX_SEQ",
+    initialValue = 1, allocationSize = 100
+)
 public class Outbox {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+        generator = "OUTBOX_SEQ_GENERATOR")
     private Long id;
+
+    @Column(name = "org_id")
+    private Long orgId; // 각 서비스에서의 ID
 
     private String aggregateType;
 
@@ -42,9 +52,9 @@ public class Outbox {
 
     private LocalDateTime sentAt;
 
-    @Builder
+    @Builder(builderMethodName = "withoutId")
     public Outbox(
-        Long id,
+        Long orgId,
         String aggregateType,
         UUID aggregateId,
         String eventType,
@@ -54,7 +64,7 @@ public class Outbox {
         LocalDateTime createdAt,
         LocalDateTime sentAt
     ) {
-        this.id = id;
+        this.orgId = orgId;
         this.aggregateType = aggregateType;
         this.aggregateId = aggregateId;
         this.eventType = eventType;
