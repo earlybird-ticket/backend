@@ -7,6 +7,7 @@ import java.util.UUID;
 
 @Builder
 public record ProcessSeatCheckCommand(
+        UUID concertSequenceId,
         List<UUID> seatInstanceIdList
 ) {
 }
