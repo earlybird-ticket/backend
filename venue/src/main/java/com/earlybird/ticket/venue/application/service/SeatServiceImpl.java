@@ -52,6 +52,7 @@ public class SeatServiceImpl implements SeatService {
     private final RedissonClient redissonClient;
     private final StringRedisTemplate stringRedisTemplate;
     private final RedisScript<Object> seatPreemptScript;
+    private final RedisScript<Object> seatCheckScript;
     private final RedisKeyFactory redisKeyFactory;
     private final RedisSeatListReader redisSeatListReader;
     private final RedisSectionListReader redisSectionListReader;
@@ -116,21 +117,61 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public ProcessSeatCheckQuery checkSeat(ProcessSeatCheckCommand processSeatCheckCommand) {
         List<UUID> seatInstanceIdList = processSeatCheckCommand.seatInstanceIdList();
-        // 1. seatInstanceId와 일치하는 seat 가져오기
-        List<Seat> seatList = seatRepository.findSeatListWithSeatInstanceInSeatInstanceIdList(seatInstanceIdList);
 
-        // 2. seat이 다 존재하는 지 확인
-        if (seatList.size() != seatInstanceIdList.size() && seatList.get(0).getSeatInstances().size() != seatInstanceIdList.size()) {
-            throw new SeatNotFoundException();
+        List<String> seatKeys = seatInstanceIdList.stream()
+                .map(seatInstanceId -> redisKeyFactory.generateSeatInstanceKey(
+                                processSeatCheckCommand.concertSequenceId(),
+                                seatInstanceId
+                                )
+                )
+                .toList();
+
+
+        Object result = stringRedisTemplate.execute(
+                seatCheckScript,
+                seatKeys
+        );
+
+        if(isAlreadyPreempted(result)) {
+            throw new SeatUnavailableException();
         }
 
-        // 3. SeatInstance의 상태확인
-        for (Seat seat : seatList) {
-            seat.checkSeatStatus(seatInstanceIdList, Status.FREE);
-        }
-
-        //3. Free면 Id와 status응답
         return ProcessSeatCheckQuery.from(seatInstanceIdList, true);
+    }
+
+    @Override
+    public String preemptSeat(SeatPreemptCommand seatPreemptCommand, String passport) {
+
+        PassportDto passportDto = passportUtil.getPassportDto(passport);
+        Long userId = passportDto.getUserId();
+        UUID reservationId = UUID.randomUUID();
+        long ttlMs = Duration.ofMinutes(10).toMillis();
+
+        List<UUID> seatInstanceIdList = seatPreemptCommand.seatList().stream()
+                .map(SeatPreemptCommand.SeatRequest::seatInstanceId)
+                .toList();
+
+        List<String> seatKeys = generateSeatInstanceRedisKeys(seatPreemptCommand, seatInstanceIdList);
+
+        Object result = executePreemptLuaScript(seatKeys, userId, reservationId, ttlMs);
+
+        if (isAlreadyPreempted(result)) {
+            throw new SeatUnavailableException();
+        }
+
+        if (!isLuaExecutionSuccess(result)) {
+            throw new RedisException();
+        }
+
+        saveOutbox(seatInstanceIdList,
+                ReservationCreateEvent.builder()
+                        .passportDto(passportDto)
+                        .userName(seatPreemptCommand.userName())
+                        .reservationId(reservationId)
+                        .build(),
+                EventType.RESERVATION_CREATE);
+
+        return reservationId.toString();
     }
 
     // TODO : 추후 배치로 고도화 고려 vs Kafka Consumer
@@ -160,43 +201,6 @@ public class SeatServiceImpl implements SeatService {
             return null;
         });
 
-    }
-
-    @Override
-    public String preemptSeat(SeatPreemptCommand seatPreemptCommand, String passport) {
-
-        PassportDto passportDto = passportUtil.getPassportDto(passport);
-        Long userId = passportDto.getUserId();
-        UUID reservationId = UUID.randomUUID();
-        long ttlMs = Duration.ofMinutes(10).toMillis();
-
-        List<UUID> seatInstanceIdList = seatPreemptCommand.seatList().stream()
-                .map(SeatPreemptCommand.SeatRequest::seatInstanceId)
-                .toList();
-
-        List<String> seatKeys = generateSeatInstanceRedisKeys(seatPreemptCommand, seatInstanceIdList);
-
-        Object result = executePreemptLuaScript(seatKeys, userId, reservationId, ttlMs);
-
-        if (isAlreadyPreempted(result)) {
-            log.warn("이미 선점된 좌석입니다.");
-            throw new SeatUnavailableException();
-        }
-
-        if (!isLuaExecutionSuccess(result)) {
-            log.error("redis set error");
-            throw new RedisException();
-        }
-
-        saveOutbox(seatInstanceIdList,
-                ReservationCreateEvent.builder()
-                        .passportDto(passportDto)
-                        .userName(seatPreemptCommand.userName())
-                        .reservationId(reservationId)
-                        .build(),
-                EventType.RESERVATION_CREATE);
-
-        return reservationId.toString();
     }
 
     private Object executePreemptLuaScript(List<String> seatKeys, Long userId, UUID reservationId, long ttlMs) {

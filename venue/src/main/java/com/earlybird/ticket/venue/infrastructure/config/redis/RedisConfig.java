@@ -69,6 +69,23 @@ public class RedisConfig {
     }
 
     @Bean
+    public RedisScript<Object> seatCheckScript() {
+        DefaultRedisScript<Object> redisScript = new DefaultRedisScript<>();
+        redisScript.setScriptText("""
+                for i = 1, #KEYS do
+                  local status = redis.call('HGET', KEYS[i], 'status')
+                  if status ~= 'FREE' then
+                    return 0
+                  end
+                end
+                
+                return 1
+                """);
+        redisScript.setResultType(Object.class);
+        return redisScript;
+    }
+
+    @Bean
     public RedisTemplate<String, String> scriptRedisTemplate(RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, String> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
