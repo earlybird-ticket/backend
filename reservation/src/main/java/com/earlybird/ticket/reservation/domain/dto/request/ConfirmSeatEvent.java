@@ -15,14 +15,17 @@ import java.util.UUID;
 public class ConfirmSeatEvent implements EventPayload {
 
     private List<UUID> seatInstanceIdList;
+    private UUID concertSequenceId;
     private PassportDto passportDto;
     private UUID reservationId;
 
     @Builder
     public ConfirmSeatEvent(List<UUID> seatInstanceIdList,
-                            UUID reservationId,
-                            PassportDto passportDto) {
+                            UUID concertSequenceId,
+                            PassportDto passportDto,
+                            UUID reservationId) {
         this.seatInstanceIdList = seatInstanceIdList;
+        this.concertSequenceId = concertSequenceId;
         this.passportDto = passportDto;
         this.reservationId = reservationId;
     }
