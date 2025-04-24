@@ -6,6 +6,7 @@ import lombok.Builder;
 
 @Builder
 public record OutboxMessage(
+    Long id,
     String aggregateType,
     UUID aggregateId,
     String eventType,
