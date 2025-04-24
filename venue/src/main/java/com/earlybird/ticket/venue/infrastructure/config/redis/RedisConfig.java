@@ -42,7 +42,7 @@ public class RedisConfig {
                     return 0
                   end
                 end
-                
+               
                 -- 2. 상태 갱신
                 for i = 1, #KEYS do
                   redis.call('HSET', KEYS[i], 'status', 'PREEMPT')
@@ -50,11 +50,20 @@ public class RedisConfig {
                   redis.call('HSET', KEYS[i], 'reservationId', ARGV[2])
                   redis.call('HSET', KEYS[i], 'updatedAt', ARGV[4])
                 end
-                
-                -- 3. 예약 ID TTL 설정
+               
+                -- 3. Section List remaining Seat 감소
+                for i = 1, #KEYS do
+                   local key = KEYS[i];
+                   local concertId = redis.call('HGET', key, 'concertId')
+                   local section = redis.call('HGET', key, 'section')
+                   local concertSequenceId = string.match(key, 'SEAT_INSTANCE:(.-):')
+                   redis.call('HINCRBY', 'SECTION_LIST:' .. concertId .. ':' .. concertSequenceId .. ':' ..section, 'remainingSeat', -1)
+                end
+               
+                -- 5. 예약 ID TTL 설정
                 return redis.call('SET', 'TIME_LIMIT:RESERVATION_ID:' .. ARGV[2], 'PREEMPT', 'NX', 'PX', tonumber(ARGV[3]))
-                
-                """);
+               
+               """);
         redisScript.setResultType(Object.class);
         return redisScript;
     }
