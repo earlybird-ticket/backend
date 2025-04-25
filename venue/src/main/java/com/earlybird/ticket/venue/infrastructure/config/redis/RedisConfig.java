@@ -2,6 +2,7 @@ package com.earlybird.ticket.venue.infrastructure.config.redis;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.StringCodec;
 import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
@@ -26,6 +27,7 @@ public class RedisConfig {
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
+        config.setCodec(new StringCodec());
         config.useSingleServer()
                 .setAddress("redis://" + redisHost + ":" + redisPort);
         return Redisson.create(config);
@@ -45,7 +47,7 @@ public class RedisConfig {
                
                 -- 2. 상태 갱신
                 for i = 1, #KEYS do
-                  redis.call('HSET', KEYS[i], 'status', 'PREEMPT')
+                  redis.call('HSET', KEYS[i], 'status', 'PREEMPTED')
                   redis.call('HSET', KEYS[i], 'userId', ARGV[1])
                   redis.call('HSET', KEYS[i], 'reservationId', ARGV[2])
                   redis.call('HSET', KEYS[i], 'updatedAt', ARGV[4])
@@ -61,7 +63,7 @@ public class RedisConfig {
                 end
                
                 -- 5. 예약 ID TTL 설정
-                return redis.call('SET', 'TIME_LIMIT:RESERVATION_ID:' .. ARGV[2], 'PREEMPT', 'NX', 'PX', tonumber(ARGV[3]))
+                return redis.call('SET', 'TIME_LIMIT:RESERVATION_ID:' .. ARGV[2], 'PREEMPTED', 'NX', 'PX', tonumber(ARGV[3]))
                
                """);
         redisScript.setResultType(Object.class);

@@ -54,7 +54,7 @@ public class SeatServiceImpl implements SeatService {
     private final RedisScript<Object> seatPreemptScript;
     private final RedisScript<Object> seatCheckScript;
     private final RedisKeyFactory redisKeyFactory;
-    private final RedisSeatListReader redisSeatListReader;
+    private final RedisSeatListReader redisSeatListReader; //하나로 합치기 (예 : 전략패턴)
     private final RedisSectionListReader redisSectionListReader;
 
     @Override

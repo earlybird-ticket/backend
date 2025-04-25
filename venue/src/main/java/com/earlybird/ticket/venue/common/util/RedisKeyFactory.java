@@ -13,6 +13,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RedisKeyFactory {
 
+    public static final String RESERVATION_TIME_LIMIT_PREFIX = "TIME_LIMIT:RESERVATION_ID:";
     public static final String SEAT_INSTANCE_PREFIX = "SEAT_INSTANCE:";
     public static final String SECTION_LIST_PREFIX = "SECTION_LIST:";
     public static final String SEAT_INDEX_PREFIX = "SEAT_INDEX:";
