@@ -107,7 +107,7 @@ public class ConcertStepConfig {
         @Qualifier("concertDataSource") DataSource concertDataSource,
         @Qualifier("sinkDataSource") DataSource sinkDataSource
     ) throws Exception {
-        return new StepBuilder("paymentOutboxCollectStep", jobRepository)
+        return new StepBuilder("concertOutboxCollectStep", jobRepository)
             .<OutboxMessage, Outbox>chunk(CHUNK_SIZE, transactionManager)
             .reader(concertOutboxReader(concertDataSource))
             .processor(sinkOutboxProcessor)

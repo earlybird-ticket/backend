@@ -65,7 +65,7 @@ public class VenueStepConfig {
     }
 
     @Bean
-    public CompositeItemWriter<Outbox> concertOutboxMigrateWriter(
+    public CompositeItemWriter<Outbox> venueOutboxMigrateWriter(
         DataSource sinkDataSource,
         DataSource venueDataSource
     ) {
@@ -111,7 +111,7 @@ public class VenueStepConfig {
             .<OutboxMessage, Outbox>chunk(CHUNK_SIZE, transactionManager)
             .reader(venueOutboxReader(venueDataSource))
             .processor(sinkOutboxProcessor)
-            .writer(concertOutboxMigrateWriter(sinkDataSource, venueDataSource))
+            .writer(venueOutboxMigrateWriter(sinkDataSource, venueDataSource))
             .build();
     }
 }

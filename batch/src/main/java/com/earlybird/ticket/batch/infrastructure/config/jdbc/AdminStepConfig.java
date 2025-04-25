@@ -65,7 +65,7 @@ public class AdminStepConfig {
     }
 
     @Bean
-    public CompositeItemWriter<Outbox> concertOutboxMigrateWriter(
+    public CompositeItemWriter<Outbox> adminOutboxMigrateWriter(
         DataSource sinkDataSource,
         DataSource adminDataSource
     ) {
@@ -107,11 +107,11 @@ public class AdminStepConfig {
         @Qualifier("adminDataSource") DataSource adminDataSource,
         @Qualifier("sinkDataSource") DataSource sinkDataSource
     ) throws Exception {
-        return new StepBuilder("venueOutboxCollectStep", jobRepository)
+        return new StepBuilder("adminOutboxCollectStep", jobRepository)
             .<OutboxMessage, Outbox>chunk(CHUNK_SIZE, transactionManager)
             .reader(adminOutboxReader(adminDataSource))
             .processor(sinkOutboxProcessor)
-            .writer(concertOutboxMigrateWriter(sinkDataSource, adminDataSource))
+            .writer(adminOutboxMigrateWriter(sinkDataSource, adminDataSource))
             .build();
     }
 }
