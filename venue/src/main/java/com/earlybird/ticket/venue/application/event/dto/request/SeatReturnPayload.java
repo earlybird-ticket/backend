@@ -10,6 +10,8 @@ import java.util.UUID;
 @Builder
 public record SeatReturnPayload(
         PassportDto passportDto,
-        List<UUID> seatInstanceIdList
+        List<UUID> seatInstanceIdList,
+        UUID reservationId,
+        UUID concertSequenceId
 ) implements EventPayload {
 }
