@@ -31,43 +31,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 public class OutboxCollectBatchConfig {
 
-    private static final int CHUNK_SIZE = 1000;
-    private static final String OUTBOX_COLLECT_JOB = "OUT_BOX_COLLECT_JOB";
+    public static final int CHUNK_SIZE = 1000;
+    public static final String OUTBOX_COLLECT_JOB = "OUT_BOX_COLLECT_JOB";
 
     @Bean
-    @Qualifier("paymentOutboxReader")
-    public JdbcPagingItemReader<OutboxMessage> paymentOutboxReader(DataSource dataSource)
-        throws Exception {
-        JdbcPagingItemReader<OutboxMessage> reader = new JdbcPagingItemReader<>();
-        return new JdbcPagingItemReaderBuilder<OutboxMessage>()
-            .name("paymentOutboxReader")
-            .dataSource(dataSource)
-            .fetchSize(CHUNK_SIZE)
-            // 기본 생성자 대신 모든 필드를 지닌 생성자 매핑
-            .rowMapper(new DataClassRowMapper<>(OutboxMessage.class))
-            .queryProvider(paymentQueryProvider(dataSource))
-            .build();
-    }
-
-    @Bean
-    public PagingQueryProvider paymentQueryProvider(DataSource dataSource) throws Exception {
-        SqlPagingQueryProviderFactoryBean queryProvider = new SqlPagingQueryProviderFactoryBean();
-        queryProvider.setDataSource(dataSource);
-        queryProvider.setSelectClause("""
-            SELECT o.id, o.aggregate_type, o.aggregate_id, o.event_type, o.payload, o.retry_count,
-            o.success, o.created_at, o.sent_at
-            """);
-        queryProvider.setFromClause("FROM p_outbox o");
-        queryProvider.setWhereClause(
-            "WHERE o.success = true or (o.success = false and o.retry_count >= 3)");
-        queryProvider.setSortKeys(Map.of(
-            "id", Order.ASCENDING
-        ));
-        return queryProvider.getObject();
-    }
-
-    @Bean
-    public ItemProcessor<OutboxMessage, Outbox> paymentOutboxProcessor() {
+    public ItemProcessor<OutboxMessage, Outbox> sinkOutboxProcessor() {
         return outboxMessage -> Outbox.withoutId()
             .orgId(outboxMessage.id())
             .aggregateType(outboxMessage.aggregateType())
@@ -81,57 +49,17 @@ public class OutboxCollectBatchConfig {
             .build();
     }
 
-
-    @Bean
-    public CompositeItemWriter<Outbox> paymentOutboxMigrateWriter(
-        DataSource sinkDataSource,
-        DataSource paymentDataSource
-    ) {
-
-        OutboxItemSqlParameterSourceProvider outboxParameterSource = new OutboxItemSqlParameterSourceProvider();
-        // payment -> sink로 복사
-        JdbcBatchItemWriter<Outbox> writeToSink = new JdbcBatchItemWriterBuilder<Outbox>()
-            .dataSource(sinkDataSource)
-            .sql("""
-                INSERT INTO p_outbox(id, aggregate_type, aggregate_id, event_type, payload, retry_count, success, created_at, sent_at, org_id)
-                VALUES (nextval('p_outbox_seq'), :aggregateType, :aggregateId, :eventType, :payload, :retryCount, :success, :createdAt, :sentAt, :orgId)
-                """)
-            .itemSqlParameterSourceProvider(outboxParameterSource)
-            .build();
-        writeToSink.afterPropertiesSet();
-
-        // payment에서 삭제
-        JdbcBatchItemWriter<Outbox> deletePayment = new JdbcBatchItemWriterBuilder<Outbox>()
-            .dataSource(paymentDataSource)
-            .sql("""
-                DELETE FROM p_outbox where id = :orgId
-                """)
-            .itemSqlParameterSourceProvider(outboxParameterSource)
-            .build();
-        deletePayment.afterPropertiesSet();
-
-        return new CompositeItemWriterBuilder<Outbox>()
-            .delegates(writeToSink, deletePayment)
-            .build();
-    }
-
-    @Bean
-    public Step collectPaymentOutboxStep(
-        JobRepository jobRepository,
-        @Qualifier("sinkTransactionManager") PlatformTransactionManager transactionManager,
-        @Qualifier("paymentDataSource") DataSource paymentDataSource,
-        @Qualifier("sinkDataSource") DataSource sinkDataSource
-    ) throws Exception {
-        return new StepBuilder("paymentOutboxCollectStep", jobRepository)
-            .<OutboxMessage, Outbox>chunk(CHUNK_SIZE, transactionManager)
-            .reader(paymentOutboxReader(paymentDataSource))
-            .processor(paymentOutboxProcessor())
-            .writer(paymentOutboxMigrateWriter(sinkDataSource, paymentDataSource))
-            .build();
-    }
-
+    /*
+     * TODO : admin, concert, coupon, reservation, venue 추가
+     *  1. ItemReader 빈 추가
+     *  2. QueryProvider 추가
+     *  3. ItemWriter 빈 추가
+     *  4. 각 서비스 step으로 빈 추가
+     *  5. Job에 각 서비스 Step 연결
+     */
     @Bean
     public Job collectOutboxJob(Step collectPaymentOutboxStep, JobRepository jobRepository) {
+        // TODO : step으로 admin, concert, coupon, reservation, venue 추가
         return new JobBuilder(OUTBOX_COLLECT_JOB, jobRepository)
             .incrementer(new RunIdIncrementer())
             .start(collectPaymentOutboxStep)
