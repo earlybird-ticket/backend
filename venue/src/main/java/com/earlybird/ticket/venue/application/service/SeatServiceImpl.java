@@ -227,7 +227,7 @@ public class SeatServiceImpl implements SeatService {
     }
 
     private boolean isAlreadyPreempted(Object result) {
-        return result instanceof Number && ((Number) result).longValue() == 0;
+        return result == null || (result instanceof Number && ((Number) result).longValue() == RedisKeyFactory.LUA_FAIL);
     }
 
     private <T extends EventPayload> void saveOutbox(List<UUID> seatInstanceIdList,

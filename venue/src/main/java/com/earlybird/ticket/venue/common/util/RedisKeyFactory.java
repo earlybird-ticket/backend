@@ -20,6 +20,8 @@ public class RedisKeyFactory {
     public static final String PREFIX_WILDCARD = "*:";
     public static final String SUFFIX_WILDCARD = ":*";
     public static final String REDIS_COLON = ":";
+    public static final Long LUA_FAIL = 0L;
+    public static final Long LUA_SUCCESS = 1L;
 
     private final RedisKeyScanner redisKeyScanner;
     private final StringRedisTemplate stringRedisTemplate;

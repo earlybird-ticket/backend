@@ -213,7 +213,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                     LocalDateTime.now().toString()
             );
 
-            if(result == 0) {
+            if(RedisKeyFactory.LUA_FAIL.equals(result)) {
                 throw new SeatReturnFailException();
             }
 
