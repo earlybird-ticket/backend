@@ -164,11 +164,11 @@ public class SeatServiceImpl implements SeatService {
         }
 
         saveOutbox(seatInstanceIdList,
-                ReservationCreateEvent.builder()
-                        .passportDto(passportDto)
-                        .userName(seatPreemptCommand.userName())
-                        .reservationId(reservationId)
-                        .build(),
+                ReservationCreateEvent.toReservationCreateEvent(
+                        seatPreemptCommand,
+                        passportDto,
+                        reservationId
+                ),
                 EventType.RESERVATION_CREATE);
 
         return reservationId.toString();

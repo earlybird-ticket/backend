@@ -116,7 +116,7 @@ public class RedisConfig {
                    local concertId = redis.call('HGET', key, 'concertId')
                    local section = redis.call('HGET', key, 'section')
                    local concertSequenceId = string.match(key, '^SEAT_INSTANCE:([^:]+):')
-                   redis.call('HINCRBY', 'SECTION_LIST:' .. concertId .. ':' .. concertSequenceId .. ':' ..section, 'remainingSeat', +1)
+                   redis.call('HINCRBY', 'SECTION_LIST:' .. concertId .. ':' .. concertSequenceId .. ':' ..section, 'remainingSeat', 1)
                 end
                 
                 -- 4. TTL 삭제
