@@ -45,15 +45,17 @@ public class OutboxCollectBatchConfig {
         @Qualifier("collectReservationOutboxStep") Step collectReservationOutboxStep,
         JobRepository jobRepository
     ) {
-        // TODO : step으로 admin, concert, coupon, reservation, venue 추가
+        // 각 step 성공 여부에 관계 없이 job 계속 수행
         return new JobBuilder(OUTBOX_COLLECT_JOB, jobRepository)
             .incrementer(new RunIdIncrementer())
             .start(collectPaymentOutboxStep)
-            .next(collectCouponOutboxStep)
-            .next(collectConcertOutboxStep)
-            .next(collectVenueOutboxStep)
-            .next(collectAdminOutboxStep)
-            .next(collectReservationOutboxStep)
+            .on("*")
+            .to(collectCouponOutboxStep)
+            .from(collectCouponOutboxStep).on("*").to(collectConcertOutboxStep)
+            .from(collectConcertOutboxStep).on("*").to(collectVenueOutboxStep)
+            .from(collectVenueOutboxStep).on("*").to(collectAdminOutboxStep)
+            .from(collectAdminOutboxStep).on("*").to(collectReservationOutboxStep)
+            .end()
             .build();
     }
 }
