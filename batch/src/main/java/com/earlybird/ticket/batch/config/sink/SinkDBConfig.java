@@ -11,16 +11,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @EnableJpaRepositories(
     basePackages = "com.earlybird.ticket.batch.infrastructure.repository",
     entityManagerFactoryRef = "sinkEntityManagerFactory",
-    transactionManagerRef = "sinkTransactionManager"
+    transactionManagerRef = "jtaTransactionManager"
 )
 @RequiredArgsConstructor
 public class SinkDBConfig {
@@ -53,13 +51,6 @@ public class SinkDBConfig {
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         em.setJpaPropertyMap(finalProps);
         return em;
-    }
-
-    @Bean
-    public PlatformTransactionManager sinkTransactionManager() {
-        JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(sinkEntityManagerFactory().getObject());
-        return transactionManager;
     }
 
 }
