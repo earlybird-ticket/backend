@@ -21,9 +21,7 @@ import com.earlybird.ticket.venue.domain.repository.SeatRepository;
 import com.earlybird.ticket.venue.infrastructure.config.redis.RedisConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RBucket;
-import org.redisson.api.RMap;
-import org.redisson.api.RedissonClient;
+import org.redisson.api.*;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -145,19 +143,28 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
 
             for(String seatKey : seatKeys) {
                 RMap<String, String> map = redissonClient.getMap(seatKey);
+
                 String storedUserId = map.get("userId");
 
-                if(storedUserId == null ||!storedUserId.equals(userId.toString())) {
+                if (storedUserId == null || !storedUserId.equals(userId.toString())) {
                     throw new SeatUnavailableException();
                 }
 
-                if(!"PREEMPTED".equals(map.get("status"))) {
+                if (!"PREEMPTED".equals(map.get("status"))) {
                     throw new SeatUnavailableException();
                 }
-
-                map.put("status", "CONFIRMED");
-                map.put("updatedAt",  CommonUtil.LocalDateTimetoString(LocalDateTime.now()));
             }
+
+            RBatch batch = redissonClient.createBatch();
+            String now = CommonUtil.LocalDateTimetoString(LocalDateTime.now());
+
+            for(String seatKey : seatKeys) {
+                RMapAsync<String, String> mapAsync = batch.getMap(seatKey);
+                mapAsync.putAsync("status", "CONFIRMED");
+                mapAsync.putAsync("updatedAt", now);
+            }
+
+            batch.execute();
 
             saveOutbox(seatInstanceIdList,
                        SeatConfirmSuccessEvent.builder()
