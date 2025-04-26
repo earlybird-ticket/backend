@@ -14,4 +14,18 @@ public record SeatReturnPayload(
         UUID reservationId,
         UUID concertSequenceId
 ) implements EventPayload {
+
+    public static SeatReturnPayload toPayload(
+            PassportDto passportDto,
+            List<UUID> seatInstanceIdList,
+            UUID reservationId,
+            UUID concertSequenceId
+    ) {
+        return SeatReturnPayload.builder()
+                .passportDto(passportDto)
+                .seatInstanceIdList(seatInstanceIdList)
+                .reservationId(reservationId)
+                .concertSequenceId(concertSequenceId)
+                .build();
+    }
 }

@@ -9,6 +9,8 @@ import java.util.UUID;
 public record ReservationCreateFailPayload(
         PassportDto passportDto,
         List<UUID> seatInstanceIdList,
+        UUID concertSequenceId,
+        UUID reservationId,
         String code
 ) implements EventPayload {
 }

@@ -231,6 +231,18 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
 
     }
 
+    @Override
+    @Transactional
+    public void handleReservationCreateFailure(ReservationCreateFailPayload reservationCreateFailPayload) {
+
+        returnSeat(SeatReturnPayload.toPayload(
+                reservationCreateFailPayload.passportDto(),
+                reservationCreateFailPayload.seatInstanceIdList(),
+                reservationCreateFailPayload.reservationId(),
+                reservationCreateFailPayload.concertSequenceId()
+        ));
+    }
+
     @Transactional
     protected <T extends EventPayload> void saveOutbox(List<UUID> seatInstanceIdList,
                                                        T eventPayload,
