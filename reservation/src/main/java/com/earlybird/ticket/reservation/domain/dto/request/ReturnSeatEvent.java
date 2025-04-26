@@ -15,20 +15,15 @@ import java.util.UUID;
 public class ReturnSeatEvent implements EventPayload {
 
     private List<UUID> seatInstanceIdList;
+    private UUID concertSequenceId;
     private PassportDto passportDto;
 
     @Builder
     public ReturnSeatEvent(List<UUID> seatInstanceIdList,
+                           UUID concertSequenceId,
                            PassportDto passportDto) {
         this.seatInstanceIdList = seatInstanceIdList;
+        this.concertSequenceId = concertSequenceId;
         this.passportDto = passportDto;
-    }
-
-    public static ReturnSeatEvent createSeatPreemptPayload(List<UUID> seatInstanceIds,
-                                                           PassportDto passportDto) {
-        return ReturnSeatEvent.builder()
-                              .seatInstanceIdList(seatInstanceIds)
-                              .passportDto(passportDto)
-                              .build();
     }
 }

@@ -55,6 +55,7 @@ public class ReservePaymentSuccessPayloadHandler implements EventHandler<Payment
                                                                                                    .toList())
                                                             .passportDto(passportDto)
                                                             .reservationId(reservationId)
+                                                            .concertSequenceId(reservation.getConcertSequenceId())
                                                             .build();
 
         Event<ConfirmSeatEvent> confirmSeatPayloadEvent = new Event<>(EventType.SEAT_CONFIRM,
