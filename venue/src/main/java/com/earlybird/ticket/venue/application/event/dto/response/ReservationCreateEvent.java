@@ -2,6 +2,7 @@ package com.earlybird.ticket.venue.application.event.dto.response;
 
 import com.earlybird.ticket.common.entity.EventPayload;
 import com.earlybird.ticket.common.entity.PassportDto;
+import com.earlybird.ticket.venue.application.dto.request.SeatPreemptCommand;
 import com.earlybird.ticket.venue.domain.entity.constant.ConcertStatus;
 import com.earlybird.ticket.venue.domain.entity.constant.Grade;
 import jakarta.validation.constraints.NotNull;
@@ -42,6 +43,34 @@ public record ReservationCreateEvent(
         Integer hallFloor
 ) implements EventPayload {
 
+    public static ReservationCreateEvent toReservationCreateEvent(
+            SeatPreemptCommand seatPreemptCommand,
+            PassportDto passportDto,
+            UUID reservationId
+    ) {
+        return ReservationCreateEvent.builder()
+                .passportDto(passportDto)
+                .userName(seatPreemptCommand.userName())
+                .reservationId(reservationId)
+                .concertId(seatPreemptCommand.concertId())
+                .concertName(seatPreemptCommand.concertName())
+                .concertSequenceId(seatPreemptCommand.concertSequenceId())
+                .concertSequenceStartDatetime(seatPreemptCommand.concertSequenceStartDatetime())
+                .concertSequenceEndDatetime(seatPreemptCommand.concertSequenceEndDatetime())
+                .concertSequenceStatus(seatPreemptCommand.concertSequenceStatus())
+                .venueId(seatPreemptCommand.venueId())
+                .venueArea(seatPreemptCommand.venueArea())
+                .venueLocation(seatPreemptCommand.venueLocation())
+                .seatList(seatPreemptCommand.seatList().stream()
+                        .map(SeatRequest::toSeatRequest)
+                        .toList()
+                )
+                .hallId(seatPreemptCommand.hallId())
+                .hallName(seatPreemptCommand.hallName())
+                .hallFloor(seatPreemptCommand.hallFloor())
+                .build();
+    }
+
     @Builder
     public record SeatRequest(
             //논리적 좌석 정보
@@ -50,5 +79,15 @@ public record ReservationCreateEvent(
             @NotNull(message = "seatCol is Necessary") Integer seatCol,
             @NotNull(message = "seatGrade is Necessary") Grade seatGrade,
             @NotNull(message = "seatPrice is Necessary") BigDecimal seatPrice) {
+
+        public static SeatRequest toSeatRequest(SeatPreemptCommand.SeatRequest seatRequest) {
+            return SeatRequest.builder()
+                    .seatInstanceId(seatRequest.seatInstanceId())
+                    .seatRow(seatRequest.seatRow())
+                    .seatCol(seatRequest.seatCol())
+                    .seatGrade(seatRequest.seatGrade())
+                    .seatPrice(seatRequest.seatPrice())
+                    .build();
+        }
     }
 }

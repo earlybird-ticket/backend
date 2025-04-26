@@ -32,6 +32,18 @@ public abstract class AbstractRedisHashReader<T> {
         return new RedisReadResult<>(dtoList, firstMap);
     }
 
+    private List<Object> executePipeline(List<String> keys) {
+        List<Object> results = stringRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
+            StringRedisConnection stringConn = (StringRedisConnection) connection;
+
+            for (String key : keys) {
+                stringConn.hGetAll(key);
+            }
+            return null;
+        });
+        return results;
+    }
+
     private List<T> mapToDtoList(List<String> keys, List<Object> results) {
 
         List<T> dtoList = new ArrayList<>();
@@ -44,18 +56,6 @@ public abstract class AbstractRedisHashReader<T> {
         }
 
         return dtoList;
-    }
-
-    private List<Object> executePipeline(List<String> keys) {
-        List<Object> results = stringRedisTemplate.executePipelined((RedisCallback<Object>) connection -> {
-            StringRedisConnection stringConn = (StringRedisConnection) connection;
-
-            for (String key : keys) {
-                stringConn.hGetAll(key);
-            }
-            return null;
-        });
-        return results;
     }
 
     protected abstract T mapToDto(String key, Map<String, String> map);

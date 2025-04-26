@@ -54,7 +54,7 @@ public class SeatServiceImpl implements SeatService {
     private final RedisScript<Object> seatPreemptScript;
     private final RedisScript<Object> seatCheckScript;
     private final RedisKeyFactory redisKeyFactory;
-    private final RedisSeatListReader redisSeatListReader;
+    private final RedisSeatListReader redisSeatListReader; //하나로 합치기 (예 : 전략패턴)
     private final RedisSectionListReader redisSectionListReader;
 
     @Override
@@ -164,11 +164,11 @@ public class SeatServiceImpl implements SeatService {
         }
 
         saveOutbox(seatInstanceIdList,
-                ReservationCreateEvent.builder()
-                        .passportDto(passportDto)
-                        .userName(seatPreemptCommand.userName())
-                        .reservationId(reservationId)
-                        .build(),
+                ReservationCreateEvent.toReservationCreateEvent(
+                        seatPreemptCommand,
+                        passportDto,
+                        reservationId
+                ),
                 EventType.RESERVATION_CREATE);
 
         return reservationId.toString();
@@ -227,7 +227,7 @@ public class SeatServiceImpl implements SeatService {
     }
 
     private boolean isAlreadyPreempted(Object result) {
-        return result instanceof Number && ((Number) result).longValue() == 0;
+        return result == null || (result instanceof Number && ((Number) result).longValue() == RedisKeyFactory.LUA_FAIL);
     }
 
     private <T extends EventPayload> void saveOutbox(List<UUID> seatInstanceIdList,

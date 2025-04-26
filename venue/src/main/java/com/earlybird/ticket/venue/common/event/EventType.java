@@ -55,7 +55,6 @@ public enum EventType {
         public static final String CONCERT_TO_SEAT_TOPIC = "ConcertToSeat";
         public static final String SEAT_TO_RESERVATION_FOR_PREEMPT_TOPIC = "SeatToReservationForPreemption";
         public static final String SEAT_TO_RESERVATION_TOPIC = "SeatToReservation";
-        public static final String RESERVATION_TO_SEAT_FOR_PREEMPT_TOPIC = "ReservationToSeatForPreemption";
         public static final String RESERVATION_TO_SEAT_TOPIC = "ReservationToSeat";
     }
 }

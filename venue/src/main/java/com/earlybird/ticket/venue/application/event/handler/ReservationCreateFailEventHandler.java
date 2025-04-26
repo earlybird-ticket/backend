@@ -14,8 +14,7 @@ public class ReservationCreateFailEventHandler implements EventHandler<Reservati
     @Override
     public void handle(Event<ReservationCreateFailPayload> event) {
         ReservationCreateFailPayload payload = event.getPayload();
-        //TODO : reservation create fail 실패 로직 작성
-//        seatHandlerService.(payload);
+        seatHandlerService.handleReservationCreateFailure(payload);
     }
 
     @Override

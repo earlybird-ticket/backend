@@ -13,12 +13,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RedisKeyFactory {
 
+    public static final String RESERVATION_TIME_LIMIT_PREFIX = "TIME_LIMIT:RESERVATION_ID:";
     public static final String SEAT_INSTANCE_PREFIX = "SEAT_INSTANCE:";
     public static final String SECTION_LIST_PREFIX = "SECTION_LIST:";
     public static final String SEAT_INDEX_PREFIX = "SEAT_INDEX:";
     public static final String PREFIX_WILDCARD = "*:";
     public static final String SUFFIX_WILDCARD = ":*";
     public static final String REDIS_COLON = ":";
+    public static final Long LUA_FAIL = 0L;
+    public static final Long LUA_SUCCESS = 1L;
 
     private final RedisKeyScanner redisKeyScanner;
     private final StringRedisTemplate stringRedisTemplate;

@@ -6,19 +6,23 @@ import com.earlybird.ticket.common.util.CommonUtil;
 import com.earlybird.ticket.venue.application.event.dto.request.*;
 import com.earlybird.ticket.venue.application.event.dto.response.*;
 import com.earlybird.ticket.venue.common.event.EventType;
+import com.earlybird.ticket.venue.common.exception.SeatReturnFailException;
+import com.earlybird.ticket.venue.common.exception.SeatUnavailableException;
 import com.earlybird.ticket.venue.common.util.EventConverter;
 import com.earlybird.ticket.venue.common.exception.SeatNotFoundException;
 import com.earlybird.ticket.venue.common.exception.TimeOutException;
+import com.earlybird.ticket.venue.common.util.RedisKeyFactory;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.domain.entity.Outbox;
 import com.earlybird.ticket.venue.domain.entity.Seat;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.domain.repository.OutboxRepository;
 import com.earlybird.ticket.venue.domain.repository.SeatRepository;
+import com.earlybird.ticket.venue.infrastructure.config.redis.RedisConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
+import org.redisson.api.*;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,15 +39,14 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
     private final OutboxRepository outboxRepository;
     private final EventConverter eventConverter;
     private final RedissonClient redissonClient;
-
-    private final String timeCachePrefix = "TIME_LIMIT:RESERVATION_ID:";
+    private final RedisKeyFactory redisKeyFactory;
+    private final StringRedisTemplate stringRedisTemplate;
+    private final RedisConfig redisConfig;
 
     @Override
     @Transactional
     public void createSeat(SeatCreatePayload seatCreatePayload) {
-        //0. userId 가져오기
-        //1. seatList size 만큼 반복
-        //2. row / col for문 돌면서 seatList 생성
+
         List<Seat> seatList = new ArrayList<>();
 
         for (SeatCreatePayload.SeatInfo seatInfo : seatCreatePayload.seatList()) {
@@ -56,24 +59,22 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                                         seatCreatePayload.passportDto()
                                                          .getUserId()));
         }
-        //3. seatList 저장
+
         seatRepository.saveAll(seatList);
     }
 
     @Override
     @Transactional
     public void createSeatInstance(SeatInstanceCreatePayload seatInstanceCreatePayload) {
-        //0. userId 가져오기
-        //1. hallId가 같은 모든 좌석 조회
+
         List<Seat> seatList = seatRepository.findSeatByHallId(seatInstanceCreatePayload.hallId());
 
         checkSeatListExists(seatList);
 
-        //2. 모든 좌석에 대해서 concertSequenceList만큼 반복
         for (UUID concertSequenceId : seatInstanceCreatePayload.concertSequenceList()) {
             for (Seat seat : seatList) {
                 for (SeatInstanceCreatePayload.SeatInstanceInfo info : seatInstanceCreatePayload.seatInstanceInfoList()) {
-                    //3. 좌석 섹션에 따라 좌석 정보 + Payload 정보로 seatInstance 생성
+
                     if (seat.getSection()
                             .equals(Section.getByValue(info.section()))) {
                         seat.createSeatInstance(info.grade(),
@@ -88,18 +89,17 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                 }
             }
         }
-        //4. seat 저장
+
     }
 
     @Override
     @Transactional
     public void updateSeatInstance(SeatInstanceUpdatePayload seatInstanceUpdatePayload) {
-        //1. seatInstance 가져오기
+
         Seat seat = seatRepository.findSeatBySeatInstanceId(seatInstanceUpdatePayload.seatInstanceId());
 
         checkSeatExist(seat);
 
-        //2. seatInstance 업데이트
         seat.updateSeatInstance(seatInstanceUpdatePayload.seatInstanceId(),
                                 seatInstanceUpdatePayload.hallId(),
                                 seatInstanceUpdatePayload.concertId(),
@@ -109,24 +109,19 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                                 seatInstanceUpdatePayload.price(),
                                 seatInstanceUpdatePayload.passportDto()
                                                          .getUserId());
-        //3. 저장
-        // TODO : redis에서 해당하는 좌석이 있다면 정보 update
     }
 
     @Override
     @Transactional
     public void deleteSeatInstance(SeatInstanceDeletePayload seatInstanceDeletePayload) {
-        //1. seatInstance 가져오기
+
         Seat seat = seatRepository.findSeatBySeatInstanceId(seatInstanceDeletePayload.seatInstanceId());
 
         checkSeatExist(seat);
 
-        //2. seatInstance delete 업데이트
         seat.deleteSeatInstance(seatInstanceDeletePayload.seatInstanceId(),
                                 seatInstanceDeletePayload.passportDto()
                                                          .getUserId());
-        //3. 저장
-        // TODO : redis에서 해당하는 좌석이 있다면 delete
     }
 
     @Override
@@ -134,21 +129,43 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
     public void confirmSeat(SeatConfirmPayload seatConfirmPayload) {
 
         List<UUID> seatInstanceIdList = seatConfirmPayload.seatInstanceIdList();
+        Long userId = seatConfirmPayload.passportDto().getUserId();
+
+        List<String> seatKeys = seatInstanceIdList.stream()
+                .map(seatInstanceId -> redisKeyFactory.generateSeatInstanceKey(
+                                seatConfirmPayload.concertSequenceId(),
+                                seatInstanceId
+                        )
+                )
+                .toList();
 
         try {
-            //TODO : redis에 해당 좌석 상태 update
-            //1. seatInstance 가져오기
-            List<Seat> seatList = getSeatList(seatInstanceIdList);
 
-            // 3. SeatInstance의 상태확인
-            // Preempt 상태면 Confirm으로 update 후 응답
-            for (Seat seat : seatList) {
-                seat.confirmSeat(seatInstanceIdList,
-                                 seatConfirmPayload.passportDto()
-                                                   .getUserId());
+            for(String seatKey : seatKeys) {
+                RMap<String, String> map = redissonClient.getMap(seatKey);
+
+                String storedUserId = map.get("userId");
+
+                if (storedUserId == null || !storedUserId.equals(userId.toString())) {
+                    throw new SeatUnavailableException();
+                }
+
+                if (!"PREEMPTED".equals(map.get("status"))) {
+                    throw new SeatUnavailableException();
+                }
             }
-            //4. 저장
-            //5. 아웃 박스 저장
+
+            RBatch batch = redissonClient.createBatch();
+            String now = CommonUtil.LocalDateTimetoString(LocalDateTime.now());
+
+            for(String seatKey : seatKeys) {
+                RMapAsync<String, String> mapAsync = batch.getMap(seatKey);
+                mapAsync.putAsync("status", "CONFIRMED");
+                mapAsync.putAsync("updatedAt", now);
+            }
+
+            batch.execute();
+
             saveOutbox(seatInstanceIdList,
                        SeatConfirmSuccessEvent.builder()
                                               .passportDto(seatConfirmPayload.passportDto())
@@ -176,20 +193,30 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
 
         List<UUID> seatInstanceIdList = seatReturnPayload.seatInstanceIdList();
 
-        try {
-            //TODO : redis에 해당 좌석 상태 update
-            //1. seatInstance 가져오기
-            List<Seat> seatList = getSeatList(seatInstanceIdList);
+        Long userId = seatReturnPayload.passportDto().getUserId();
 
-            // 3. SeatInstance의 상태확인
-            // Free update
-            for (Seat seat : seatList) {
-                seat.returnSeat(seatInstanceIdList,
-                                seatReturnPayload.passportDto()
-                                                 .getUserId());
+        List<String> seatKeys = seatInstanceIdList.stream()
+                .map(seatInstanceId -> redisKeyFactory.generateSeatInstanceKey(
+                        seatReturnPayload.concertSequenceId(),
+                        seatInstanceId
+                        )
+                )
+                .toList();
+
+        try {
+
+            Long result = stringRedisTemplate.execute(
+                    redisConfig.seatReturnScript(),
+                    seatKeys,
+                    userId.toString(),
+                    seatReturnPayload.reservationId().toString(),
+                    LocalDateTime.now().toString()
+            );
+
+            if(RedisKeyFactory.LUA_FAIL.equals(result)) {
+                throw new SeatReturnFailException();
             }
-            //4. 저장
-            //5. 아웃 박스 저장
+
             saveOutbox(seatInstanceIdList,
                        SeatReturnSuccessEvent.builder()
                                              .passportDto(seatReturnPayload.passportDto())
@@ -211,6 +238,18 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
 
     }
 
+    @Override
+    @Transactional
+    public void handleReservationCreateFailure(ReservationCreateFailPayload reservationCreateFailPayload) {
+
+        returnSeat(SeatReturnPayload.toPayload(
+                reservationCreateFailPayload.passportDto(),
+                reservationCreateFailPayload.seatInstanceIdList(),
+                reservationCreateFailPayload.reservationId(),
+                reservationCreateFailPayload.concertSequenceId()
+        ));
+    }
+
     @Transactional
     protected <T extends EventPayload> void saveOutbox(List<UUID> seatInstanceIdList,
                                                        T eventPayload,
@@ -230,7 +269,7 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
     }
 
     private void checkExpiredReservationTime(UUID reservationId) {
-        RBucket<String> bucket = redissonClient.getBucket(timeCachePrefix + reservationId);
+        RBucket<String> bucket = redissonClient.getBucket(RedisKeyFactory.RESERVATION_TIME_LIMIT_PREFIX + reservationId);
 
         if (!bucket.isExists()) {
             throw new TimeOutException();

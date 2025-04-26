@@ -2,6 +2,7 @@ package com.earlybird.ticket.venue.infrastructure.config.redis;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.StringCodec;
 import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
@@ -26,6 +27,7 @@ public class RedisConfig {
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
+        config.setCodec(new StringCodec());
         config.useSingleServer()
                 .setAddress("redis://" + redisHost + ":" + redisPort);
         return Redisson.create(config);
@@ -45,7 +47,7 @@ public class RedisConfig {
                
                 -- 2. 상태 갱신
                 for i = 1, #KEYS do
-                  redis.call('HSET', KEYS[i], 'status', 'PREEMPT')
+                  redis.call('HSET', KEYS[i], 'status', 'PREEMPTED')
                   redis.call('HSET', KEYS[i], 'userId', ARGV[1])
                   redis.call('HSET', KEYS[i], 'reservationId', ARGV[2])
                   redis.call('HSET', KEYS[i], 'updatedAt', ARGV[4])
@@ -61,7 +63,7 @@ public class RedisConfig {
                 end
                
                 -- 5. 예약 ID TTL 설정
-                return redis.call('SET', 'TIME_LIMIT:RESERVATION_ID:' .. ARGV[2], 'PREEMPT', 'NX', 'PX', tonumber(ARGV[3]))
+                return redis.call('SET', 'TIME_LIMIT:RESERVATION_ID:' .. ARGV[2], 'PREEMPTED', 'NX', 'PX', tonumber(ARGV[3]))
                
                """);
         redisScript.setResultType(Object.class);
@@ -82,6 +84,48 @@ public class RedisConfig {
                 return 1
                 """);
         redisScript.setResultType(Object.class);
+        return redisScript;
+    }
+
+    @Bean
+    public RedisScript<Long> seatReturnScript() {
+        DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+        redisScript.setScriptText("""
+                -- 1. 상태 확인
+                for i = 1, #KEYS do
+                  local status = redis.call('HGET', KEYS[i], 'status')
+                  local userId = redis.call('HGET', KEYS[i], 'userId')
+                  local reservationId = redis.call('HGET', KEYS[i], 'reservationId')
+                
+                  if status == 'FREE' or userId ~= ARGV[1] or reservationId ~= ARGV[2] then
+                    return 0
+                  end
+                end
+                
+                -- 2. 상태 갱신
+                for i = 1, #KEYS do
+                  redis.call('HSET', KEYS[i], 'status', 'FREE')
+                  redis.call('HSET', KEYS[i], 'userId', '')
+                  redis.call('HSET', KEYS[i], 'reservationId', '')
+                  redis.call('HSET', KEYS[i], 'updatedAt', ARGV[3])
+                end
+                
+                -- 3. 남은 좌석 수 복구
+                for i = 1, #KEYS do
+                   local key = KEYS[i];
+                   local concertId = redis.call('HGET', key, 'concertId')
+                   local section = redis.call('HGET', key, 'section')
+                   local concertSequenceId = string.match(key, '^SEAT_INSTANCE:([^:]+):')
+                   redis.call('HINCRBY', 'SECTION_LIST:' .. concertId .. ':' .. concertSequenceId .. ':' ..section, 'remainingSeat', 1)
+                end
+                
+                -- 4. TTL 삭제
+                redis.call('DEL', 'TIME_LIMIT:RESERVATION_ID:' .. ARGV[2])
+                
+                return 1
+                """);
+
+        redisScript.setResultType(Long.class);
         return redisScript;
     }
 

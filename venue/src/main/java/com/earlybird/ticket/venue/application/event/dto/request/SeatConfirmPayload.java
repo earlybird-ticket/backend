@@ -11,6 +11,7 @@ import java.util.UUID;
 public record SeatConfirmPayload(
         PassportDto passportDto,
         List<UUID> seatInstanceIdList,
-        UUID reservationId
+        UUID reservationId,
+        UUID concertSequenceId
 ) implements EventPayload {
 }

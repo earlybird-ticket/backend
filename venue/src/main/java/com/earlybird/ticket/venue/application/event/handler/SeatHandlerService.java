@@ -16,4 +16,6 @@ public interface SeatHandlerService {
     void confirmSeat(SeatConfirmPayload seatConfirmPayload);
 
     void returnSeat(SeatReturnPayload seatReturnPayload);
+
+    void handleReservationCreateFailure(ReservationCreateFailPayload reservationCreateFailPayload);
 }
