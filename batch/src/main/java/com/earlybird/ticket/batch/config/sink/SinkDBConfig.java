@@ -1,10 +1,9 @@
 package com.earlybird.ticket.batch.config.sink;
 
-import java.util.HashMap;
+import com.atomikos.jdbc.AtomikosDataSourceBean;
 import java.util.Map;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
@@ -33,17 +32,9 @@ public class SinkDBConfig {
 
     @Bean
     @ConfigurationProperties("spring.datasource-sink")
-    public DataSourceProperties sinkDataSourceProperties() {
-        return new DataSourceProperties();
-    }
-
-    @Bean
     public DataSource sinkDataSource() {
-        return sinkDataSourceProperties()
-            .initializeDataSourceBuilder()
-            .build();
+        return new AtomikosDataSourceBean();
     }
-
 
     @Bean(name = "sinkEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean sinkEntityManagerFactory() {
