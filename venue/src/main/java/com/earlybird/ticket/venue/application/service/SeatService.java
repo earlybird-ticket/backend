@@ -19,4 +19,8 @@ public interface SeatService {
     ProcessSeatCheckQuery checkSeat(ProcessSeatCheckCommand processSeatCheckCommand);
 
     String preemptSeat(SeatPreemptCommand seatPreemptCommand, String passport);
+
+    String preemptSeatByVIP(SeatPreemptCommand seatPreemptCommand, String passport);
+
+    String preemptWaitingSeatByVIP(SeatPreemptCommand seatPreemptCommand, String passport);
 }
