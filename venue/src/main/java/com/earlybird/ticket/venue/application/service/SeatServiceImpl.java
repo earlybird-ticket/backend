@@ -13,16 +13,18 @@ import com.earlybird.ticket.venue.application.event.dto.response.ReservationCrea
 import com.earlybird.ticket.venue.common.dto.RedisReadResult;
 import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.common.exception.RedisException;
-import com.earlybird.ticket.venue.common.exception.SeatNotFoundException;
 import com.earlybird.ticket.venue.common.exception.SeatUnavailableException;
-import com.earlybird.ticket.venue.common.util.*;
+import com.earlybird.ticket.venue.common.util.EventConverter;
+import com.earlybird.ticket.venue.common.util.RedisKeyFactory;
+import com.earlybird.ticket.venue.common.util.RedisSeatListReader;
+import com.earlybird.ticket.venue.common.util.RedisSectionListReader;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.domain.entity.Outbox;
 import com.earlybird.ticket.venue.domain.entity.Seat;
 import com.earlybird.ticket.venue.domain.entity.SeatInstance;
-import com.earlybird.ticket.venue.domain.entity.constant.Status;
 import com.earlybird.ticket.venue.domain.repository.OutboxRepository;
 import com.earlybird.ticket.venue.domain.repository.SeatRepository;
+import com.earlybird.ticket.venue.infrastructure.config.redis.RedisConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
@@ -33,7 +35,6 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -51,8 +52,7 @@ public class SeatServiceImpl implements SeatService {
     private final EventConverter eventConverter;
     private final RedissonClient redissonClient;
     private final StringRedisTemplate stringRedisTemplate;
-    private final RedisScript<Object> seatPreemptScript;
-    private final RedisScript<Object> seatCheckScript;
+    private final RedisConfig redisConfig;
     private final RedisKeyFactory redisKeyFactory;
     private final RedisSeatListReader redisSeatListReader; //하나로 합치기 (예 : 전략패턴)
     private final RedisSectionListReader redisSectionListReader;
@@ -128,7 +128,7 @@ public class SeatServiceImpl implements SeatService {
 
 
         Object result = stringRedisTemplate.execute(
-                seatCheckScript,
+                redisConfig.seatCheckScript(),
                 seatKeys
         );
 
@@ -153,7 +153,13 @@ public class SeatServiceImpl implements SeatService {
 
         List<String> seatKeys = generateSeatInstanceRedisKeys(seatPreemptCommand, seatInstanceIdList);
 
-        Object result = executePreemptLuaScript(seatKeys, userId, reservationId, ttlMs);
+        Object result = executePreemptLuaScript(
+                redisConfig.seatPreemptScript(),
+                seatKeys,
+                userId,
+                reservationId,
+                ttlMs
+        );
 
         if (isAlreadyPreempted(result)) {
             throw new SeatUnavailableException();
@@ -173,6 +179,89 @@ public class SeatServiceImpl implements SeatService {
 
         return reservationId.toString();
     }
+
+    @Override
+    public String preemptSeatByVIP(SeatPreemptCommand seatPreemptCommand, String passport) {
+
+        PassportDto passportDto = passportUtil.getPassportDto(passport);
+        Long userId = passportDto.getUserId();
+        UUID reservationId = UUID.randomUUID();
+        long ttlMs = Duration.ofMinutes(10).toMillis();
+
+        List<UUID> seatInstanceIdList = seatPreemptCommand.seatList().stream()
+                .map(SeatPreemptCommand.SeatRequest::seatInstanceId)
+                .toList();
+
+        List<String> seatKeys = generateSeatInstanceRedisKeys(seatPreemptCommand, seatInstanceIdList);
+
+        Object result = executePreemptLuaScript(
+                redisConfig.seatPreemptByVIPScript(),
+                seatKeys,
+                userId,
+                reservationId,
+                ttlMs
+        );
+
+        if (isAlreadyPreempted(result)) {
+            throw new SeatUnavailableException();
+        }
+
+        if (!isLuaExecutionSuccess(result)) {
+            throw new RedisException();
+        }
+
+        saveOutbox(seatInstanceIdList,
+                ReservationCreateEvent.toReservationCreateEvent(
+                        seatPreemptCommand,
+                        passportDto,
+                        reservationId
+                ),
+                EventType.RESERVATION_CREATE);
+
+        return reservationId.toString();
+    }
+
+    @Override
+    public String preemptWaitingSeatByVIP(SeatPreemptCommand seatPreemptCommand, String passport) {
+
+        PassportDto passportDto = passportUtil.getPassportDto(passport);
+        Long userId = passportDto.getUserId();
+        UUID reservationId = UUID.randomUUID();
+        long ttlMs = Duration.ofMinutes(10).toMillis();
+
+        List<UUID> seatInstanceIdList = seatPreemptCommand.seatList().stream()
+                .map(SeatPreemptCommand.SeatRequest::seatInstanceId)
+                .toList();
+
+        List<String> seatKeys = generateSeatInstanceRedisKeys(seatPreemptCommand, seatInstanceIdList);
+
+        Object result = executePreemptLuaScript(
+                redisConfig.waitingSeatPreemptByVIPScript(),
+                seatKeys,
+                userId,
+                reservationId,
+                ttlMs
+        );
+
+        if (isAlreadyPreempted(result)) {
+            throw new SeatUnavailableException();
+        }
+
+        if (!isLuaExecutionSuccess(result)) {
+            throw new RedisException();
+        }
+
+        saveOutbox(seatInstanceIdList,
+                ReservationCreateEvent.toReservationCreateEvent(
+                        seatPreemptCommand,
+                        passportDto,
+                        reservationId
+                ),
+                EventType.RESERVATION_CREATE);
+
+        return reservationId.toString();
+    }
+
 
     // TODO : 추후 배치로 고도화 고려 vs Kafka Consumer
     @Scheduled(cron = "0 42 12 * * *", zone = "Asia/Seoul")
@@ -203,9 +292,9 @@ public class SeatServiceImpl implements SeatService {
 
     }
 
-    private Object executePreemptLuaScript(List<String> seatKeys, Long userId, UUID reservationId, long ttlMs) {
+    private Object executePreemptLuaScript(RedisScript<Object> script, List<String> seatKeys, Long userId, UUID reservationId, long ttlMs) {
         return stringRedisTemplate.execute(
-                seatPreemptScript,
+                script,
                 seatKeys,
                 userId.toString(),
                 reservationId.toString(),

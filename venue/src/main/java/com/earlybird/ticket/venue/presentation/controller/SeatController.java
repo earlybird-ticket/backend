@@ -83,4 +83,36 @@ public class SeatController {
                         "좌석 선점 성공"));
     }
 
+    @PostMapping("/preempt/vip")
+    public ResponseEntity<CommonDto<String>> preemptSeatByVIP(
+            @RequestHeader("X-User-Passport") String passport,
+            @RequestBody @Valid SeatPreemptRequest seatPreemptRequest
+    ) {
+        String reservationId = seatService.preemptSeatByVIP(
+                seatPreemptRequest.toSeatPreemptCommand(),
+                passport
+        );
+
+        return ResponseEntity.ok().body(
+                CommonDto.ok(reservationId,
+                        "좌석 선점 성공"));
+    }
+
+    @PostMapping("/preempt/vip/waiting")
+    public ResponseEntity<CommonDto<String>> preemptWaitingSeatByVIP(
+            @RequestHeader("X-User-Passport") String passport,
+            @RequestBody @Valid SeatPreemptRequest seatPreemptRequest
+    ) {
+        String reservationId = seatService.preemptWaitingSeatByVIP(
+                seatPreemptRequest.toSeatPreemptCommand(),
+                passport
+        );
+
+        return ResponseEntity.ok().body(
+                CommonDto.ok(reservationId,
+                        "좌석 선점 성공"));
+    }
+
+
+
 }
