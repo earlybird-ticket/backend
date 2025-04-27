@@ -39,7 +39,9 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-//    implementation 'com.zaxxer:HikariCP' // 명시적으로 추가
+    // for Distributed Transaction
+    implementation 'com.atomikos:transactions-jdbc:6.0.0:jakarta'
+    implementation 'com.atomikos:transactions-jta:6.0.0:jakarta'
 
     // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

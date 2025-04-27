@@ -3,6 +3,11 @@ spring:
     import:
       - classpath:application-source-db.yml
 
+  jta:
+    atomikos:
+      transaction:
+        timeout: 60
+
   application:
     name: batch
     jpa:
@@ -22,17 +27,29 @@ spring:
     password: postgres
 
   datasource-sink:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:15432/data-db1
-    username: postgres
-    password: postgres
+    max-pool-size: 10
+    min-pool-size: 5
+    xa-data-source-class-name: org.postgresql.xa.PGXADataSource
+    unique-resource-name: sinkDataSource
+    xa-properties:
+      serverName: ${POSTGRES_SINK_HOST:localhost}
+      portNumber: ${POSTGRES_SINK_PORT:15432}
+      databaseName: ${POSTGRES_SINK_DB:data-db1}
+      user: ${POSTGRES_USER:postgres}
+      password: ${POSTGRES_PASSWORD:postgres}
 
   jpa:
     defer-datasource-initialization: true
     hibernate:
       ddl-auto: update
     properties:
+      jakarta:
+        persistence:
+          transactionType: JTA
       hibernate:
+        transaction:
+          jta:
+            platform: org.hibernate.engine.transaction.jta.platform.internal.AtomikosJtaPlatform
         jdbc:
           batch_size: 100
         order_inserts: true
@@ -44,6 +61,7 @@ logging:
   level:
     org.springframework.batch.core.launch.support.SimpleJobOperator: ERROR
     org.springframework.batch.core.job.SimpleStepHandler: ERROR
+    org.springframework.batch.item.database.JdbcPagingItemReader: TRACE
 server:
   port: 18091
 

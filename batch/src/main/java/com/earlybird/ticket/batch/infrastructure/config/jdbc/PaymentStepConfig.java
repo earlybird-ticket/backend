@@ -64,9 +64,6 @@ public class PaymentStepConfig {
         return queryProvider.getObject();
     }
 
-    /* TODO : TransactionManager 변경
-        현재는 sink의 트랜잭션매니저만 가지고 있어 source에서는 롤백 발생 X
-    */
     @Bean
     public CompositeItemWriter<Outbox> paymentOutboxMigrateWriter(
         DataSource sinkDataSource,
@@ -103,7 +100,7 @@ public class PaymentStepConfig {
     @Bean
     public Step collectPaymentOutboxStep(
         JobRepository jobRepository,
-        @Qualifier("sinkTransactionManager") PlatformTransactionManager transactionManager,
+        @Qualifier("jtaTransactionManager") PlatformTransactionManager transactionManager,
         @Qualifier("paymentDataSource") DataSource paymentDataSource,
         @Qualifier("sinkDataSource") DataSource sinkDataSource
     ) throws Exception {

@@ -3,45 +3,75 @@ spring:
     import: optional:file:.env[.properties]
 
   datasource-payment:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PAYMENT_PORT:5432}/${POSTGRES_DB}
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:postgres}
+    xa-data-source-class-name: org.postgresql.xa.PGXADataSource
+    unique-resource-name: paymentDataSource
+    max-pool-size: 10
+    min-pool-size: 5
+    xa-properties:
+      serverName: ${POSTGRES_HOST:localhost}
+      portNumber: ${POSTGRES_PAYMENT_PORT:5432}
+      databaseName: ${POSTGRES_DB}
+      user: ${POSTGRES_USER:postgres}
+      password: ${POSTGRES_PASSWORD:postgres}
 
   datasource-admin:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_ADMIN_PORT}/${POSTGRES_DB}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    xa-data-source-class-name: org.postgresql.xa.PGXADataSource
+    unique-resource-name: adminDataSource
+    max-pool-size: 10
+    min-pool-size: 5
+    xa-properties:
+      serverName: ${POSTGRES_HOST:localhost}
+      portNumber: ${POSTGRES_ADMIN_PORT:5432}
+      databaseName: ${POSTGRES_DB}
+      user: ${POSTGRES_USER:postgres}
+      password: ${POSTGRES_PASSWORD:postgres}
 
   datasource-concert:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_CONCERT_PORT}/${POSTGRES_DB}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    xa-data-source-class-name: org.postgresql.xa.PGXADataSource
+    unique-resource-name: concertDataSource
+    max-pool-size: 10
+    min-pool-size: 5
+    xa-properties:
+      serverName: ${POSTGRES_HOST:localhost}
+      portNumber: ${POSTGRES_CONCERT_PORT:5432}
+      databaseName: ${POSTGRES_DB}
+      user: ${POSTGRES_USER:postgres}
+      password: ${POSTGRES_PASSWORD:postgres}
 
   datasource-coupon:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_COUPON_PORT}/${POSTGRES_DB}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    xa-data-source-class-name: org.postgresql.xa.PGXADataSource
+    unique-resource-name: couponDataSource
+    max-pool-size: 10
+    min-pool-size: 5
+    xa-properties:
+      serverName: ${POSTGRES_HOST:localhost}
+      portNumber: ${POSTGRES_COUPON_PORT:5432}
+      databaseName: ${POSTGRES_DB}
+      user: ${POSTGRES_USER:postgres}
+      password: ${POSTGRES_PASSWORD:postgres}
 
   datasource-reservation:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_RESERVATION_PORT:5432}/${POSTGRES_DB}
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:postgres}
-
-  datasource-user:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_USER_PORT:5432}/${POSTGRES_DB:postgres}
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:postgres}
+    xa-data-source-class-name: org.postgresql.xa.PGXADataSource
+    unique-resource-name: reservationDataSource
+    max-pool-size: 10
+    min-pool-size: 5
+    xa-properties:
+      serverName: ${POSTGRES_HOST:localhost}
+      portNumber: ${POSTGRES_RESERVATION_PORT:5432}
+      databaseName: ${POSTGRES_DB}
+      user: ${POSTGRES_USER:postgres}
+      password: ${POSTGRES_PASSWORD:postgres}
 
   datasource-venue:
-    driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_VENUE_PORT:15006}/${POSTGRES_DB}
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:postgres}
+    xa-data-source-class-name: org.postgresql.xa.PGXADataSource
+    unique-resource-name: venueDataSource
+    max-pool-size: 10
+    min-pool-size: 5
+    xa-properties:
+      serverName: ${POSTGRES_HOST:localhost}
+      portNumber: ${POSTGRES_VENUE_PORT:5432}
+      databaseName: ${POSTGRES_DB}
+      user: ${POSTGRES_USER:postgres}
+      password: ${POSTGRES_PASSWORD:postgres}
 
 
