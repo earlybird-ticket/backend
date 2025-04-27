@@ -97,13 +97,10 @@ public class CouponStepConfig {
             .build();
     }
 
-    /* TODO : TransactionManager 변경
-        현재는 sink의 트랜잭션매니저만 가지고 있어 source에서는 롤백 발생 X
-     */
     @Bean
     public Step collectCouponOutboxStep(
         JobRepository jobRepository,
-        @Qualifier("sinkTransactionManager") PlatformTransactionManager transactionManager,
+        @Qualifier("jtaTransactionManager") PlatformTransactionManager transactionManager,
         @Qualifier("couponDataSource") DataSource couponDataSource,
         @Qualifier("sinkDataSource") DataSource sinkDataSource
     ) throws Exception {

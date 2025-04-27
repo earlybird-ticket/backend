@@ -1,10 +1,9 @@
 package com.earlybird.ticket.batch.config.sink;
 
-import java.util.HashMap;
+import com.atomikos.jdbc.AtomikosDataSourceBean;
 import java.util.Map;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateSettings;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
@@ -12,16 +11,14 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @EnableJpaRepositories(
     basePackages = "com.earlybird.ticket.batch.infrastructure.repository",
     entityManagerFactoryRef = "sinkEntityManagerFactory",
-    transactionManagerRef = "sinkTransactionManager"
+    transactionManagerRef = "jtaTransactionManager"
 )
 @RequiredArgsConstructor
 public class SinkDBConfig {
@@ -33,17 +30,9 @@ public class SinkDBConfig {
 
     @Bean
     @ConfigurationProperties("spring.datasource-sink")
-    public DataSourceProperties sinkDataSourceProperties() {
-        return new DataSourceProperties();
-    }
-
-    @Bean
     public DataSource sinkDataSource() {
-        return sinkDataSourceProperties()
-            .initializeDataSourceBuilder()
-            .build();
+        return new AtomikosDataSourceBean();
     }
-
 
     @Bean(name = "sinkEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean sinkEntityManagerFactory() {
@@ -62,13 +51,6 @@ public class SinkDBConfig {
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         em.setJpaPropertyMap(finalProps);
         return em;
-    }
-
-    @Bean
-    public PlatformTransactionManager sinkTransactionManager() {
-        JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(sinkEntityManagerFactory().getObject());
-        return transactionManager;
     }
 
 }
