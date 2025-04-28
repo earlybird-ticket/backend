@@ -250,7 +250,7 @@ public class ReservationServiceImpl implements ReservationService {
     public FindReservationQuery findReservation(UUID reservationId,
                                                 String passport) {
 
-        Reservation reservation = reservationRepository.findByIdAndReservationStatusConfirmed(reservationId)
+        Reservation reservation = reservationRepository.findById(reservationId)
                                                        .orElseThrow(NotFoundReservationException::new);
 
         List<ReservationSeat> reservationSeatList = reservationSeatRepository.findByReservation(reservation);

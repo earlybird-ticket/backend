@@ -13,5 +13,4 @@ public interface ReservationRepository {
 
     List<Reservation> findAllById(List<UUID> reservationIds);
 
-    Optional<Reservation> findByIdAndReservationStatusConfirmed(UUID reservationId);
 }

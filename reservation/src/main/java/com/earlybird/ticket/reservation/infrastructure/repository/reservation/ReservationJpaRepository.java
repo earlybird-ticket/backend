@@ -9,5 +9,4 @@ import java.util.UUID;
 public interface ReservationJpaRepository extends JpaRepository<Reservation, UUID> {
     Optional<Reservation> findById(UUID reservationId);
 
-    Optional<Reservation> findByIdAndReservationStatusConfirmed(UUID reservationId);
 }
