@@ -142,126 +142,20 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public String preemptSeat(SeatPreemptCommand seatPreemptCommand, String passport) {
 
-        PassportDto passportDto = passportUtil.getPassportDto(passport);
-        Long userId = passportDto.getUserId();
-        UUID reservationId = UUID.randomUUID();
-        long ttlMs = Duration.ofMinutes(10).toMillis();
-
-        List<UUID> seatInstanceIdList = seatPreemptCommand.seatList().stream()
-                .map(SeatPreemptCommand.SeatRequest::seatInstanceId)
-                .toList();
-
-        List<String> seatKeys = generateSeatInstanceRedisKeys(seatPreemptCommand, seatInstanceIdList);
-
-        Object result = executePreemptLuaScript(
-                redisConfig.seatPreemptScript(),
-                seatKeys,
-                userId,
-                reservationId,
-                ttlMs
-        );
-
-        if (isAlreadyPreempted(result)) {
-            throw new SeatUnavailableException();
-        }
-
-        if (!isLuaExecutionSuccess(result)) {
-            throw new RedisException();
-        }
-
-        saveOutbox(seatInstanceIdList,
-                ReservationCreateEvent.toReservationCreateEvent(
-                        seatPreemptCommand,
-                        passportDto,
-                        reservationId
-                ),
-                EventType.RESERVATION_CREATE);
-
-        return reservationId.toString();
+        return preemptSeatInternal(passport, seatPreemptCommand, redisConfig.seatPreemptScript());
     }
 
     @Override
     public String preemptSeatByVIP(SeatPreemptCommand seatPreemptCommand, String passport) {
 
-        PassportDto passportDto = passportUtil.getPassportDto(passport);
-        Long userId = passportDto.getUserId();
-        UUID reservationId = UUID.randomUUID();
-        long ttlMs = Duration.ofMinutes(10).toMillis();
-
-        List<UUID> seatInstanceIdList = seatPreemptCommand.seatList().stream()
-                .map(SeatPreemptCommand.SeatRequest::seatInstanceId)
-                .toList();
-
-        List<String> seatKeys = generateSeatInstanceRedisKeys(seatPreemptCommand, seatInstanceIdList);
-
-        Object result = executePreemptLuaScript(
-                redisConfig.seatPreemptByVIPScript(),
-                seatKeys,
-                userId,
-                reservationId,
-                ttlMs
-        );
-
-        if (isAlreadyPreempted(result)) {
-            throw new SeatUnavailableException();
-        }
-
-        if (!isLuaExecutionSuccess(result)) {
-            throw new RedisException();
-        }
-
-        saveOutbox(seatInstanceIdList,
-                ReservationCreateEvent.toReservationCreateEvent(
-                        seatPreemptCommand,
-                        passportDto,
-                        reservationId
-                ),
-                EventType.RESERVATION_CREATE);
-
-        return reservationId.toString();
+        return preemptSeatInternal(passport, seatPreemptCommand, redisConfig.seatPreemptByVIPScript());
     }
 
     @Override
     public String preemptWaitingSeatByVIP(SeatPreemptCommand seatPreemptCommand, String passport) {
 
-        PassportDto passportDto = passportUtil.getPassportDto(passport);
-        Long userId = passportDto.getUserId();
-        UUID reservationId = UUID.randomUUID();
-        long ttlMs = Duration.ofMinutes(10).toMillis();
-
-        List<UUID> seatInstanceIdList = seatPreemptCommand.seatList().stream()
-                .map(SeatPreemptCommand.SeatRequest::seatInstanceId)
-                .toList();
-
-        List<String> seatKeys = generateSeatInstanceRedisKeys(seatPreemptCommand, seatInstanceIdList);
-
-        Object result = executePreemptLuaScript(
-                redisConfig.waitingSeatPreemptByVIPScript(),
-                seatKeys,
-                userId,
-                reservationId,
-                ttlMs
-        );
-
-        if (isAlreadyPreempted(result)) {
-            throw new SeatUnavailableException();
-        }
-
-        if (!isLuaExecutionSuccess(result)) {
-            throw new RedisException();
-        }
-
-        saveOutbox(seatInstanceIdList,
-                ReservationCreateEvent.toReservationCreateEvent(
-                        seatPreemptCommand,
-                        passportDto,
-                        reservationId
-                ),
-                EventType.RESERVATION_CREATE);
-
-        return reservationId.toString();
+        return preemptSeatInternal(passport, seatPreemptCommand, redisConfig.waitingSeatPreemptByVIPScript());
     }
-
 
     // TODO : 추후 배치로 고도화 고려 vs Kafka Consumer
     @Scheduled(cron = "0 42 12 * * *", zone = "Asia/Seoul")
@@ -291,6 +185,46 @@ public class SeatServiceImpl implements SeatService {
         });
 
     }
+
+    private String preemptSeatInternal(String passport, SeatPreemptCommand seatPreemptCommand, RedisScript<Object> redisScript) {
+        PassportDto passportDto = passportUtil.getPassportDto(passport);
+        Long userId = passportDto.getUserId();
+        UUID reservationId = UUID.randomUUID();
+        long ttlMs = Duration.ofMinutes(10).toMillis();
+
+        List<UUID> seatInstanceIdList = seatPreemptCommand.seatList().stream()
+                .map(SeatPreemptCommand.SeatRequest::seatInstanceId)
+                .toList();
+
+        List<String> seatKeys = generateSeatInstanceRedisKeys(seatPreemptCommand, seatInstanceIdList);
+
+        Object result = executePreemptLuaScript(
+                redisScript,
+                seatKeys,
+                userId,
+                reservationId,
+                ttlMs
+        );
+
+        if (isAlreadyPreempted(result)) {
+            throw new SeatUnavailableException();
+        }
+
+        if (!isLuaExecutionSuccess(result)) {
+            throw new RedisException();
+        }
+
+        saveOutbox(seatInstanceIdList,
+                ReservationCreateEvent.toReservationCreateEvent(
+                        seatPreemptCommand,
+                        passportDto,
+                        reservationId
+                ),
+                EventType.RESERVATION_CREATE);
+
+        return reservationId.toString();
+    }
+
 
     private Object executePreemptLuaScript(RedisScript<Object> script, List<String> seatKeys, Long userId, UUID reservationId, long ttlMs) {
         return stringRedisTemplate.execute(
