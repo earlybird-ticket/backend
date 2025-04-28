@@ -1,4 +1,4 @@
-package com.earlybird.ticket.venue.infrastructure.config.kafka;
+package com.earlybird.ticket.venue.infrastructure.kafka.config;
 
 import com.earlybird.ticket.venue.common.exception.JsonDeserializationException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;

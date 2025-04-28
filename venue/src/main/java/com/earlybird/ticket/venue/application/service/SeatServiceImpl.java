@@ -15,16 +15,16 @@ import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.common.exception.RedisException;
 import com.earlybird.ticket.venue.common.exception.SeatUnavailableException;
 import com.earlybird.ticket.venue.common.util.EventConverter;
-import com.earlybird.ticket.venue.common.util.RedisKeyFactory;
-import com.earlybird.ticket.venue.common.util.RedisSeatListReader;
-import com.earlybird.ticket.venue.common.util.RedisSectionListReader;
+import com.earlybird.ticket.venue.infrastructure.redis.util.RedisKeyFactory;
+import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSeatListReader;
+import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSectionListReader;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.domain.entity.Outbox;
 import com.earlybird.ticket.venue.domain.entity.Seat;
 import com.earlybird.ticket.venue.domain.entity.SeatInstance;
 import com.earlybird.ticket.venue.domain.repository.OutboxRepository;
 import com.earlybird.ticket.venue.domain.repository.SeatRepository;
-import com.earlybird.ticket.venue.infrastructure.config.redis.RedisConfig;
+import com.earlybird.ticket.venue.infrastructure.redis.config.RedisConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
@@ -162,11 +162,15 @@ public class SeatServiceImpl implements SeatService {
     public void warmUpSeatInstance() {
 
         //Mock Data
-        Map<UUID, LocalDateTime> todayTicketOpen = new HashMap<>();
-        todayTicketOpen.put(UUID.fromString("2d6d2381-a295-46fa-b798-a891f523c726"), LocalDateTime.now());
-        todayTicketOpen.put(UUID.fromString("52aab2c6-82e4-4c10-b983-e26bdb8550de"), LocalDateTime.now().minusMinutes(10));
+        Map<UUID, LocalDateTime> ticketDeadline = new HashMap<>();
+        ticketDeadline.put(UUID.fromString("2d6d2381-a295-46fa-b798-a891f523c726"), LocalDateTime.now());
+        ticketDeadline.put(UUID.fromString("52aab2c6-82e4-4c10-b983-e26bdb8550de"), LocalDateTime.now().minusMinutes(10));
 
-        List<UUID> concertSequenceIdList = new ArrayList<>(todayTicketOpen.keySet());
+        Map<UUID, LocalDateTime> vipTicketDeadline = new HashMap<>();
+        vipTicketDeadline.put(UUID.fromString("2d6d2381-a295-46fa-b798-a891f523c726"), LocalDateTime.now());
+        vipTicketDeadline.put(UUID.fromString("52aab2c6-82e4-4c10-b983-e26bdb8550de"), LocalDateTime.now().minusMinutes(10));
+
+        List<UUID> concertSequenceIdList = new ArrayList<>(vipTicketDeadline.keySet());
 
         List<Seat> seats = seatRepository.findSeatListWithSeatInstanceInConcertSequenceIdList(concertSequenceIdList);
 
@@ -175,7 +179,7 @@ public class SeatServiceImpl implements SeatService {
 
             for (Seat seat : seats) {
                 for (SeatInstance seatInstance : seat.getSeatInstances()) {
-                    makeSeatInstanceOnRedis(seat, seatInstance, stringConn, todayTicketOpen);
+                    makeSeatInstanceOnRedis(seat, seatInstance, stringConn, ticketDeadline, vipTicketDeadline);
                     makeSectionListOnRedis(seat, seatInstance, stringConn);
                     makeSeatIndexOnRedis(seat, seatInstance, stringConn);
                 }
@@ -289,7 +293,13 @@ public class SeatServiceImpl implements SeatService {
         stringConn.hSet(sectionKey, "price", seatInstance.getPrice().toString());
     }
 
-    private void makeSeatInstanceOnRedis(Seat seat, SeatInstance seatInstance, StringRedisConnection stringConn, Map<UUID, LocalDateTime> todayTicketOpen) {
+    private void makeSeatInstanceOnRedis(
+            Seat seat,
+            SeatInstance seatInstance,
+            StringRedisConnection stringConn,
+            Map<UUID, LocalDateTime> ticketDeadline,
+            Map<UUID, LocalDateTime> vipTicketDeadline
+    ) {
         String seatInstanceKey = redisKeyFactory.generateSeatInstanceKey(seatInstance.getConcertSequenceId(), seatInstance.getId());
 
         stringConn.hSet(seatInstanceKey, "status", seatInstance.getStatus().getValue());
@@ -302,7 +312,8 @@ public class SeatServiceImpl implements SeatService {
         stringConn.hSet(seatInstanceKey, "floor", seat.getFloor().toString());
         stringConn.hSet(seatInstanceKey, "grade", seatInstance.getGrade().getValue());
         stringConn.hSet(seatInstanceKey, "price", seatInstance.getPrice().toString());
-        stringConn.hSet(seatInstanceKey, "expireAt", CommonUtil.LocalDateTimetoString(todayTicketOpen.get(seatInstance.getConcertSequenceId())));
+        stringConn.hSet(seatInstanceKey, "expiredAt", CommonUtil.LocalDateTimetoString(ticketDeadline.get(seatInstance.getConcertSequenceId())));
+        stringConn.hSet(seatInstanceKey, "vipExpiredAt", CommonUtil.LocalDateTimetoString(vipTicketDeadline.get(seatInstance.getConcertSequenceId())));
         stringConn.hSet(seatInstanceKey, "updatedAt", "");
     }
 }

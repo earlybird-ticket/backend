@@ -1,4 +1,4 @@
-package com.earlybird.ticket.venue.infrastructure.config.redis;
+package com.earlybird.ticket.venue.infrastructure.redis.config;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;

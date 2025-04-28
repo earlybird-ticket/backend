@@ -1,4 +1,4 @@
-package com.earlybird.ticket.venue.infrastructure.config.kafka;
+package com.earlybird.ticket.venue.infrastructure.kafka.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;

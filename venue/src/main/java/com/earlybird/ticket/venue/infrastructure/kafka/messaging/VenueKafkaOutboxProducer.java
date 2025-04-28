@@ -1,4 +1,4 @@
-package com.earlybird.ticket.venue.infrastructure.messaging;
+package com.earlybird.ticket.venue.infrastructure.kafka.messaging;
 
 import com.earlybird.ticket.venue.domain.entity.Outbox;
 import com.earlybird.ticket.venue.infrastructure.repository.OutboxJpaRepository;

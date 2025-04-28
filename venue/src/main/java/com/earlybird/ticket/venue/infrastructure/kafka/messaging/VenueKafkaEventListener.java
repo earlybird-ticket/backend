@@ -1,9 +1,8 @@
-package com.earlybird.ticket.venue.infrastructure.messaging;
+package com.earlybird.ticket.venue.infrastructure.kafka.messaging;
 
 import com.earlybird.ticket.common.entity.EventPayload;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.common.event.EventType;
-import com.earlybird.ticket.venue.application.event.dispatcher.EventDispatcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
