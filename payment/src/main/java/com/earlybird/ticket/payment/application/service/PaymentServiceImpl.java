@@ -69,17 +69,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public void confirmPayment(ConfirmPaymentCommand confirmPaymentCommand) {
-        /*
-            TODO:
-                1. 결제 가능 시간 가져옴 ✅
-                2. 결제 진행 ✅
-                3. 결제 성공 시간 받아옴 ✅
-                4. 결제 제한 시간과 성공 시간 비교
-                4-1. 결제 제한 내에 성공 -> SUCCESS 이벤트 발행 ✅
-                4-2. 결제 제한 내 이후에 성공
-                    a. Reservation으로 FAIL 이벤트 발행 ✅
-                    b. Payment로 CANCEL 이벤트 발행 -> paymentCancel 실행
-         */
+
         validateReservationTimedOut(confirmPaymentCommand.reservationId());
         validateDuplicatePayment(confirmPaymentCommand.reservationId());
         Payment payment = paymentRepository.findByReservationId(
@@ -94,9 +84,13 @@ public class PaymentServiceImpl implements PaymentService {
             .userRole(Role.USER.getValue())
             .build();
 
-        // 결제 시간 제한
-        LocalDateTime dueDate = temporaryStore.getExpireDate(payment.getReservationId());
-        log.info("결제 제한 시간 : {}", dueDate);
+        // 결제 시도 전 시간 제한 체크
+        Long remainingTime = temporaryStore.getRemainingTime(payment.getReservationId());
+        log.info("결제 제한 시간 : {}", remainingTime);
+
+        if (remainingTime < 10) { // TODO: 테스트 후 값 조정
+            throw new PaymentTimeoutException();
+        }
 
         // 결제 내역 -> 업데이트용 엔티티 변경
         UpdatePaymentCommand updatePaymentCommand = paymentClient.confirmPayment(
@@ -104,26 +98,6 @@ public class PaymentServiceImpl implements PaymentService {
         );
         log.info("결과 -> {}", updatePaymentCommand);
         Payment receipt = updatePaymentCommand.toPayment(payment.getUserId());
-
-        if (updatePaymentCommand.approvedAt().isAfter(dueDate)) {
-            // 결제 실패 이벤트 발행해야함.
-//            payment.expirePayment(receipt);
-            // Reservation으로 보낼 FAIL 이벤트
-            PaymentFailEvent fail = PaymentFailEvent.builder()
-                .reservationId(payment.getReservationId())
-                .passportDto(passport)
-                .paymentMethod(receipt.getMethod())
-                .paymentStatus(PaymentStatus.EXPIRED)
-                .paymentId(payment.getId())
-                .build();
-
-            // Payment로 보낼 CANCEL 이벤트
-            Outbox outbox = createOutbox(payment, EventType.PAYMENT_FAIL, fail);
-            // TODO : 결제 쪽으로 보낼 취소 이벤트도 추가
-            // TODO : 취소 성공 이후 EXPIRED로 바꾸기
-            outboxRepository.save(outbox);
-            return;
-        }
 
         // 결제 방법, 상태 반영
         payment.confirmPayment(receipt);
@@ -143,8 +117,6 @@ public class PaymentServiceImpl implements PaymentService {
         // 아웃박스 저장
         Outbox outbox = createOutbox(payment, EventType.PAYMENT_SUCCESS, event);
         outboxRepository.save(outbox);
-
-
     }
 
     @Override

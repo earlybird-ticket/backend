@@ -53,6 +53,7 @@ public class PaymentRedisTemporaryStore implements TemporaryStore {
         }
     }
 
+    @Deprecated
     @Override
     public LocalDateTime getExpireDate(UUID reservationId) {
         String key = RESERVATION_KEY + reservationId;
@@ -64,5 +65,13 @@ public class PaymentRedisTemporaryStore implements TemporaryStore {
             .atZone(ZoneId.systemDefault())
             .plusSeconds(bucket.getExpireTime())
             .toLocalDateTime();
+    }
+
+    @Override
+    public Long getRemainingTime(UUID reservationId) {
+        String key = RESERVATION_KEY + reservationId;
+
+        RBucket<Object> bucket = redissonClient.getBucket(key);
+        return bucket.getExpireTime();
     }
 }
