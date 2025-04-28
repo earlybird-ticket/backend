@@ -3,6 +3,7 @@ package com.earlybird.ticket.venue.application.event.dispatcher;
 import com.earlybird.ticket.common.entity.EventPayload;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.application.event.handler.EventHandler;
+import com.earlybird.ticket.venue.infrastructure.kafka.messaging.EventDispatcher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EventDispatcherImpl implements EventDispatcher{
+public class EventDispatcherImpl implements EventDispatcher {
 
     private final List<EventHandler<? extends EventPayload>> handlerList;
 

@@ -1,4 +1,4 @@
-package com.earlybird.ticket.venue.infrastructure.config.kafka;
+package com.earlybird.ticket.venue.infrastructure.kafka.config;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerInterceptor;

@@ -1,4 +1,4 @@
-package com.earlybird.ticket.venue.common.util;
+package com.earlybird.ticket.venue.infrastructure.redis.util;
 
 import com.earlybird.ticket.venue.common.dto.RedisReadResult;
 import lombok.RequiredArgsConstructor;

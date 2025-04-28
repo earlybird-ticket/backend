@@ -1,4 +1,4 @@
-package com.earlybird.ticket.venue.common.util;
+package com.earlybird.ticket.venue.infrastructure.redis.util;
 
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import org.springframework.data.redis.core.StringRedisTemplate;
