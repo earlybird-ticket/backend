@@ -101,4 +101,12 @@ public class Payment extends BaseEntity {
         this.delete(this.userId);
     }
 
+    public void expirePayment(Payment expired) {
+        if (!this.getReservationId().equals(expired.reservationId)) {
+            throw new PaymentNotFoundException();
+        }
+        this.status = PaymentStatus.EXPIRED;
+        this.delete(this.userId);
+    }
+
 }

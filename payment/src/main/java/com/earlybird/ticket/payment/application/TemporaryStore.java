@@ -12,4 +12,6 @@ public interface TemporaryStore {
     void cacheConfirmedPayment(UUID reservationId);
 
     LocalDateTime getExpireDate(UUID reservationId);
+
+    Long getRemainingTime(UUID reservationId);
 }

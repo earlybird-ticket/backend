@@ -5,11 +5,15 @@ import com.earlybird.ticket.common.entity.PassportDto;
 import com.earlybird.ticket.common.entity.constant.Role;
 import com.earlybird.ticket.common.util.CommonUtil;
 import com.earlybird.ticket.payment.application.TemporaryStore;
+import com.earlybird.ticket.payment.application.event.dto.request.PaymentCancelFailedEvent;
+import com.earlybird.ticket.payment.application.event.dto.request.PaymentFailEvent;
 import com.earlybird.ticket.payment.application.event.dto.request.PaymentSuccessEvent;
 import com.earlybird.ticket.payment.application.service.dto.command.ConfirmPaymentCommand;
 import com.earlybird.ticket.payment.application.service.dto.command.CreatePaymentCommand;
+import com.earlybird.ticket.payment.application.service.dto.command.UpdatePaymentCommand;
 import com.earlybird.ticket.payment.application.service.dto.query.FindPaymentQuery;
 import com.earlybird.ticket.payment.application.service.exception.PaymentAmountDoesNotMatchException;
+import com.earlybird.ticket.payment.application.service.exception.PaymentCancelException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentDuplicatedException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentInformationDoesNotMatchException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentNotFoundException;
@@ -19,6 +23,7 @@ import com.earlybird.ticket.payment.common.EventType;
 import com.earlybird.ticket.payment.domain.entity.Event;
 import com.earlybird.ticket.payment.domain.entity.Outbox;
 import com.earlybird.ticket.payment.domain.entity.Payment;
+import com.earlybird.ticket.payment.domain.entity.constant.PaymentStatus;
 import com.earlybird.ticket.payment.domain.repository.OutboxRepository;
 import com.earlybird.ticket.payment.domain.repository.PaymentRepository;
 import java.math.BigDecimal;
@@ -64,6 +69,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public void confirmPayment(ConfirmPaymentCommand confirmPaymentCommand) {
+
         validateReservationTimedOut(confirmPaymentCommand.reservationId());
         validateDuplicatePayment(confirmPaymentCommand.reservationId());
         Payment payment = paymentRepository.findByReservationId(
@@ -72,20 +78,31 @@ public class PaymentServiceImpl implements PaymentService {
 
         validatePaymentAmount(payment, confirmPaymentCommand.amount());
 
-        // 결제 내역 -> 업데이트용 엔티티 변경
-        Payment receipt = paymentClient.confirmPayment(
-            confirmPaymentCommand, payment.getId()
-        ).toPayment(payment.getUserId());
-        // 결제 방법, 상태 반영
-        payment.confirmPayment(receipt);
-
-        temporaryStore.cacheConfirmedPayment(payment.getReservationId());
-
         // 임시 passport 생성
         PassportDto passport = PassportDto.builder()
             .userId(payment.getUserId())
             .userRole(Role.USER.getValue())
             .build();
+
+        // 결제 시도 전 시간 제한 체크
+        Long remainingTime = temporaryStore.getRemainingTime(payment.getReservationId());
+        log.info("결제 제한 시간 : {}", remainingTime);
+
+        if (remainingTime < 10) { // TODO: 테스트 후 값 조정
+            throw new PaymentTimeoutException();
+        }
+
+        // 결제 내역 -> 업데이트용 엔티티 변경
+        UpdatePaymentCommand updatePaymentCommand = paymentClient.confirmPayment(
+            confirmPaymentCommand, payment.getId()
+        );
+        log.info("결과 -> {}", updatePaymentCommand);
+        Payment receipt = updatePaymentCommand.toPayment(payment.getUserId());
+
+        // 결제 방법, 상태 반영
+        payment.confirmPayment(receipt);
+
+        temporaryStore.cacheConfirmedPayment(payment.getReservationId());
 
         // 이벤트 생성
         PaymentSuccessEvent event = PaymentSuccessEvent.builder()
@@ -100,8 +117,6 @@ public class PaymentServiceImpl implements PaymentService {
         // 아웃박스 저장
         Outbox outbox = createOutbox(payment, EventType.PAYMENT_SUCCESS, event);
         outboxRepository.save(outbox);
-
-
     }
 
     @Override
@@ -112,9 +127,27 @@ public class PaymentServiceImpl implements PaymentService {
 
         validateIsUserMatches(passportDto, payment);
 
-        Payment cancelPayment = paymentClient.cancelPayment(
-                payment.getPaymentKey(), payment.getReservationId())
-            .toCancelPayment();
+        Payment cancelPayment = null;
+        try {
+
+            cancelPayment = paymentClient.cancelPayment(
+                    payment.getPaymentKey(), payment.getReservationId())
+                .toCancelPayment();
+
+        } catch (PaymentCancelException e) {
+            // 결제 취소 3회 실패 시 DLQ로 이동
+            PaymentCancelFailedEvent paymentCancelFailedEvent = PaymentCancelFailedEvent.builder()
+                .paymentKey(payment.getPaymentKey())
+                .paymentId(payment.getId())
+                .reservationId(payment.getReservationId())
+                .build();
+
+            Outbox outbox = createOutbox(payment, EventType.PAYMENT_CANCEL_FAIL,
+                paymentCancelFailedEvent);
+
+            outboxRepository.save(outbox);
+            return;
+        }
 
         payment.cancelPayment(cancelPayment);
     }
