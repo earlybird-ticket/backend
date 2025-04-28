@@ -21,7 +21,8 @@ public class SecurityConfig {
         http.cors(AbstractHttpConfigurer::disable);
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/external/**",
-                                                                "api/v1/internal/**")
+                                                                "api/v1/internal/**",
+                                                                "/actuator/prometheus")
                                                .permitAll()
                                                .anyRequest()
                                                .authenticated());

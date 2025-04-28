@@ -1,0 +1,45 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: [ 'localhost:9090' ]
+
+  - job_name: 'spring-boot-apps'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets:
+          - host.docker.internal:18080 # Eureka (ServerApplication)
+          - host.docker.internal:18081 # Gateway
+          - host.docker.internal:18082 # Auth
+          - host.docker.internal:18083 # Admin
+          - host.docker.internal:18084 # User
+          - host.docker.internal:18085 # Concert
+          - host.docker.internal:18086 # Venue
+          - host.docker.internal:18087 # Coupon
+          - host.docker.internal:18088 # Reservation
+          - host.docker.internal:18089 # Payment
+          - host.docker.internal:18090 # Queue
+          - host.docker.internal:19091 # Batch (주의: 19091 포트임!)
+          - host.docker.internal:18092 # Alarm
+
+  - job_name: 'postgresql'
+    static_configs:
+      - targets:
+          - host.docker.internal:19187
+          - host.docker.internal:19188
+          - host.docker.internal:19189
+          - host.docker.internal:19190
+          - host.docker.internal:19191
+          - host.docker.internal:19192
+          - host.docker.internal:19193
+          - host.docker.internal:19194
+          - host.docker.internal:19195
+  - job_name: 'redis'
+    static_configs:
+      - targets: [ 'redis-exporter:9121' ]
+  - job_name: 'kafka'
+    static_configs:
+      - targets: [ 'kafka-exporter:9308' ]
