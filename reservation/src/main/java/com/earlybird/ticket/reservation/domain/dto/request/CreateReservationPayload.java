@@ -7,14 +7,15 @@ import com.earlybird.ticket.reservation.domain.entity.constant.SeatGrade;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Getter
-public class CreateReservationEvent implements EventPayload {
+@NoArgsConstructor
+public class CreateReservationPayload implements EventPayload {
     @NotNull(message = "reservationId is Necessary")
     private UUID reservationId;
     @NotNull(message = "userName is Necessary")
@@ -57,22 +58,23 @@ public class CreateReservationEvent implements EventPayload {
 
     private PassportDto passportDto;
 
-    public CreateReservationEvent(UUID reservationId,
-                                  String userName,
-                                  UUID concertId,
-                                  String concertName,
-                                  UUID concertSequenceId,
-                                  LocalDateTime concertSequenceStartDatetime,
-                                  LocalDateTime concertSequenceEndDatetime,
-                                  ConcertStatus concertSequenceStatus,
-                                  UUID venueId,
-                                  String venueArea,
-                                  String venueLocation,
-                                  List<SeatRequest> seatList,
-                                  UUID hallId,
-                                  String hallName,
-                                  Integer hallFloor,
-                                  PassportDto passportDto) {
+    @Builder
+    public CreateReservationPayload(UUID reservationId,
+                                    String userName,
+                                    UUID concertId,
+                                    String concertName,
+                                    UUID concertSequenceId,
+                                    LocalDateTime concertSequenceStartDatetime,
+                                    LocalDateTime concertSequenceEndDatetime,
+                                    ConcertStatus concertSequenceStatus,
+                                    UUID venueId,
+                                    String venueArea,
+                                    String venueLocation,
+                                    List<SeatRequest> seatList,
+                                    UUID hallId,
+                                    String hallName,
+                                    Integer hallFloor,
+                                    PassportDto passportDto) {
         this.reservationId = reservationId;
         this.userName = userName;
         this.concertId = concertId;
@@ -93,6 +95,7 @@ public class CreateReservationEvent implements EventPayload {
     }
 
     @Getter
+    @NoArgsConstructor
     public static class SeatRequest {
 
 
@@ -106,14 +109,14 @@ public class CreateReservationEvent implements EventPayload {
         @NotNull(message = "seatGrade is Necessary")
         SeatGrade seatGrade;
         @NotNull(message = "seatPrice is Necessary")
-        BigDecimal seatPrice;
+        Integer seatPrice;
 
         @Builder
         public SeatRequest(@NotNull(message = "seatInstanceId is Necessary") UUID seatInstanceId,
                            @NotNull(message = "seatRow is Necessary") Integer seatRow,
                            @NotNull(message = "seatCol is Necessary") Integer seatCol,
                            @NotNull(message = "seatGrade is Necessary") SeatGrade seatGrade,
-                           @NotNull(message = "seatPrice is Necessary") BigDecimal seatPrice) {
+                           @NotNull(message = "seatPrice is Necessary") Integer seatPrice) {
             this.seatInstanceId = seatInstanceId;
             this.seatRow = seatRow;
             this.seatCol = seatCol;

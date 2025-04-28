@@ -42,7 +42,9 @@ public enum EventType {
                   Topic.RESERVATION_TO_COUPON_TOPIC),
 
     //CONSUME,
-    RESERVATION_CREATE(CreateReservationEvent.class,
+
+
+    RESERVATION_CREATE(CreateReservationPayload.class,
                        Topic.SEAT_TO_RESERVATION_FOR_PREEMPT_TOPIC),
 
     //Seat -> Reservation(확정 성공)

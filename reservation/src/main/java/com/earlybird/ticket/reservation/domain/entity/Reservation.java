@@ -187,6 +187,7 @@ public class Reservation extends BaseEntity {
                           .hallId(hallId)
                           .hallName(hallName)
                           .hallFloor(hallFloor)
+                          .content("temp")
                           .build();
     }
 

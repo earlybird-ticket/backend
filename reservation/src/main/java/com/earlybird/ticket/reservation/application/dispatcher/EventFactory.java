@@ -3,8 +3,10 @@ package com.earlybird.ticket.reservation.application.dispatcher;
 import com.earlybird.ticket.common.entity.EventPayload;
 import com.earlybird.ticket.reservation.domain.entity.Event;
 import com.earlybird.ticket.reservation.domain.entity.constant.EventType;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -14,10 +16,16 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class EventFactory {
 
-    private final ObjectMapper objectMapper;
 
     public Event<? extends EventPayload> createEvent(String json) {
         try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                                   false);
+            objectMapper.configure(DeserializationFeature.ACCEPT_FLOAT_AS_INT,
+                                   true);
+            objectMapper.registerModule(new JavaTimeModule());
+
             // eventType 추출
             String typeStr = objectMapper.readTree(json)
                                          .get("eventType")
