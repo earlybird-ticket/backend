@@ -1,22 +1,23 @@
 <configuration>
-    <property name="LOGS_PATH" value="./owl-log/logs"/>
     <property name="LOGS_LEVEL" value="INFO"/>
+    <property name="LOGS_PATH" value="./logs"/>
 
-    <!-- 콘솔 출력 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>
-                %d{yyyy-MM-dd HH:mm:ss} %highlight(%-5level) [%thread] [traceId=%X{traceId}] - %msg%n
-            </pattern>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <prettyPrint>true</prettyPrint>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [traceId=%X{traceId}] - %msg%n</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
+
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>log/log_file.log</file>
-
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
-
+        <file>${LOGS_PATH}/app.log</file>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeContext>true</includeContext>
+            <customFields>{"service":"earlybird-common"}</customFields>
+        </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS_PATH}/%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+            <fileNamePattern>${LOGS_PATH}/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>10MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
@@ -24,14 +25,15 @@
         </rollingPolicy>
     </appender>
 
-    <appender name="Error" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>log/error_file.log</file>
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative][%thread] %-5level %logger{35} - %msg%n</pattern>
-            <charset>UTF-8</charset>
+    <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGS_PATH}/error.log</file>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <prettyPrint>true</prettyPrint>
+            <includeContext>true</includeContext>
+            <customFields>{"service":"earlybird-common","error":"true"}</customFields>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOGS_PATH}/%d{yyyy-MM-dd}_error.log</fileNamePattern>
+            <fileNamePattern>${LOGS_PATH}/error.%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -39,11 +41,9 @@
         </filter>
     </appender>
 
-
-    <!-- Logger 설정 -->
-    <root level="INFO">
+    <root level="${LOGS_LEVEL}">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
-        <appender-ref ref="Error"/>
+        <appender-ref ref="ERROR"/>
     </root>
 </configuration>
