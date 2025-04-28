@@ -34,8 +34,6 @@ public class ReserveCouponPayloadHandler implements EventHandler<CouponReservePa
     @Override
     @Transactional
     public void handle(Event<CouponReservePayload> event) {
-        log.info("[CouponEventHandler] 이벤트 수신: {}",
-                 event);
 
         CouponReservePayload payload = event.getPayload();
         if (payload == null) {
@@ -75,11 +73,7 @@ public class ReserveCouponPayloadHandler implements EventHandler<CouponReservePa
         String payloadJson;
         try {
             payloadJson = new ObjectMapper().writeValueAsString(couponConfirmPayloadEvent);
-            log.info("[CouponEventHandler] 직렬화된 ConfirmCouponPayload: {}",
-                     payloadJson);
         } catch (JsonProcessingException e) {
-            log.error("[CouponEventHandler] ConfirmCouponPayload 직렬화 실패",
-                      e);
             throw new CustomJsonProcessingException();
         }
 

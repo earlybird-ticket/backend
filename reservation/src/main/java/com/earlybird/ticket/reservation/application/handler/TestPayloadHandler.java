@@ -13,6 +13,7 @@ public class TestPayloadHandler implements EventHandler<TestPayload> {
 
     @Override
     public void handle(Event<TestPayload> event) {
+
         log.info("[TestPayloadHandler] 처리 시작 - Payload: {}",
                  event.getPayload()
                       .getTest());

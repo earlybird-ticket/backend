@@ -7,6 +7,7 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.kafka.support.ProducerListener;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +34,16 @@ public class KafkaProducerListener implements ProducerListener<String, String> {
                     producerRecord.value());
         logData.put("timestamp",
                     System.currentTimeMillis());
+        if (producerRecord.headers() != null) {
+            var header = producerRecord.headers()
+                                       .lastHeader("traceId");
+            if (header != null) {
+                logData.put("traceId",
+                            new String(header.value(),
+                                       StandardCharsets.UTF_8));
+
+            }
+        }
 
         try {
             log.info("Kafka Success Log: {}",

@@ -6,7 +6,10 @@ import com.earlybird.ticket.reservation.application.dto.response.FindReservation
 import com.earlybird.ticket.reservation.application.service.ReservationService;
 import com.earlybird.ticket.reservation.domain.dto.response.ReservationSearchResult;
 import com.earlybird.ticket.reservation.presentation.dto.response.FindReservationResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
@@ -14,11 +17,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/external/reservations")
+@Slf4j
 public class ReservationExternalController {
 
     private final ReservationService reservationService;
@@ -91,10 +98,20 @@ public class ReservationExternalController {
     public ResponseEntity<CommonDto<Void>> test() {
         reservationService.test();
 
+        log.info("check MDC ={}",
+                 MDC.get("traceId"));
         return ResponseEntity.status(HttpStatus.OK)
                              .body(CommonDto.ok(null,
                                                 "test"));
     }
 
-
+    @GetMapping("/debug/headers")
+    public ResponseEntity<Map<String, String>> debugHeaders(HttpServletRequest request) {
+        Map<String, String> headers = Collections.list(request.getHeaderNames())
+                                                 .stream()
+                                                 .collect(Collectors.toMap(h -> h,
+                                                                           request::getHeader));
+        return ResponseEntity.ok(headers);
+    }
 }
+

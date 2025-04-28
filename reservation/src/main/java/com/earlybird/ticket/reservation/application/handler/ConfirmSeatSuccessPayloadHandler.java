@@ -35,15 +35,7 @@ public class ConfirmSeatSuccessPayloadHandler implements EventHandler<SeatConfir
                                                  .getReservation();
 
         reservation.updateStatusConfirm(userId);
-        log.info("조회된 seatInstanceList 개수: {}",
-                 seatIntanceList.size());
-        seatIntanceList.forEach(seat -> {
-            log.info("수정 전 상태: {}",
-                     seat.getStatus());
-            seat.updateStatusConfirm(userId);
-            log.info("수정 후 상태: {}",
-                     seat.getStatus());
-        });
+        seatIntanceList.forEach(seat -> seat.updateStatusConfirm(userId));
 
 
     }

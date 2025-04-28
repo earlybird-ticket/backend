@@ -30,15 +30,7 @@ public class ReturnSeatSuccessPayloadHandler implements EventHandler<SeatReturnS
 
         List<ReservationSeat> seatIntanceList = reservationSeatRepository.findAllBySeatInstaceIdIn(payload.seatInstanceIdList());
 
-        log.info("조회된 seatInstanceList 개수: {}",
-                 seatIntanceList.size());
-        seatIntanceList.forEach(seat -> {
-            log.info("수정 전 상태: {}",
-                     seat.getStatus());
-            seat.updateStatusFREE(userId);
-            log.info("수정 후 상태: {}",
-                     seat.getStatus());
-        });
+        seatIntanceList.forEach(seat -> seat.updateStatusFREE(userId));
 
         seatIntanceList.forEach(reservationSeat -> {
             reservationSeat.updateStatusFREE(userId);
@@ -46,9 +38,6 @@ public class ReturnSeatSuccessPayloadHandler implements EventHandler<SeatReturnS
             reservation.updateStatusCancelled(userId);
         });
 
-        seatIntanceList.forEach(seat -> log.info("업데이트 후 상태 확인: id={}, status={}",
-                                                 seat.getSeatInstanceId(),
-                                                 seat.getStatus()));
 
     }
 

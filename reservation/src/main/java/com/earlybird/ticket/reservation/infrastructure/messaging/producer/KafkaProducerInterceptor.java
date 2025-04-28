@@ -31,6 +31,15 @@ public class KafkaProducerInterceptor implements ProducerInterceptor<String, Str
         logData.put("timestamp",
                     System.currentTimeMillis());
 
+        if (producerRecord.headers() != null) {
+            var header = producerRecord.headers()
+                                       .lastHeader("traceId");
+            if (header != null) {
+                logData.put("traceId",
+                            header.value());
+            }
+        }
+
         try {
             log.info("Kafka Interceptor Log: {}",
                      objectMapper.writeValueAsString(logData));
@@ -47,6 +56,7 @@ public class KafkaProducerInterceptor implements ProducerInterceptor<String, Str
                                   Exception exception) {
         log.info("onAcknowledgement start");
 
+
         Map<String, Object> logData = new HashMap<>();
         logData.put("event",
                     "kafka_ack");
@@ -58,6 +68,7 @@ public class KafkaProducerInterceptor implements ProducerInterceptor<String, Str
                     metadata.offset());
         logData.put("timestamp",
                     System.currentTimeMillis());
+
 
         if (exception != null) {
             logData.put("status",
