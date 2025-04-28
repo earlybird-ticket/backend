@@ -1,0 +1,34 @@
+filebeat.inputs:
+  - type: filestream
+    id: early-bird
+    enabled: true
+    paths:
+      - /logs/*.log  # 컨테이너 내부 경로
+    parsers:
+      - ndjson:
+          message_key: message
+          add_error_key: true
+    fields:
+      app: earlybird-app
+    fields_under_root: true
+    close.on_state_change.interval: 5m
+
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+setup.template.settings:
+  index.number_of_shards: 1
+
+setup.kibana:
+  host: "monitoring-kibana:5601"  #  컨테이너 이름 맞춰야 함!
+
+output.logstash:
+  hosts: [ "monitoring-logstash:5044" ]  #  컨테이너 이름 맞춰야 함!
+
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+  - add_kubernetes_metadata: ~
