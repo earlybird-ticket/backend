@@ -5,6 +5,7 @@ import com.earlybird.ticket.common.entity.PassportDto;
 import com.earlybird.ticket.common.entity.constant.Role;
 import com.earlybird.ticket.common.util.CommonUtil;
 import com.earlybird.ticket.payment.application.TemporaryStore;
+import com.earlybird.ticket.payment.application.event.dto.request.PaymentCancelFailedEvent;
 import com.earlybird.ticket.payment.application.event.dto.request.PaymentFailEvent;
 import com.earlybird.ticket.payment.application.event.dto.request.PaymentSuccessEvent;
 import com.earlybird.ticket.payment.application.service.dto.command.ConfirmPaymentCommand;
@@ -12,6 +13,7 @@ import com.earlybird.ticket.payment.application.service.dto.command.CreatePaymen
 import com.earlybird.ticket.payment.application.service.dto.command.UpdatePaymentCommand;
 import com.earlybird.ticket.payment.application.service.dto.query.FindPaymentQuery;
 import com.earlybird.ticket.payment.application.service.exception.PaymentAmountDoesNotMatchException;
+import com.earlybird.ticket.payment.application.service.exception.PaymentCancelException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentDuplicatedException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentInformationDoesNotMatchException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentNotFoundException;
@@ -153,9 +155,27 @@ public class PaymentServiceImpl implements PaymentService {
 
         validateIsUserMatches(passportDto, payment);
 
-        Payment cancelPayment = paymentClient.cancelPayment(
-                payment.getPaymentKey(), payment.getReservationId())
-            .toCancelPayment();
+        Payment cancelPayment = null;
+        try {
+
+            cancelPayment = paymentClient.cancelPayment(
+                    payment.getPaymentKey(), payment.getReservationId())
+                .toCancelPayment();
+
+        } catch (PaymentCancelException e) {
+            // 결제 취소 3회 실패 시 DLQ로 이동
+            PaymentCancelFailedEvent paymentCancelFailedEvent = PaymentCancelFailedEvent.builder()
+                .paymentKey(payment.getPaymentKey())
+                .paymentId(payment.getId())
+                .reservationId(payment.getReservationId())
+                .build();
+
+            Outbox outbox = createOutbox(payment, EventType.PAYMENT_CANCEL_FAIL,
+                paymentCancelFailedEvent);
+
+            outboxRepository.save(outbox);
+            return;
+        }
 
         payment.cancelPayment(cancelPayment);
     }

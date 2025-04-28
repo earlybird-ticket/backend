@@ -6,13 +6,16 @@ import com.earlybird.ticket.payment.application.service.dto.command.ConfirmPayme
 import com.earlybird.ticket.payment.application.service.dto.command.UpdatePaymentCancelCommand;
 import com.earlybird.ticket.payment.application.service.dto.command.UpdatePaymentCommand;
 import com.earlybird.ticket.payment.application.service.exception.PaymentAbortException;
+import com.earlybird.ticket.payment.application.service.exception.PaymentCancelClientFailedException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentCancelException;
+import com.earlybird.ticket.payment.application.service.exception.PaymentCancelServerFailedException;
 import com.earlybird.ticket.payment.infrastructure.client.dto.response.ProcessPaymentCancelClientResponse;
 import com.earlybird.ticket.payment.infrastructure.client.dto.response.ProcessPaymentConfirmClientResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 @Slf4j
 @Component
@@ -107,16 +111,20 @@ public class PaymentWebClient implements PaymentClient {
                     return response.bodyToMono(String.class)
                         .flatMap(errorBody -> {
                             log.error("토스페이 결제 취소 클라이언트 에러: {}", errorBody);
-                            return Mono.error(new PaymentCancelException());
+                            return Mono.error(new PaymentCancelClientFailedException());
                         });
                 } else {
                     return response.bodyToMono(String.class)
                         .flatMap(errorBody -> {
                             log.error("토스페이 결제 취소 서버 에러: {}", errorBody);
-                            return Mono.error(new PaymentCancelException());
+                            return Mono.error(new PaymentCancelServerFailedException());
                         });
                 }
             })
+            .retryWhen(
+                Retry.fixedDelay(3, Duration.of(2, ChronoUnit.SECONDS))
+                    .filter(throwable -> throwable instanceof PaymentCancelException)
+            ) // 실패 시 3회까지 재시도
             .block();
 
         log.info("토스페이 취소 = {}", result);
