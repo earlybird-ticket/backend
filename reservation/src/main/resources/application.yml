@@ -70,5 +70,8 @@ eureka:
       defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:18080}/eureka
     registry-fetch-interval-seconds: 10
   instance:
+    instance-id: ${spring.application.name}:${server.port}
+    prefer-ip-address: true
+    hostname: ${spring.application.name}
     lease-renewal-interval-in-seconds: 10
     lease-expiration-duration-in-seconds: 30

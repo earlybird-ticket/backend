@@ -33,6 +33,10 @@ spring:
 
 
 eureka:
+  instance:
+    instance-id: ${spring.application.name}:${server.port}
+    prefer-ip-address: true
+    hostname: ${spring.application.name}
   client:
     initial-instance-info-replication-interval-seconds: 5  # 초기 등록 주기
     registry-fetch-interval-seconds: 5  # 레지스트리 갱신 주기 (기본 30초)
