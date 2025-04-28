@@ -1,10 +1,10 @@
 package com.earlybird.ticket.coupon.infrastructure.config;
 
-import com.fasterxml.jackson.databind.ser.std.StringSerializer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
