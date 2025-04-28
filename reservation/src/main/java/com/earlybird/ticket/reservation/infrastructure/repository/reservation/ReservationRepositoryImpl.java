@@ -30,8 +30,4 @@ public class ReservationRepositoryImpl implements ReservationRepository {
         return reservationRepository.findAllById(reservationIds);
     }
 
-    @Override
-    public Optional<Reservation> findByIdAndReservationStatusConfirmed(UUID reservationId) {
-        return reservationRepository.findByIdAndReservationStatusConfirmed(reservationId);
-    }
 }

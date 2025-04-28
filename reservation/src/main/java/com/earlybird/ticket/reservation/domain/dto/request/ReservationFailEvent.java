@@ -10,5 +10,6 @@ import java.util.UUID;
 @Builder
 public record ReservationFailEvent(List<UUID> seatInstanceIdList,
                                    PassportDto passportDto,
+                                   UUID reservationId,
                                    String code) implements EventPayload {
 }
