@@ -109,6 +109,7 @@ public class CreateReservationRequestHandler implements EventHandler<CreateReser
                               payload.getReservationId());
 
                     ReservationFailEvent failEvent = ReservationFailEvent.builder()
+                                                                         .reservationId(payload.getReservationId())
                                                                          .passportDto(payload.getPassportDto())
                                                                          .seatInstanceIdList(instanceSeatIdList)
                                                                          .code(Code.RESERVATION_CREATE_FAIL.getCode())
