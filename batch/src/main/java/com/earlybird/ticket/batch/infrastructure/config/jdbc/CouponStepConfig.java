@@ -23,7 +23,14 @@ import org.springframework.batch.item.support.builder.CompositeItemWriterBuilder
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.RecoverableDataAccessException;
+import org.springframework.dao.TransientDataAccessException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.core.DataClassRowMapper;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -109,6 +116,21 @@ public class CouponStepConfig {
             .reader(couponOutboxReader(couponDataSource))
             .processor(sinkOutboxProcessor)
             .writer(couponOutboxMigrateWriter(sinkDataSource, couponDataSource))
+            .faultTolerant()
+            .retryPolicy(new SimpleRetryPolicy(3, Map.of(
+                TransientDataAccessException.class, true,
+                CannotGetJdbcConnectionException.class, true,
+                RecoverableDataAccessException.class, true,
+                DataAccessResourceFailureException.class, true
+            )))
+            .backOffPolicy(new ExponentialBackOffPolicy() {
+                {
+                    setInitialInterval(500);
+                    setMultiplier(2.0);
+                    setMaxInterval(5000);
+                }
+            })
+            .skip(DataIntegrityViolationException.class)
             .build();
     }
 }
