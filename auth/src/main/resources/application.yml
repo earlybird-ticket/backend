@@ -30,9 +30,37 @@ eureka:
 
 server:
   port: ${AUTH_SERVER_PORT:18082}
+  tomcat:
+    mbeanregistry:
+      enabled: true
 
 
 jwt:
   secret: ${AUTH_JWT_SECRET}
   access:
     exp: ${AUTH_JWT_ACCESS_EXP}
+
+management:
+  endpoints:
+    jmx:
+      exposure:
+        include: health,info,prometheus
+    web:
+      exposure:
+        include: refresh,health,beans,busrefresh,info,metrics,prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        all: true
+    enable:
+      jvm: true
+  zipkin:
+    tracing:
+      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
+  tracing:
+    sampling:
+      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
+  prometheus:
+    metrics:
+      export:
+        enabled: true

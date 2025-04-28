@@ -1,5 +1,8 @@
 server:
   port: ${EUREKA_PORT}
+  tomcat:
+    mbeanregistry:
+      enabled: true
 spring:
   config:
     import: optional:file:.env[.properties]
@@ -12,3 +15,29 @@ eureka:
       defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:18080}/eureka
     fetch-registry: false
     register-with-eureka: false
+
+
+management:
+  endpoints:
+    jmx:
+      exposure:
+        include: health,info,prometheus
+    web:
+      exposure:
+        include: refresh,health,beans,busrefresh,info,metrics,prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        all: true
+    enable:
+      jvm: true
+  zipkin:
+    tracing:
+      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
+  tracing:
+    sampling:
+      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
