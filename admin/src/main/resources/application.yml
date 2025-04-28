@@ -28,27 +28,7 @@ eureka:
   client:
     service-url:
       defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:18080}/eureka
-management:
-  endpoints:
-    jmx:
-      exposure:
-        include: health,info,prometheus
-    web:
-      exposure:
-        include: refresh,health,beans,busrefresh,info,metrics,prometheus
-  metrics:
-    distribution:
-      percentiles-histogram:
-        all: true
-    enable:
-      jvm: true
-  zipkin:
-    tracing:
-      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
-  tracing:
-    sampling:
-      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
-  prometheus:
-    metrics:
-      export:
-        enabled: true
+  instance:
+    instance-id: ${spring.application.name}:${server.port}
+    prefer-ip-address: true
+    hostname: ${spring.application.name}
