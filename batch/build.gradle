@@ -43,6 +43,9 @@ dependencies {
     implementation 'com.atomikos:transactions-jdbc:6.0.0:jakarta'
     implementation 'com.atomikos:transactions-jta:6.0.0:jakarta'
 
+    // DB 버전 관리
+    implementation 'org.flywaydb:flyway-database-postgresql'
+
     // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.batch:spring-batch-test'
