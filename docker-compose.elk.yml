@@ -1,0 +1,82 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+    container_name: monitoring-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    ports:
+      - "${ELASTICSEARCH_PORT}:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - overtime_network
+    platform: linux/amd64
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.10.0
+    container_name: monitoring-logstash
+    ports:
+      - "${LOGSTASH_APPENDER_PORT}:5044"
+      - "${LOGSTASH_HTTP_PORT}:9600"
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      - elasticsearch
+    networks:
+      - overtime_network
+    platform: linux/amd64
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.10.1
+    container_name: monitoring-kibana
+    ports:
+      - "${KIBANA_PORT}:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - overtime_network
+    platform: linux/amd64
+  #
+  #  metricbeat:
+  #    image: docker.elastic.co/beats/metricbeat:8.10.0
+  #    container_name: monitoring-metricbeat
+  #    user: root
+  #    depends_on:
+  #      - elasticsearch
+  #      - kibana
+  #    networks:
+  #      - overtime_network
+  #    volumes:
+  #      - ./metricbeat.docker.yml:/usr/share/metricbeat/metricbeat.yml:ro
+  #      - /var/run/docker.sock:/var/run/docker.sock:ro
+  #      - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
+  #      - /proc:/hostfs/proc:ro
+  #      - /:/hostfs:ro
+  #    command: [ "metricbeat", "-e", "--strict.perms=false" ]
+  #    platform: linux/amd64
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.10.0
+    container_name: monitoring-filebeat
+    user: root
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /Users/Sunro1994/Documents/earlybird/backend/logs:/logs:ro
+    depends_on:
+      - logstash
+    networks:
+      - overtime_network
+    command: [ "filebeat", "-e", "--strict.perms=false" ]
+    platform: linux/amd64
+
+networks:
+  overtime_network:
+    driver: bridge
+
+volumes:
+  elasticsearch-data:
