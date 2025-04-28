@@ -29,4 +29,9 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     public List<Reservation> findAllById(List<UUID> reservationIds) {
         return reservationRepository.findAllById(reservationIds);
     }
+
+    @Override
+    public Optional<Reservation> findByIdAndReservationStatusConfirmed(UUID reservationId) {
+        return reservationRepository.findByIdAndReservationStatusConfirmed(reservationId);
+    }
 }
