@@ -5,9 +5,11 @@ import com.earlybird.ticket.common.entity.PassportDto;
 import com.earlybird.ticket.common.entity.constant.Role;
 import com.earlybird.ticket.common.util.CommonUtil;
 import com.earlybird.ticket.payment.application.TemporaryStore;
+import com.earlybird.ticket.payment.application.event.dto.request.PaymentFailEvent;
 import com.earlybird.ticket.payment.application.event.dto.request.PaymentSuccessEvent;
 import com.earlybird.ticket.payment.application.service.dto.command.ConfirmPaymentCommand;
 import com.earlybird.ticket.payment.application.service.dto.command.CreatePaymentCommand;
+import com.earlybird.ticket.payment.application.service.dto.command.UpdatePaymentCommand;
 import com.earlybird.ticket.payment.application.service.dto.query.FindPaymentQuery;
 import com.earlybird.ticket.payment.application.service.exception.PaymentAmountDoesNotMatchException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentDuplicatedException;
@@ -19,6 +21,7 @@ import com.earlybird.ticket.payment.common.EventType;
 import com.earlybird.ticket.payment.domain.entity.Event;
 import com.earlybird.ticket.payment.domain.entity.Outbox;
 import com.earlybird.ticket.payment.domain.entity.Payment;
+import com.earlybird.ticket.payment.domain.entity.constant.PaymentStatus;
 import com.earlybird.ticket.payment.domain.repository.OutboxRepository;
 import com.earlybird.ticket.payment.domain.repository.PaymentRepository;
 import java.math.BigDecimal;
@@ -64,6 +67,17 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public void confirmPayment(ConfirmPaymentCommand confirmPaymentCommand) {
+        /*
+            TODO:
+                1. 결제 가능 시간 가져옴 ✅
+                2. 결제 진행 ✅
+                3. 결제 성공 시간 받아옴 ✅
+                4. 결제 제한 시간과 성공 시간 비교
+                4-1. 결제 제한 내에 성공 -> SUCCESS 이벤트 발행 ✅
+                4-2. 결제 제한 내 이후에 성공
+                    a. Reservation으로 FAIL 이벤트 발행 ✅
+                    b. Payment로 CANCEL 이벤트 발행 -> paymentCancel 실행
+         */
         validateReservationTimedOut(confirmPaymentCommand.reservationId());
         validateDuplicatePayment(confirmPaymentCommand.reservationId());
         Payment payment = paymentRepository.findByReservationId(
@@ -72,20 +86,47 @@ public class PaymentServiceImpl implements PaymentService {
 
         validatePaymentAmount(payment, confirmPaymentCommand.amount());
 
-        // 결제 내역 -> 업데이트용 엔티티 변경
-        Payment receipt = paymentClient.confirmPayment(
-            confirmPaymentCommand, payment.getId()
-        ).toPayment(payment.getUserId());
-        // 결제 방법, 상태 반영
-        payment.confirmPayment(receipt);
-
-        temporaryStore.cacheConfirmedPayment(payment.getReservationId());
-
         // 임시 passport 생성
         PassportDto passport = PassportDto.builder()
             .userId(payment.getUserId())
             .userRole(Role.USER.getValue())
             .build();
+
+        // 결제 시간 제한
+        LocalDateTime dueDate = temporaryStore.getExpireDate(payment.getReservationId());
+        log.info("결제 제한 시간 : {}", dueDate);
+
+        // 결제 내역 -> 업데이트용 엔티티 변경
+        UpdatePaymentCommand updatePaymentCommand = paymentClient.confirmPayment(
+            confirmPaymentCommand, payment.getId()
+        );
+        log.info("결과 -> {}", updatePaymentCommand);
+        Payment receipt = updatePaymentCommand.toPayment(payment.getUserId());
+
+        if (updatePaymentCommand.approvedAt().isAfter(dueDate)) {
+            // 결제 실패 이벤트 발행해야함.
+//            payment.expirePayment(receipt);
+            // Reservation으로 보낼 FAIL 이벤트
+            PaymentFailEvent fail = PaymentFailEvent.builder()
+                .reservationId(payment.getReservationId())
+                .passportDto(passport)
+                .paymentMethod(receipt.getMethod())
+                .paymentStatus(PaymentStatus.EXPIRED)
+                .paymentId(payment.getId())
+                .build();
+
+            // Payment로 보낼 CANCEL 이벤트
+            Outbox outbox = createOutbox(payment, EventType.PAYMENT_FAIL, fail);
+            // TODO : 결제 쪽으로 보낼 취소 이벤트도 추가
+            // TODO : 취소 성공 이후 EXPIRED로 바꾸기
+            outboxRepository.save(outbox);
+            return;
+        }
+
+        // 결제 방법, 상태 반영
+        payment.confirmPayment(receipt);
+
+        temporaryStore.cacheConfirmedPayment(payment.getReservationId());
 
         // 이벤트 생성
         PaymentSuccessEvent event = PaymentSuccessEvent.builder()

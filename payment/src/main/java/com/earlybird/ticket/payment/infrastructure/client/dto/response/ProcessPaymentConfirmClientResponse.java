@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.UUID;
 import lombok.Builder;
 
 @Builder
@@ -15,7 +16,7 @@ public record ProcessPaymentConfirmClientResponse(
     String method,
     String status,
     String paymentKey,
-
+    @JsonProperty("orderId") UUID reservationId,
     @JsonProperty("approvedAt")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     OffsetDateTime approvedAt,
@@ -32,6 +33,7 @@ public record ProcessPaymentConfirmClientResponse(
             .paymentMethod(PaymentMethod.from(method))
             .status(PaymentStatus.from(status))
             .paymentKey(paymentKey)
+            .reservationId(reservationId)
             .approvedAt(transformDate())
             .build();
     }
