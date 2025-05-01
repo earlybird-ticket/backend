@@ -105,17 +105,17 @@ eureka:
 server:
   port: ${GATEWAY_SERVER_PORT}
   netty:
-    connection-timeout: 5s
+    connection-timeout: 30s
   jetty:
-    max-connections: 500
+    max-connections: 5000
   tomcat:
-    threads:
-      max: 500
-      min-spare: 500
-    max-connections: 1000
-    accept-count: 500
     mbeanregistry:
       enabled: true
+    threads:
+      min-spare: 100
+      max: 5000
+    connection-timeout: 60s
+    max-connections: 5000
 
 jwt:
   secret: ${AUTH_JWT_SECRET}
