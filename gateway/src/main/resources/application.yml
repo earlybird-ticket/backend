@@ -10,11 +10,11 @@ spring:
   cloud:
     gateway:
       httpclient:
-        connect-timeout: 5000
-        response-timeout: 60s
+        connect-timeout: 10000
+        response-timeout: 120s
         pool:
-          max-connections: 5000
-          acquire-timeout: 6000
+          max-connections: 10000
+          acquire-timeout: 15000
       discovery:
         locator:
           enabled: true
@@ -102,7 +102,7 @@ eureka:
 server:
   port: ${GATEWAY_SERVER_PORT}
   netty:
-    connection-timeout: 5s
+    connection-timeout: 30s
   jetty:
     max-connections: 500
   tomcat:
