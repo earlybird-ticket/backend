@@ -31,6 +31,9 @@ spring:
 
 server:
   port: 18088
+  tomcat:
+    mbeanregistry:
+      enabled: true
 
 
 management:

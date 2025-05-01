@@ -24,8 +24,8 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        format_sql: true
-        show_sql: true
+        #        format_sql: true
+        #        show_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   kafka:
@@ -41,6 +41,9 @@ eureka:
 
 server:
   port: ${PAYMENT_SERVER_PORT:18089}
+  tomcat:
+    mbeanregistry:
+      enabled: true
 
 toss:
   client-key: ${TOSS_CLIENT_KEY}
