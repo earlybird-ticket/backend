@@ -18,7 +18,12 @@ spring:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PAYMENT_PORT:5432}/${POSTGRES_DB:postgres}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
-
+    hikari:
+      maximum-pool-size: 3000
+      minimum-idle: 10
+      idle-timeout: 30000
+      connection-timeout: 300000
+  
   jpa:
     hibernate:
       ddl-auto: update
@@ -48,6 +53,11 @@ server:
   tomcat:
     mbeanregistry:
       enabled: true
+    threads:
+      min-spare: 100
+      max: 5000
+    connection-timeout: 60s
+    max-connections: 5000
 
 toss:
   client-key: ${TOSS_CLIENT_KEY}

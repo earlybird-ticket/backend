@@ -18,22 +18,21 @@ public class PaymentKafkaEventListener {
 
     private final EventDispatcher eventDispatcher;
 
-    @KafkaListener(
-        topics = {
-            Topic.RESERVATION_TO_PAYMENT_TOPIC,
-//            Topic.PAYMENT_TO_PAYMENT_TOPIC
-        },
-        containerFactory = "kafkaListenerContainerFactory"
-    )
-    public void listen(@Payload String message, Acknowledgment ack) {
+    @KafkaListener(topics = {Topic.RESERVATION_TO_PAYMENT_TOPIC,
+            //            Topic.PAYMENT_TO_PAYMENT_TOPIC
+    }, containerFactory = "kafkaListenerContainerFactory", concurrency = "50")
+    public void listen(@Payload String message,
+                       Acknowledgment ack) {
         try {
-            log.info("message = {}", message);
+            log.info("message = {}",
+                     message);
             // TODO : EventDispatcher 구현
             eventDispatcher.handle(Event.fromJson(message));
             ack.acknowledge();
 
         } catch (Exception e) {
-            log.error("메시지 처리 실패: {}", e.getMessage());
+            log.error("메시지 처리 실패: {}",
+                      e.getMessage());
             throw new PaymentNonRecoverableException();
         }
     }

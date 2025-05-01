@@ -12,70 +12,70 @@ public class KafkaConfig {
     @Bean
     public NewTopic reservationToSeatForPreemption() {
         return new NewTopic("ReservationToSeatForPreemption",
-                            3,
+                            50,
                             (short) 3);
     }
 
     @Bean
     public NewTopic reservationToSeat() {
         return new NewTopic("ReservationToSeat",
-                            3,
+                            10,
                             (short) 3);
     }
 
     @Bean
     public NewTopic paymentToReservation() {
         return new NewTopic("PaymentToReservation",
-                            1,
+                            10,
                             (short) 3);
     }
 
     @Bean
     public NewTopic reservationToPayment() {
         return new NewTopic("ReservationToPayment",
-                            1,
+                            10,
                             (short) 3);
     }
 
     @Bean
     public NewTopic reservationToCoupon() {
         return new NewTopic("ReservationToCoupon",
-                            1,
+                            10,
                             (short) 3);
     }
 
     @Bean
     public NewTopic seatToReservationForPreemptionDlt() {
         return new NewTopic("SeatToReservationForPreemption.DLT",
-                            1,
+                            3,
                             (short) 3);
     }
 
     @Bean
     public NewTopic reservationToCouponDlt() {
         return new NewTopic("ReservationToCoupon.DLT",
-                            1,
+                            3,
                             (short) 3);
     }
 
     @Bean
     public NewTopic paymentToReservationDlt() {
         return new NewTopic("PaymentToReservation.DLT",
-                            1,
+                            3,
                             (short) 3);
     }
 
     @Bean
     public NewTopic createReservationDlt() {
         return new NewTopic("CreateReservation.DLT",
-                            1,
+                            3,
                             (short) 3);
     }
 
     @Bean
     public NewTopic seatToReservation() {
         return new NewTopic("SeatToReservation",
-                            3,
+                            10,
                             (short) 3);
     }
 

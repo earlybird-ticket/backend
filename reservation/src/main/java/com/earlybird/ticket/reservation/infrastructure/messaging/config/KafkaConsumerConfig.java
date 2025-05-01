@@ -53,15 +53,15 @@ public class KafkaConsumerConfig {
 
         // 한 번의 poll() 요청에서 가져올 최대 레코드 수 (성능 조절, 테스트하면서 수를 건드려야 할듯)
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,
-                  20);
+                  50);
 
         // Poll 간격 최대 시간 (이 시간을 초과하면 Consumer 그룹에서 제거됨)
         props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG,
-                  15000);
+                  60000);
 
         // Heartbeat 주기 (Consumer가 정상적으로 살아있음을 브로커에 알림)
         props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG,
-                  1000);
+                  6000);
 
         // Consumer가 장애로 인해 응답하지 않을 경우 제거되는 시간 (세션 타임아웃)
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG,
