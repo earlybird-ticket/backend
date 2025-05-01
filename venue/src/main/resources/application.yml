@@ -68,12 +68,19 @@ management:
     distribution:
       percentiles-histogram:
         all: true
+    enable:
+      jvm: true
   zipkin:
     tracing:
-      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:19411}/api/v2/spans"
+      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
   tracing:
     sampling:
       probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
 
 api:
   connection-timeout: 3000
