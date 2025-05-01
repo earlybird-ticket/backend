@@ -1,8 +1,8 @@
 package com.earlybird.ticket.venue.infrastructure.kafka.messaging;
 
 import com.earlybird.ticket.common.entity.EventPayload;
-import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.common.event.EventType;
+import com.earlybird.ticket.venue.domain.entity.Event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -16,17 +16,17 @@ import org.springframework.stereotype.Component;
 public class VenueKafkaEventListener {
     private final EventDispatcher eventDispatcher;
 
-    @KafkaListener(topics = {
-            EventType.Topic.ADMIN_TO_VENUE_TOPIC
-    }, containerFactory = "kafkaListenerContainerFactory", groupId = "test-group-id")
-    public void listenAdminToVenueTopic(@Payload String message, Acknowledgment ack) {
-        try{
+    @KafkaListener(topics = {EventType.Topic.ADMIN_TO_VENUE_TOPIC}, containerFactory = "kafkaListenerContainerFactory", groupId = "test-group-id", concurrency = "50")
+    public void listenAdminToVenueTopic(@Payload String message,
+                                        Acknowledgment ack) {
+        try {
             Event<? extends EventPayload> event = Event.fromJson(message);
             eventDispatcher.handle(event);
             ack.acknowledge();
 
         } catch (Exception e) {
-            log.error("메시지 처리 실패: {}", e.getMessage());
+            log.error("메시지 처리 실패: {}",
+                      e.getMessage());
             throw e;
         }
     }
