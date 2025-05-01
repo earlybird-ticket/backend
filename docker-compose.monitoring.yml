@@ -1,4 +1,5 @@
-# docker-compose -f docker-compose.monitoring.yml up -d
+version: '3.8'
+
 services:
   earlybird-prometheus:
     image: prom/prometheus
@@ -9,6 +10,7 @@ services:
       - "${PROMETHEUS_PORT}:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
     restart: always
 
   earlybird-grafana:
@@ -19,7 +21,9 @@ services:
     ports:
       - "${GRAFANA_PORT}:3000"
     depends_on:
-      - prometheus
+      - earlybird-prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana
     restart: always
 
   earlybird-zipkin:
@@ -29,10 +33,165 @@ services:
       - earlybird_network
     ports:
       - "${ZIPKIN_PORT}:9411"
-    restart: always  # 선택사항: 실패 시 자동 재시작
+    restart: always
+
+  earlybird-loki:
+    image: grafana/loki:latest
+    container_name: earlybird-loki
+    networks:
+      - earlybird_network
+    ports:
+      - "${LOKI_PORT}:3100"
+    command: -config.file=/etc/loki/loki-local-config.yaml
+    volumes:
+      - ./loki-local-config.yaml:/etc/loki/loki-local-config.yaml
+    restart: always
+
+  earlybird-promtail:
+    image: grafana/promtail:latest
+    container_name: earlybird-promtail
+    networks:
+      - earlybird_network
+    volumes:
+      - ./log:/mnt/logs
+      - ./promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    restart: always
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.55.0
+    container_name: redis-exporter
+    networks:
+      - earlybird_network
+    ports:
+      - "${REDIS_EXPORTER_PORT}:9121"
+    environment:
+      - REDIS_ADDR=${REDIS_ADDR}
+    restart: always
+
+  earlybird-node-exporter:
+    image: prom/node-exporter
+    container_name: earlybird-node-exporter
+    networks:
+      - earlybird_network
+    ports:
+      - "${NODE_EXPORTER_PORT}:9100"
+    restart: always
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter
+    container_name: kafka-exporter
+    networks:
+      - earlybird_network
+    ports:
+      - "${KAFKA_EXPORTER_PORT}:9308"
+    command:
+      - "--kafka.server=${KAFKA_ADDR}"
+    restart: always
+
+  earlybird-postgres-exporter-user:
+    image: prometheuscommunity/postgres-exporter
+    container_name: earlybird-postgres-exporter-user
+    networks:
+      - earlybird_network
+    ports:
+      - "19187:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_EXPORTER_HOST}:${POSTGRES_USER_PORT}/${POSTGRES_DB}?sslmode=disable
+    restart: always
+
+  earlybird-postgres-exporter-concert:
+    image: prometheuscommunity/postgres-exporter
+    container_name: earlybird-postgres-exporter-concert
+    networks:
+      - earlybird_network
+    ports:
+      - "19188:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_EXPORTER_HOST}:${POSTGRES_CONCERT_PORT}/${POSTGRES_DB}?sslmode=disable
+    restart: always
+
+  earlybird-postgres-exporter-admin:
+    image: prometheuscommunity/postgres-exporter
+    container_name: earlybird-postgres-exporter-admin
+    networks:
+      - earlybird_network
+    ports:
+      - "19189:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_EXPORTER_HOST}:${POSTGRES_ADMIN_PORT}/${POSTGRES_DB}?sslmode=disable
+    restart: always
+
+  earlybird-postgres-exporter-coupon:
+    image: prometheuscommunity/postgres-exporter
+    container_name: earlybird-postgres-exporter-coupon
+    networks:
+      - earlybird_network
+    ports:
+      - "19190:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_EXPORTER_HOST}:${POSTGRES_COUPON_PORT}/${POSTGRES_DB}?sslmode=disable
+    restart: always
+
+  earlybird-postgres-exporter-reservation:
+    image: prometheuscommunity/postgres-exporter
+    container_name: earlybird-postgres-exporter-reservation
+    networks:
+      - earlybird_network
+    ports:
+      - "19191:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_EXPORTER_HOST}:${POSTGRES_RESERVATION_PORT}/${POSTGRES_DB}?sslmode=disable
+    restart: always
+
+  earlybird-postgres-exporter-payment:
+    image: prometheuscommunity/postgres-exporter
+    container_name: earlybird-postgres-exporter-payment
+    networks:
+      - earlybird_network
+    ports:
+      - "19192:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_EXPORTER_HOST}:${POSTGRES_PAYMENT_PORT}/${POSTGRES_DB}?sslmode=disable
+    restart: always
+
+  earlybird-postgres-exporter-venue:
+    image: prometheuscommunity/postgres-exporter
+    container_name: earlybird-postgres-exporter-venue
+    networks:
+      - earlybird_network
+    ports:
+      - "19193:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_EXPORTER_HOST}:${POSTGRES_VENUE_PORT}/${POSTGRES_DB}?sslmode=disable
+    restart: always
+
+  earlybird-postgres-exporter-alarm:
+    image: prometheuscommunity/postgres-exporter
+    container_name: earlybird-postgres-exporter-alarm
+    networks:
+      - earlybird_network
+    ports:
+      - "19194:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_EXPORTER_HOST}:${POSTGRES_ALARM_PORT}/${POSTGRES_DB}?sslmode=disable
+    restart: always
+
+  earlybird-postgres-exporter-batch:
+    image: prometheuscommunity/postgres-exporter
+    container_name: earlybird-postgres-exporter-batch
+    networks:
+      - earlybird_network
+    ports:
+      - "19195:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_EXPORTER_HOST}:${POSTGRES_BATCH_PORT}/${POSTGRES_DB}?sslmode=disable
+    restart: always
 
 volumes:
   prometheus_data:
+  grafana_data:
+
 networks:
   earlybird_network:
     driver: bridge

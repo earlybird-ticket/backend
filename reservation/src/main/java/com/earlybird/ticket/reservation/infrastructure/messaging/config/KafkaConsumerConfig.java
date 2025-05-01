@@ -53,7 +53,7 @@ public class KafkaConsumerConfig {
 
         // 한 번의 poll() 요청에서 가져올 최대 레코드 수 (성능 조절, 테스트하면서 수를 건드려야 할듯)
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,
-                  20);
+                  50);
 
         // Poll 간격 최대 시간 (이 시간을 초과하면 Consumer 그룹에서 제거됨)
         props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG,

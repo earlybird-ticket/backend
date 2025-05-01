@@ -2,9 +2,10 @@ package com.earlybird.ticket.payment.infrastructure.repository;
 
 import com.earlybird.ticket.payment.domain.entity.Outbox;
 import com.earlybird.ticket.payment.domain.repository.OutboxRepository;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor

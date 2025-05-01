@@ -19,11 +19,11 @@ public class PaymentKafkaOutboxProducer {
     private final OutboxRepository outboxRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 500)
     @Transactional
     public void publishOutbox() {
+        long startTime = System.currentTimeMillis();
         List<Outbox> outboxes = outboxRepository.findTop100UnmarkedOutboxOrderByCreatedAt();
-
         for (Outbox outbox : outboxes) {
             try {
                 log.info("Publishing event, id={}",
@@ -52,6 +52,9 @@ public class PaymentKafkaOutboxProducer {
                 }
             }
         }
+        log.info("durationTime = {} ",
+                 System.currentTimeMillis() - startTime);
+
     }
 }
 

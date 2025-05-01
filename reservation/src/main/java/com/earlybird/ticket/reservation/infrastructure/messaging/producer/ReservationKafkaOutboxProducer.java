@@ -21,9 +21,10 @@ public class ReservationKafkaOutboxProducer {
     private final OutboxRepository outboxRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    @Scheduled(fixedDelay = 7000)
+    @Scheduled(fixedDelay = 500)
     @Transactional
     public void publishPendingOutboxMessages() {
+        long startTime = System.currentTimeMillis();
         List<Outbox> outboxes = outboxRepository.findTOP100ByOrderByCreatedAtAsc();
 
         for (Outbox outbox : outboxes) {
@@ -54,5 +55,7 @@ public class ReservationKafkaOutboxProducer {
                 }
             }
         }
+        log.info("durationTime = {} ",
+                 System.currentTimeMillis() - startTime);
     }
 }

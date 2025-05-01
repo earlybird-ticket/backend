@@ -131,6 +131,8 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
     @Override
     @Transactional
     public void preemptSeat(SeatPreemptPayload seatPreemptPayload) {
+        log.info("request Start Time = {} ",
+                 LocalDateTime.now());
         List<UUID> seatInstanceIdList = seatPreemptPayload.seatInstanceIdList();
 
         try {
@@ -152,6 +154,13 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
 
             //4. 저장
             //5. 아웃 박스 저장
+            bucket.setIfAbsent(timeCachePrefix + seatPreemptPayload.reservationId(),
+                               Duration.ofMinutes(10));
+            log.info("cache Store time = {} ",
+                     LocalDateTime.now());
+            log.info("reservationId = {} ",
+                     seatPreemptPayload.reservationId());
+
             saveOutbox(seatInstanceIdList,
                        SeatPreemptSuccessEvent.builder()
                                               .passportDto(seatPreemptPayload.passportDto())
@@ -159,8 +168,6 @@ public class SeatHandlerServiceImpl implements SeatHandlerService {
                                               .build(),
                        EventType.SEAT_PREEMPT_SUCCESS);
 
-            bucket.setIfAbsent(timeCachePrefix + seatPreemptPayload.reservationId(),
-                               Duration.ofMinutes(10));
 
         } catch (Exception e) {
             log.error("메시지 처리 실패: {}",
