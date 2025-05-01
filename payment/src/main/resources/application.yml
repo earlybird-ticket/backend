@@ -12,8 +12,12 @@ spring:
 
   jackson:
     property-naming-strategy: SNAKE_CASE
-
   datasource:
+    hikari:
+      maximum-pool-size: 1000  # 기본은 10이라 너무 작음
+      minimum-idle: 10
+      idle-timeout: 30000
+      connection-timeout: 30000
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PAYMENT_PORT:5432}/${POSTGRES_DB:postgres}
     username: ${POSTGRES_USER:postgres}
@@ -44,7 +48,7 @@ server:
   tomcat:
     threads:
       min-spare: 100
-      max: 600
+      max: 3500
     max-connections: 1000
     accept-count: 200    #200개까지 백로그 수용 (300스레드 + 200대기)
     connection-timeout: 20000 #20초

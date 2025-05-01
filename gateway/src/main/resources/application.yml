@@ -107,11 +107,13 @@ server:
     max-connections: 500
   tomcat:
     threads:
-      max: 500
+      max: 3500
       min-spare: 500
-    max-connections: 1000
-    accept-count: 500
-
+    max-connections: 10000
+    accept-count: 1000
+    mbeanregistry:
+      enabled: true
+    connection-timeout: 5s
 jwt:
   secret: ${AUTH_JWT_SECRET}
 
