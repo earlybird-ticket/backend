@@ -1,8 +1,8 @@
-![image](https://github.com/user-attachments/assets/f8a62c93-a9f9-4f13-949d-b7ee765ed430)![image](https://github.com/user-attachments/assets/e7a36ad2-1f66-450c-a451-bd7119473faf)![image](https://github.com/user-attachments/assets/d283b7fb-4f0a-42c0-bbe4-d78ef1bd10ff)<div align="center">
+<div align="center">
   <h1>Earlybird-Ticket</h1>
 </div>
 
-![ServiceMainImage](https://github.com/user-attachments/assets/07e91e0a-02c2-457c-8290-3b5335fcf0a3)
+![ServiceMainImage](https://github.com/earlybird-ticket/backend/blob/dev/docs/main%20image.png)
 
 # 📝 프로젝트 소개
 
@@ -28,7 +28,7 @@
 
 - 티켓 예매 Sequence Flow
 
-  ![SequenceDiagram](https://github.com/user-attachments/assets/7db55b00-d0ba-4b20-9912-f0323d7f3e73)
+  ![SequenceDiagram](https://github.com/earlybird-ticket/backend/blob/dev/docs/flow%20chart.png)
 
 # 📌 주요기능
 
@@ -103,11 +103,11 @@
 
 # ⚙️ 프로젝트 아키텍처
 
-<img src="https://private-user-images.githubusercontent.com/132982907/444393631-e8b9152c-df28-4f62-9d4f-892fa37408f1.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDc4MDQ1MzMsIm5iZiI6MTc0NzgwNDIzMywicGF0aCI6Ii8xMzI5ODI5MDcvNDQ0MzkzNjMxLWU4YjkxNTJjLWRmMjgtNGY2Mi05ZDRmLTg5MmZhMzc0MDhmMS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNTIxJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDUyMVQwNTEwMzNaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0yMTA5YmY3NWJkZTA1MGVlNTIxOGFiMWYwNDNhY2I2ZjQ3ZGU4MGUzZWZkMWMwYTIwMjRhNmMyMDgwNTA3NjE4JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.Vt9egLkQyri65Z7-STEr--Sgpf9a6mOc-fkkTXPoWvU" />
+<img src="https://github.com/earlybird-ticket/backend/blob/dev/docs/architecture.png" />
 
 # 📄 MSA 통신 아키텍처
 
-<img width="517" alt="스크린샷 2025-05-16 오후 2 53 52" src="https://github.com/user-attachments/assets/416c1c28-6a60-48d4-8f40-83be23da474a" />
+<img width="517" alt="스크린샷 2025-05-16 오후 2 53 52" src="https://github.com/earlybird-ticket/backend/blob/dev/docs/message%20flow%20chart.png" />
 
 # 💻 기술 스택
 
@@ -144,10 +144,10 @@
   <tbody>
     <tr>
       <td align="center">
-      <img width=250px height="200" src="" alt=""/><br />
+      <img width=250px height="200" src="https://github.com/earlybird-ticket/backend/blob/dev/docs/kafka%20lag%20left.png" alt=""/><br />
       <sub><b>단일 파티션, 단일 컨슈머 -> 500명 결과</b></sub><br /></td>
       <td align="center">
-      <img width=250px height="200" src="https://private-user-images.githubusercontent.com/132982907/444406697-8fecc5c6-621a-4335-baa5-d9aaad9f9c2b.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDc4MDQ3MjIsIm5iZiI6MTc0NzgwNDQyMiwicGF0aCI6Ii8xMzI5ODI5MDcvNDQ0NDA2Njk3LThmZWNjNWM2LTYyMWEtNDMzNS1iYWE1LWQ5YWFhZDlmOWMyYi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNTIxJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDUyMVQwNTEzNDJaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1iNmU2YTlmYThmYjg2OTBjYmE0OTZlZjhiNmQ4MDgwZDAzZTU2YTNjNDdiOWJjZTg2NDdjMDhmMWU0ODk4MGY4JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.QTOWeJpi0pWpxSwnqkuffFge7okiFU-qQembiGTX3GY" alt=""/><br />
+      <img width=250px height="200" src="https://github.com/earlybird-ticket/backend/blob/dev/docs/kafka%20lag%20right.png" alt=""/><br />
       <sub><b>50 파티션, 50 컨슈머 -> 6500명 결과</b></sub><br /></td>
     </tr>
   </tbody>
@@ -161,13 +161,13 @@
   <tbody>
     <tr>
       <td align="center">
-      <img width=250px height="200" src="https://private-user-images.githubusercontent.com/96401835/445921227-d46d2d5f-c182-499e-9316-220fe3c86015.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDc4MjA2MzAsIm5iZiI6MTc0NzgyMDMzMCwicGF0aCI6Ii85NjQwMTgzNS80NDU5MjEyMjctZDQ2ZDJkNWYtYzE4Mi00OTllLTkzMTYtMjIwZmUzYzg2MDE1LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTIxVDA5Mzg1MFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTdlMGU2NjljNTUxYjQyZjBhZGE0ODlhODgwYTFlNWRjNzljY2Q3N2ViZWRkYzIxY2RhOTUxYmEwZjVmYWJiZDAmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.RsUXMn81J04HimMsj9yk8reoLJRrLiSwxEOJNrjbIXY" alt=""/><br />
+      <img width=250px height="200" src="https://github.com/earlybird-ticket/backend/blob/dev/docs/redis%201000.png" alt=""/><br />
       <sub><b>1000명</b></sub><br /></td>
       <td align="center">
-      <img width=250px height="200" src="https://private-user-images.githubusercontent.com/96401835/445921275-fd7e4d43-4d69-462c-b29c-e4af64978d41.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDc4MjA2MzAsIm5iZiI6MTc0NzgyMDMzMCwicGF0aCI6Ii85NjQwMTgzNS80NDU5MjEyNzUtZmQ3ZTRkNDMtNGQ2OS00NjJjLWIyOWMtZTRhZjY0OTc4ZDQxLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTIxVDA5Mzg1MFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTMxNDdhN2U2ZWI0ZGE0ZjM5Y2Y5ZjJkYmQ5MWM1M2U4MDc3NDRjOWY5NTEzYmEwMGI0MzMzOGRkYTdmZTE1MzAmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.kv7izb0JTczdx1PYCPvRuhDWSP7L1boUOL_vpQMVzAg" alt=""/><br />
+      <img width=250px height="200" src="https://github.com/earlybird-ticket/backend/blob/dev/docs/redis%203000.png" alt=""/><br />
       <sub><b>3000명</b></sub><br /></td>
       <td align="center">
-      <img width=250px height="200" src="https://private-user-images.githubusercontent.com/96401835/445921275-fd7e4d43-4d69-462c-b29c-e4af64978d41.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDc4MjA2MzAsIm5iZiI6MTc0NzgyMDMzMCwicGF0aCI6Ii85NjQwMTgzNS80NDU5MjEyNzUtZmQ3ZTRkNDMtNGQ2OS00NjJjLWIyOWMtZTRhZjY0OTc4ZDQxLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTIxVDA5Mzg1MFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTMxNDdhN2U2ZWI0ZGE0ZjM5Y2Y5ZjJkYmQ5MWM1M2U4MDc3NDRjOWY5NTEzYmEwMGI0MzMzOGRkYTdmZTE1MzAmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.kv7izb0JTczdx1PYCPvRuhDWSP7L1boUOL_vpQMVzAg" alt=""/><br />
+      <img width=250px height="200" src="https://github.com/earlybird-ticket/backend/blob/dev/docs/redis%206500.png" alt=""/><br />
       <sub><b>6500명</b></sub><br /></td>
     </tr>
   </tbody>
@@ -179,13 +179,13 @@
   <tbody>
     <tr>
       <td align="center">
-      <img width=250px height="200" src="https://private-user-images.githubusercontent.com/132982907/445925470-7e1105fe-d090-4f70-89bf-31898aa216b4.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDc4MjA2MzAsIm5iZiI6MTc0NzgyMDMzMCwicGF0aCI6Ii8xMzI5ODI5MDcvNDQ1OTI1NDcwLTdlMTEwNWZlLWQwOTAtNGY3MC04OWJmLTMxODk4YWEyMTZiNC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNTIxJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDUyMVQwOTM4NTBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0zY2ZmZjMzYmFjNzgwOTM5MzVmMjA2MjZjOTA0YmQ0NDFmYzAwMzMwOTZiYWNhNzg5ZGI0YjdmZTNjYTk0MmU0JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.wbEGFpi3m69DEI3da4FDkx9vemIkJazgUkBWMf_6sGU" alt=""/><br />
+      <img width=250px height="200" src="https://github.com/earlybird-ticket/backend/blob/dev/docs/lua%201000.png" alt=""/><br />
       <sub><b>1000명</b></sub><br /></td>
       <td align="center">
-      <img width=250px height="200" src="https://private-user-images.githubusercontent.com/96401835/445921338-51d27da8-1e0f-48bd-a84c-6d5ef4edac9f.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDc4MjA2MzAsIm5iZiI6MTc0NzgyMDMzMCwicGF0aCI6Ii85NjQwMTgzNS80NDU5MjEzMzgtNTFkMjdkYTgtMWUwZi00OGJkLWE4NGMtNmQ1ZWY0ZWRhYzlmLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTIxVDA5Mzg1MFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTJlODAyZjlkY2EzMzY3MWQ3MjcxMGNjMzU5YzY3NWMzNjQ1NDY0ZDQyNjU5MDU1NDJlN2JmN2E4YTIzZjEwMGEmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.P4FBe9wOtXtAc3hg7DzisqMW_D7DgbUPZp4Yj5-M2u4" alt=""/><br />
+      <img width=250px height="200" src="https://github.com/earlybird-ticket/backend/blob/dev/docs/lua%203000.png" alt=""/><br />
       <sub><b>3000명</b></sub><br /></td>
       <td align="center">
-      <img width=250px height="200" src="https://private-user-images.githubusercontent.com/96401835/445921366-f24ad034-292b-4c95-a393-5ce3f64b4861.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDc4MjA2MzAsIm5iZiI6MTc0NzgyMDMzMCwicGF0aCI6Ii85NjQwMTgzNS80NDU5MjEzNjYtZjI0YWQwMzQtMjkyYi00Yzk1LWEzOTMtNWNlM2Y2NGI0ODYxLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTIxVDA5Mzg1MFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTVkZjViYWM4ODVhMWQ1YTgxOGNmMzg0NzM1MTdiYjQwODc4OTBiM2FmNDI2N2E2MTVmNGY0NTkwNDNlMjdjMjAmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.eQk9kEMxZiQWK4NYPlGZu77X2ZrstjJ2AdNAXg7Rsfk" alt=""/><br />
+      <img width=250px height="200" src="https://github.com/earlybird-ticket/backend/blob/dev/docs/lua%206500.png" alt=""/><br />
       <sub><b>6500명</b></sub><br /></td>
     </tr>
   </tbody>
