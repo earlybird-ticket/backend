@@ -192,8 +192,7 @@
 </table>
 
 # 💣 트러블 슈팅
-
-- [Lua Script를 사용하여 좌석 예매 원자성 보장 및 동시성 제어](https://github.com/earlybird-ticket/backend/wiki/%5B-%ED%8A%B8%EB%9F%AC%EB%B8%94-%EC%8A%88%ED%8C%85-%5D-%5DLua-Script%EB%A5%BC-%EC%82%AC%EC%9A%A9%ED%95%98%EC%97%AC-%EC%A2%8C%EC%84%9D-%EC%98%88%EB%A7%A4-%EC%9B%90%EC%9E%90%EC%84%B1-%EB%B3%B4%EC%9E%A5-%EB%B0%8F-%EB%8F%99%EC%8B%9C%EC%84%B1-%EC%A0%9C%EC%96%B4)
+- [Lua Script를 사용하여 좌석 예매 원자성 보장 및 동시성 제어](https://github.com/earlybird-ticket/backend/wiki/%5B-%ED%8A%B8%EB%9F%AC%EB%B8%94-%EC%8A%88%ED%8C%85-%5D-Lua-Script%EB%A5%BC-%EC%82%AC%EC%9A%A9%ED%95%98%EC%97%AC-%EC%A2%8C%EC%84%9D-%EC%98%88%EB%A7%A4-%EC%9B%90%EC%9E%90%EC%84%B1-%EB%B3%B4%EC%9E%A5-%EB%B0%8F-%EB%8F%99%EC%8B%9C%EC%84%B1-%EC%A0%9C%EC%96%B4)
 - [Kafka & Outbox를 이용한 원자성 확보 트랜잭션 처리](https://github.com/earlybird-ticket/backend/wiki/%5B-%ED%8A%B8%EB%9F%AC%EB%B8%94-%EC%8A%88%ED%8C%85-%5D-Kafka-&-Outbox%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%9C-%EC%9B%90%EC%9E%90%EC%84%B1-%ED%99%95%EB%B3%B4-%ED%8A%B8%EB%9E%9C%EC%9E%AD%EC%85%98-%EC%B2%98%EB%A6%AC)
 - [Producer & Consumer 간의 타입 일치 및 직렬화 역직렬화 문제 해결](https://github.com/earlybird-ticket/backend/wiki/%5B-%ED%8A%B8%EB%9F%AC%EB%B8%94-%EC%8A%88%ED%8C%85-%5D-Producer-&-Consumer-%EA%B0%84%EC%9D%98-%ED%83%80%EC%9E%85-%EC%9D%BC%EC%B9%98-%EB%B0%8F-%EC%A7%81%EB%A0%AC%ED%99%94-%EC%97%AD%EC%A7%81%EB%A0%AC%ED%99%94-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0)
 - [Redis Sentinel 기반 고가용성 및 데이터 유실 방지 설계](https://github.com/earlybird-ticket/backend/wiki/%5B-%ED%8A%B8%EB%9F%AC%EB%B8%94-%EC%8A%88%ED%8C%85-%5D-Redis-Sentinel-%EA%B8%B0%EB%B0%98-%EA%B3%A0%EA%B0%80%EC%9A%A9%EC%84%B1-%EB%B0%8F-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%9C%A0%EC%8B%A4-%EB%B0%A9%EC%A7%80-%EC%84%A4%EA%B3%84)
