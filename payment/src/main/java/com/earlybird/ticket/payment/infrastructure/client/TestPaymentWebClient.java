@@ -9,6 +9,7 @@ import com.earlybird.ticket.payment.application.service.exception.PaymentAbortEx
 import com.earlybird.ticket.payment.application.service.exception.PaymentCancelClientFailedException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentCancelException;
 import com.earlybird.ticket.payment.application.service.exception.PaymentCancelServerFailedException;
+import com.earlybird.ticket.payment.infrastructure.MockTossPayServer;
 import com.earlybird.ticket.payment.infrastructure.client.dto.response.ProcessPaymentCancelClientResponse;
 import com.earlybird.ticket.payment.infrastructure.client.dto.response.ProcessPaymentConfirmClientResponse;
 import java.nio.charset.StandardCharsets;
@@ -18,8 +19,8 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -30,24 +31,29 @@ import reactor.util.retry.Retry;
 
 @Slf4j
 @Component
-@Primary
-@Profile("!test")
-public class PaymentWebClient implements PaymentClient {
+@Profile("test")
+@Qualifier("paymentWebClient")
+public class TestPaymentWebClient implements PaymentClient {
 
     private static final String IDEMPOTENCY_KEY = "Idempotency-key";
 
-    private static final String TOSS_PAYMENT_URI_PREFIX = "https://api.tosspayments.com/v1/payments";
+    private final String TOSS_PAYMENT_URI_PREFIX;
 
     private final String tossClientSecret;
 
     private final WebClient webClient;
 
-    public PaymentWebClient(
+    private final MockTossPayServer mockTossPayServer;
+
+    public TestPaymentWebClient(
         @Value("${toss.secret-key}") String tossClientSecret,
-        WebClient webClient
+        WebClient webClient,
+        MockTossPayServer mockTossPayServer
     ) {
         this.tossClientSecret = tossClientSecret;
         this.webClient = webClient;
+        this.mockTossPayServer = mockTossPayServer;
+        this.TOSS_PAYMENT_URI_PREFIX = mockTossPayServer.getUrl();
     }
 
     @Override
