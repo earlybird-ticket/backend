@@ -38,8 +38,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
-@Primary
-@Profile("!test")
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
 
