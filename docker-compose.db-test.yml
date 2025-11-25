@@ -1,0 +1,151 @@
+# docker-compose -f docker-compose.db.yml up -d
+services:
+  earlybird-prometheus:
+    image: prom/prometheus
+    container_name: earlybird-prometheus
+    networks:
+      - earlybird_network
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    environment:
+      - PROMETHEUS_HOST=${PROMETHEUS_HOST}
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus-test.yml
+      - prometheus_data:/prometheus
+    restart: always
+
+  earlybird-redis:
+    image: redis:latest
+    container_name: earlybird-redis
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - earlybird-redis_data:/data
+    networks:
+      - earlybird_network
+    restart: always
+    platform: linux/amd64
+
+  earlybird-user-postgres:
+    image: postgis/postgis:latest
+    container_name: earlybird-user-postgres
+    restart: always
+    platform: linux/amd64
+    ports:
+      - "${POSTGRES_USER_PORT}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - earlybird_user_postgres_data:/var/lib/postgresql/data
+    networks:
+      - earlybird_network
+
+  earlybird-concert-postgres:
+    image: postgis/postgis:latest
+    container_name: earlybird-concert-postgres
+    restart: always
+    platform: linux/amd64
+    ports:
+      - "${POSTGRES_CONCERT_PORT}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - earlybird_concert_postgres_data:/var/lib/postgresql/data
+    networks:
+      - earlybird_network
+
+  earlybird-reservation-postgres:
+    image: postgis/postgis:latest
+    container_name: earlybird-reservation-postgres
+    restart: always
+    platform: linux/amd64
+    ports:
+      - "${POSTGRES_RESERVATION_PORT}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - earlybird_reservation_postgres_data:/var/lib/postgresql/data
+    networks:
+      - earlybird_network
+
+  earlybird-payment-postgres:
+    image: postgis/postgis:latest
+    container_name: earlybird-payment-postgres
+    restart: always
+    platform: linux/amd64
+    ports:
+      - "${POSTGRES_PAYMENT_PORT}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - earlybird_payment_postgres_data:/var/lib/postgresql/data
+    networks:
+      - earlybird_network
+
+  earlybird-venue-postgres:
+    image: postgis/postgis:latest
+    container_name: earlybird-venue-postgres
+    restart: always
+    platform: linux/amd64
+    ports:
+      - "${POSTGRES_VENUE_PORT}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - earlybird_venue_postgres_data:/var/lib/postgresql/data
+    networks:
+      - earlybird_network
+
+  #  redis-exporter:
+  #    image: oliver006/redis_exporter:v1.55.0
+  #    container_name: redis-exporter
+  #    networks:
+  #      - earlybird_network
+  #    ports:
+  #      - "${REDIS_EXPORTER_PORT}:9121"
+  #    environment:
+  #      - REDIS_ADDR=${REDIS_ADDR}
+  #    restart: always
+
+  earlybird-node-exporter:
+    image: prom/node-exporter
+    container_name: earlybird-node-exporter
+    networks:
+      - earlybird_network
+    ports:
+      - "${NODE_EXPORTER_PORT}:9100"
+    restart: always
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter
+    container_name: kafka-exporter
+    networks:
+      - earlybird_network
+    ports:
+      - "${KAFKA_EXPORTER_PORT}:9308"
+    command:
+      - "--kafka.server=${KAFKA_ADDR}"
+    restart: always
+
+volumes:
+  earlybird_user_postgres_data:
+  earlybird_concert_postgres_data:
+  earlybird_admin_postgres_data:
+  earlybird_coupon_postgres_data:
+  earlybird_reservation_postgres_data:
+  earlybird_payment_postgres_data:
+  earlybird_venue_postgres_data:
+  earlybird-redis_data:
+networks:
+  earlybird_network:
+    driver: bridge
