@@ -50,6 +50,7 @@
       },
       "id": 139,
       "panels": [],
+      "repeat": "application",
       "title": "Quick Facts",
       "type": "row"
     },
@@ -398,7 +399,6 @@
       },
       "id": 156,
       "panels": [],
-      "repeat": "instance",
       "title": "hikari connections",
       "type": "row"
     },
@@ -467,6 +467,112 @@
         "x": 0,
         "y": 5
       },
+      "id": 157,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.6.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by(le) (rate(hikaricp_connections_acquire_seconds_bucket{instance=\"$instance\"}[1m]))) * 1000",
+          "interval": "15",
+          "legendFormat": "db 커넥션 점유 시간 P95",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-main"
+          },
+          "editorMode": "code",
+          "expr": "hikaricp_connections_acquire_seconds_max{instance=\"$instance\"} * 1000",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "db 커넥션 점유 최대 시간",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "히카리 커넥션 점유 시간(ms)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-main"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
       "id": 155,
       "options": {
         "legend": {
@@ -482,7 +588,6 @@
         }
       },
       "pluginVersion": "11.6.0",
-      "repeat": "instance",
       "repeatDirection": "h",
       "targets": [
         {
@@ -494,14 +599,14 @@
           "expr": "hikaricp_connections_active{instance=\"$instance\"}",
           "hide": false,
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "활성 커넥션 수",
           "range": true,
           "refId": "active"
         },
         {
           "editorMode": "code",
           "expr": "hikaricp_connections_pending{instance=\"$instance\"}",
-          "legendFormat": "__auto",
+          "legendFormat": "대기 커넥션 수",
           "range": true,
           "refId": "pending"
         },
@@ -514,7 +619,7 @@
           "expr": "hikaricp_connections_idle{instance=\"$instance\"}",
           "hide": false,
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "유휴 커넥션 수",
           "range": true,
           "refId": "idle"
         }
@@ -583,9 +688,9 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 5
+        "w": 24,
+        "x": 0,
+        "y": 13
       },
       "id": 154,
       "options": {
@@ -602,7 +707,6 @@
         }
       },
       "pluginVersion": "11.6.0",
-      "repeat": "instance",
       "repeatDirection": "h",
       "targets": [
         {
@@ -622,7 +726,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 13
+        "y": 21
       },
       "id": 150,
       "panels": [],
@@ -692,7 +796,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 14
+        "y": 22
       },
       "id": 151,
       "options": {
@@ -784,7 +888,7 @@
         "h": 7,
         "w": 6,
         "x": 6,
-        "y": 14
+        "y": 22
       },
       "id": 149,
       "options": {
@@ -876,7 +980,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 14
+        "y": 22
       },
       "id": 152,
       "options": {
@@ -968,7 +1072,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 14
+        "y": 22
       },
       "id": 153,
       "options": {
@@ -1003,7 +1107,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 29
       },
       "id": 140,
       "panels": [],
@@ -1075,7 +1179,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 22
+        "y": 30
       },
       "id": 111,
       "options": {
@@ -1206,7 +1310,7 @@
         "h": 7,
         "w": 6,
         "x": 6,
-        "y": 22
+        "y": 30
       },
       "id": 112,
       "options": {
@@ -1306,7 +1410,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 22
+        "y": 30
       },
       "id": 113,
       "options": {
@@ -1420,7 +1524,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 22
+        "y": 30
       },
       "id": 119,
       "options": {
@@ -1522,7 +1626,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 29
+        "y": 37
       },
       "id": 141,
       "panels": [],
@@ -1594,7 +1698,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 30
+        "y": 38
       },
       "id": 24,
       "options": {
@@ -1721,7 +1825,7 @@
         "h": 7,
         "w": 6,
         "x": 6,
-        "y": 30
+        "y": 38
       },
       "id": 25,
       "options": {
@@ -1849,7 +1953,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 30
+        "y": 38
       },
       "id": 26,
       "options": {
@@ -1976,7 +2080,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 30
+        "y": 38
       },
       "id": 86,
       "options": {
@@ -2054,7 +2158,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 45
       },
       "id": 142,
       "panels": [],
@@ -2128,7 +2232,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 38
+        "y": 46
       },
       "id": 106,
       "options": {
@@ -2257,7 +2361,7 @@
         "h": 7,
         "w": 6,
         "x": 6,
-        "y": 38
+        "y": 46
       },
       "id": 93,
       "options": {
@@ -2372,7 +2476,7 @@
         "h": 7,
         "w": 6,
         "x": 12,
-        "y": 38
+        "y": 46
       },
       "id": 32,
       "options": {
@@ -2603,7 +2707,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 38
+        "y": 46
       },
       "id": 124,
       "options": {
@@ -2703,7 +2807,7 @@
         "h": 7,
         "w": 6,
         "x": 0,
-        "y": 45
+        "y": 53
       },
       "id": 138,
       "options": {
@@ -2799,7 +2903,7 @@
         "h": 7,
         "w": 12,
         "x": 6,
-        "y": 45
+        "y": 53
       },
       "id": 91,
       "options": {
@@ -2898,7 +3002,7 @@
         "h": 7,
         "w": 6,
         "x": 18,
-        "y": 45
+        "y": 53
       },
       "id": 61,
       "options": {
@@ -2954,7 +3058,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 52
+        "y": 60
       },
       "id": 143,
       "panels": [],
@@ -2975,7 +3079,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 53
+        "y": 61
       },
       "id": 3,
       "maxPerRow": 3,
@@ -3038,7 +3142,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 60
+        "y": 68
       },
       "id": 144,
       "panels": [],
@@ -3058,7 +3162,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 61
+        "y": 69
       },
       "id": 78,
       "maxPerRow": 3,
@@ -3121,7 +3225,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 68
+        "y": 76
       },
       "id": 145,
       "panels": [],
@@ -3191,7 +3295,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 69
+        "y": 77
       },
       "id": 98,
       "options": {
@@ -3288,7 +3392,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 69
+        "y": 77
       },
       "id": 101,
       "options": {
@@ -3399,7 +3503,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 69
+        "y": 77
       },
       "id": 99,
       "options": {
@@ -3451,7 +3555,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 76
+        "y": 84
       },
       "id": 146,
       "panels": [],
@@ -3521,7 +3625,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 77
+        "y": 85
       },
       "id": 37,
       "options": {
@@ -3619,7 +3723,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 77
+        "y": 85
       },
       "id": 38,
       "options": {
@@ -3662,7 +3766,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 84
+        "y": 92
       },
       "id": 147,
       "panels": [],
@@ -3682,7 +3786,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 85
+        "y": 93
       },
       "id": 131,
       "maxPerRow": 3,
@@ -3822,5 +3926,5 @@
   "timezone": "Asia/Seoul",
   "title": "JVM (Micrometer)",
   "uid": "ef2zzgdx1ks1se",
-  "version": 7
+  "version": 1
 }

@@ -106,16 +106,16 @@ services:
     networks:
       - earlybird_network
 
-  #  redis-exporter:
-  #    image: oliver006/redis_exporter:v1.55.0
-  #    container_name: redis-exporter
-  #    networks:
-  #      - earlybird_network
-  #    ports:
-  #      - "${REDIS_EXPORTER_PORT}:9121"
-  #    environment:
-  #      - REDIS_ADDR=${REDIS_ADDR}
-  #    restart: always
+  redis-exporter:
+      image: oliver006/redis_exporter:v1.55.0
+      container_name: redis-exporter
+      networks:
+        - earlybird_network
+      ports:
+        - "${REDIS_EXPORTER_PORT}:9121"
+      environment:
+        - REDIS_ADDR=${REDIS_ADDR}
+      restart: always
 
   earlybird-node-exporter:
     image: prom/node-exporter
