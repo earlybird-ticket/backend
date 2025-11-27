@@ -8,12 +8,12 @@ services:
       - earlybird_network
     ports:
       - "${GRAFANA_PORT}:3000"
-    depends_on:
-      - earlybird-prometheus
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
-      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - PROMETHEUS_HOST=${PROMETHEUS_HOST}
+      - PROMETHEUS_PORT=${PROMETHEUS_PORT}
     restart: always
 
 volumes:

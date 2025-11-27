@@ -4,6 +4,6 @@ datasources:
   - name: EBT-prometheus
     type: prometheus
     access: proxy
-    url: http://${PROMETHEUS_HOST}:9090
+    url: http://${PROMETHEUS_HOST}:${PROMETHEUS_PORT}
     isDefault: true
     uid: prometheus-main
