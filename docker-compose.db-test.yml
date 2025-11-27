@@ -9,9 +9,9 @@ services:
       - "${PROMETHEUS_PORT}:9090"
     environment:
       - PROMETHEUS_HOST=${PROMETHEUS_HOST}
+      - KAFKA_EXPORTER_PORT=${KAFKA_EXPORTER_PORT}
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus-test.yml
-      - prometheus_data:/prometheus
+      - ./prometheus-test.yml:/etc/prometheus/prometheus.yml
     restart: always
 
   earlybird-redis:
@@ -148,4 +148,4 @@ volumes:
   earlybird-redis_data:
 networks:
   earlybird_network:
-    driver: bridge
+    external: true

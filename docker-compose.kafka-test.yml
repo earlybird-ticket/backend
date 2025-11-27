@@ -8,9 +8,11 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      earlybird_network:
 
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.5.9
     container_name: kafka
     depends_on:
       - zookeeper
@@ -27,6 +29,8 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
     volumes:
       - ./kafka_data:/var/lib/kafka/data
+    networks:
+      earlybird_network:
 
   kafka-ui-test:
     image: provectuslabs/kafka-ui
@@ -40,6 +44,12 @@ services:
       platform: linux/amd64
     depends_on:
       - kafka
+    networks:
+      earlybird_network:
 
 volumes:
   postgres_data:
+
+networks:
+  earlybird_network:
+    external: true
