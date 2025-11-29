@@ -11,10 +11,11 @@ spring:
       port: ${REDIS_PORT:6379}
   datasource:
     hikari:
-      maximum-pool-size: 3000  # 기본은 10이라 너무 작음
-      minimum-idle: 10
-      idle-timeout: 30000
-      connection-timeout: 30000
+      maximum-pool-size: 32
+      max-lifetime: 1800000
+      minimum-idle: 8
+      idle-timeout: 600000
+      connection-timeout: 3000
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_RESERVATION_PORT:5432}/${POSTGRES_DB}
     username: ${POSTGRES_USER:postgres}
@@ -35,10 +36,12 @@ server:
     mbeanregistry:
       enabled: true
     threads:
-      min-spare: 100
-      max: 5000
-    connection-timeout: 60s
-    max-connections: 5000
+      max: 32
+      min-spare: 8
+    accept-count: 200
+    max-connections: 3000
+    connection-timeout: 5s
+    keep-alive-timeout: 5s
 
 
 management:
@@ -55,12 +58,12 @@ management:
         all: true
     enable:
       jvm: true
-  zipkin:
-    tracing:
-      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
-  tracing:
-    sampling:
-      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
+#  zipkin:
+#    tracing:
+#      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
+#  tracing:
+#    sampling:
+#      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
   prometheus:
     metrics:
       export:
