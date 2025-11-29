@@ -64,6 +64,7 @@ public class CreateReservationRequestHandler implements EventHandler<CreateReser
     private static Reservation createReservation(CreateReservationPayload payload) {
         return Reservation.createReservation(payload.getPassportDto()
                                                     .getUserId(),
+                                             payload.getReservationId(),
                                              payload.getUserName(),
                                              payload.getConcertId(),
                                              payload.getConcertName(),

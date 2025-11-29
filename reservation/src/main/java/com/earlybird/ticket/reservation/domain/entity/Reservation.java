@@ -23,7 +23,7 @@ import java.util.UUID;
 public class Reservation extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+//    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "reservation_id")
     private UUID id;
 
@@ -158,6 +158,7 @@ public class Reservation extends BaseEntity {
     }
 
     public static Reservation createReservation(Long userId,
+                                                UUID id,
                                                 String username,
                                                 UUID concertId,
                                                 String concertName,
@@ -172,6 +173,7 @@ public class Reservation extends BaseEntity {
                                                 String hallName,
                                                 Integer hallFloor) {
         return Reservation.builder()
+                            .id(id)
                           .userId(userId)
                           .username(username)
                           .reservationStatus(ReservationStatus.PENDING)
