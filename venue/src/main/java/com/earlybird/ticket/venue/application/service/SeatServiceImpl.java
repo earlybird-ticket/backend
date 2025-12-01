@@ -8,7 +8,6 @@ import com.earlybird.ticket.venue.application.dto.request.ProcessSeatCheckComman
 import com.earlybird.ticket.venue.application.dto.request.SeatPreemptCommand;
 import com.earlybird.ticket.venue.application.dto.response.ProcessSeatCheckQuery;
 import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
-import com.earlybird.ticket.venue.application.dto.response.SeatListQuery.SeatQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.event.dto.response.ReservationCreateEvent;
 import com.earlybird.ticket.venue.common.dto.RedisReadResult;
@@ -16,7 +15,6 @@ import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.common.exception.RedisException;
 import com.earlybird.ticket.venue.common.exception.SeatUnavailableException;
 import com.earlybird.ticket.venue.common.util.EventConverter;
-import com.earlybird.ticket.venue.domain.entity.constant.Status;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisKeyFactory;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSeatListReader;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSectionListReader;
@@ -27,6 +25,7 @@ import com.earlybird.ticket.venue.domain.entity.SeatInstance;
 import com.earlybird.ticket.venue.domain.repository.OutboxRepository;
 import com.earlybird.ticket.venue.domain.repository.SeatRepository;
 import com.earlybird.ticket.venue.infrastructure.redis.config.RedisConfig;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
@@ -40,6 +39,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -58,6 +58,7 @@ public class SeatServiceImpl implements SeatService {
     private final RedisKeyFactory redisKeyFactory;
     private final RedisSeatListReader redisSeatListReader; //하나로 합치기 (예 : 전략패턴)
     private final RedisSectionListReader redisSectionListReader;
+    private final MeterRegistry meterRegistry;
 
     @Override
     public SectionListQuery findSectionList(UUID concertSequenceId) {
@@ -98,8 +99,12 @@ public class SeatServiceImpl implements SeatService {
                 Collections.emptyList()
             );
         }
-
+        long startRead = System.currentTimeMillis();
         RedisReadResult<SeatListQuery.SeatQuery> readResult = redisSeatListReader.readWithRaw(keys);
+
+        meterRegistry.timer("sectionListSelectTimeMillis", ":" , section)
+                .record(System.currentTimeMillis() - startRead, TimeUnit.MILLISECONDS);
+
         Map<String, String> firstMap = readResult.rawMap();
 
         UUID concertId = UUID.fromString(firstMap.get("concertId"));
@@ -113,9 +118,6 @@ public class SeatServiceImpl implements SeatService {
             grade,
             floor,
             readResult.results()
-                .stream()
-                .filter(seatQuery -> seatQuery.status().equals(Status.FREE.getValue()))
-                .toList()
         );
 
     }
@@ -165,7 +167,7 @@ public class SeatServiceImpl implements SeatService {
     }
 
     // TODO : 추후 배치로 고도화 고려 vs Kafka Consumer
-    @Scheduled(cron = "0 26 20 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 26 16 * * *", zone = "Asia/Seoul")
     public void warmUpSeatInstance() {
         //Mock Data
         Map<UUID, LocalDateTime> ticketDeadline = new HashMap<>();

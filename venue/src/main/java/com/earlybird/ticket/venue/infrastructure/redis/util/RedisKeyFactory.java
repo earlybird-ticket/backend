@@ -19,6 +19,7 @@ public class RedisKeyFactory {
     public static final String SEAT_INDEX_PREFIX = "SEAT_INDEX:";
     public static final String PREFIX_WILDCARD = "*:";
     public static final String SUFFIX_WILDCARD = ":*";
+    public static final String FREE_SUFFIX = ":FREE";
     public static final String REDIS_COLON = ":";
     public static final Long LUA_FAIL = 0L;
     public static final Long LUA_SUCCESS = 1L;
@@ -27,7 +28,7 @@ public class RedisKeyFactory {
     private final StringRedisTemplate stringRedisTemplate;
 
     public String generateSeatIndexKey(UUID concertSequenceId, String section) {
-        return SEAT_INDEX_PREFIX + concertSequenceId + REDIS_COLON + section;
+        return SEAT_INDEX_PREFIX + concertSequenceId + REDIS_COLON + section + FREE_SUFFIX;
     }
 
     public String generateSectionListKey(UUID concertId, UUID concertSequenceId, String section) {
