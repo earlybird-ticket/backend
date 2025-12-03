@@ -13,6 +13,8 @@ services:
     volumes:
       - ./prometheus-test.yml:/etc/prometheus/prometheus.yml
     restart: always
+    platform: linux/amd64
+
 
   earlybird-redis:
     image: redis:latest
@@ -25,6 +27,15 @@ services:
       - earlybird_network
     restart: always
     platform: linux/amd64
+    command: [
+      "redis-server",
+      "--maxmemory", "1500mb",
+      "--maxmemory-policy", "allkeys-lru"
+    ]
+    deploy:
+      resources:
+        limits:
+          memory: 2g
 
   earlybird-user-postgres:
     image: postgis/postgis:latest
