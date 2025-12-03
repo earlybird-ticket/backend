@@ -2,9 +2,9 @@ package com.earlybird.ticket.venue.infrastructure.redis.util;
 
 import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import com.earlybird.ticket.venue.common.dto.RedisReadResult;
-import org.springframework.data.redis.connection.StringRedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -13,8 +13,12 @@ import java.util.*;
 @Component
 public class RedisSeatListReader extends AbstractRedisHashReader<SeatListQuery.SeatQuery> {
 
-    public RedisSeatListReader(StringRedisTemplate stringRedisTemplate) {
+    RedisScript<List> findSeatListBySectionScript;
+
+    public RedisSeatListReader(StringRedisTemplate stringRedisTemplate,
+                               @Qualifier("findSeatListBySectionScript") RedisScript<List> redisScript) {
         super(stringRedisTemplate);
+        this.findSeatListBySectionScript = redisScript;
     }
 
     private static final String[] SECTION_FIELDS = new String[]{"floor", "grade", "concertId"};
@@ -26,24 +30,14 @@ public class RedisSeatListReader extends AbstractRedisHashReader<SeatListQuery.S
     private static final int IDX_PRICE = 3;
 
     @Override
-    protected List<Object> executePipeline(List<String> keys) {
-
-        return getStringRedisTemplate().executePipelined((RedisCallback<Object>) connection -> {
-            StringRedisConnection stringConn = (StringRedisConnection) connection;
-            // 섹션 정보
-            stringConn.hMGet(keys.get(0), SECTION_FIELDS);
-            // 좌석 인스턴스 별 정보
-            for (String key : keys) {
-                stringConn.hMGet(key, INSTANCE_FIELDS);
-            }
-            return null;
-        });
+    protected List<Object> fetchRawData(List<String> keys) {
+        return executeFindSeatInstancesByLua(keys);
     }
 
     // SeatReader 전용 메서드 (헤더와 바디)
     public RedisReadResult<SeatListQuery.SeatQuery> readWithRaw(List<String> keys) {
 
-        List<Object> results = executePipeline(keys);
+        List<Object> results = fetchRawData(keys);
 
         // 1. 헤더(섹션 정보) 파싱 - 0번 인덱스
         List<String> headerData = (List<String>) results.get(0);
@@ -83,5 +77,8 @@ public class RedisSeatListReader extends AbstractRedisHashReader<SeatListQuery.S
 
     private int parseIntOrZero(String val) {
         return val != null ? Integer.parseInt(val) : 0;
+    }
+    private List executeFindSeatInstancesByLua(List<String> keys) {
+         return getStringRedisTemplate().execute(findSeatListBySectionScript, keys);
     }
 }

@@ -18,7 +18,7 @@ public class RedisSectionListReader extends AbstractRedisHashReader<SectionListQ
     }
 
     @Override
-    protected List<Object> executePipeline(List<String> keys) {
+    protected List<Object> fetchRawData(List<String> keys) {
         List<Object> results = getStringRedisTemplate().executePipelined((RedisCallback<Object>) connection -> {
             StringRedisConnection stringConn = (StringRedisConnection) connection;
 

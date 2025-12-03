@@ -9,14 +9,13 @@ import java.util.*;
 public abstract class AbstractRedisHashReader<T> {
 
     private final StringRedisTemplate stringRedisTemplate;
-    private static final String[] sectionFields = new String[]{"floor", "grade", "concertId"};
 
     public List<T> read(List<String> keys) {
         if (keys == null || keys.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<Object> results = executePipeline(keys);
+        List<Object> results = fetchRawData(keys);
 
         return mapToDtoList(keys, results);
     }
@@ -34,7 +33,7 @@ public abstract class AbstractRedisHashReader<T> {
     protected StringRedisTemplate getStringRedisTemplate() {
         return stringRedisTemplate;
     }
-    protected abstract List<Object> executePipeline(List<String> keys);
+    protected abstract List<Object> fetchRawData(List<String> keys);
 
     protected abstract T mapToDto(String key, Object map);
 }
