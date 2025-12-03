@@ -15,6 +15,8 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.util.List;
+
 @EnableCaching
 @Configuration
 public class RedisConfig {
@@ -31,6 +33,29 @@ public class RedisConfig {
         config.useSingleServer()
                 .setAddress("redis://" + redisHost + ":" + redisPort);
         return Redisson.create(config);
+    }
+
+    @Bean
+    public RedisScript<List> findSeatListBySectionScript() {
+        DefaultRedisScript<List> redisScript = new DefaultRedisScript<>();
+        redisScript.setScriptText("""
+                local result = {}
+                
+                -- 1. 헤더 조회 (KEYS[1])
+                -- 필드명 ARGV로 전달
+                local header = redis.call('HMGET', KEYS[1], 'floor', 'grade', 'concertId') -- RedisSeatListReader.SECTION_FIELDS 순서에 유의!
+                table.insert(result, header)
+                
+                -- 2. 좌석 조회
+                for i = 1, #KEYS do
+                    local seat = redis.call('HMGET', KEYS[i], 'row', 'col', 'status', 'price') -- RedisSeatListReader.INSTANCE_FIELDS 순서에 유의!
+                    table.insert(result, seat)
+                end
+                
+                return result
+                """);
+        redisScript.setResultType(List.class);
+        return redisScript;
     }
 
     @Bean
