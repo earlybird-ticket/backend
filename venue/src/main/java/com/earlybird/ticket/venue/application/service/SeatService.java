@@ -4,6 +4,7 @@ import com.earlybird.ticket.venue.application.dto.request.ProcessSeatCheckComman
 import com.earlybird.ticket.venue.application.dto.request.SeatPreemptCommand;
 import com.earlybird.ticket.venue.application.dto.response.ProcessSeatCheckQuery;
 import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
+import com.earlybird.ticket.venue.application.dto.response.SeatListQueryV2;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.event.dto.request.*;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,7 @@ import java.util.UUID;
 public interface SeatService {
     SectionListQuery findSectionList(UUID concertSequenceId);
 
-    SeatListQuery findSeatList(UUID concertSequenceId, String section);
+    SeatListQueryV2 findSeatList(UUID concertSequenceId, String section);
 
     ProcessSeatCheckQuery checkSeat(ProcessSeatCheckCommand processSeatCheckCommand);
 

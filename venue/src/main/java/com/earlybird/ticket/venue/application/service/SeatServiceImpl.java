@@ -3,14 +3,16 @@ package com.earlybird.ticket.venue.application.service;
 import com.earlybird.ticket.common.entity.EventPayload;
 import com.earlybird.ticket.common.entity.PassportDto;
 import com.earlybird.ticket.common.util.CommonUtil;
+import com.earlybird.ticket.common.util.DataUtil;
 import com.earlybird.ticket.common.util.PassportUtil;
+import com.earlybird.ticket.venue.application.dto.request.PrepareSeatIndexCommand;
 import com.earlybird.ticket.venue.application.dto.request.ProcessSeatCheckCommand;
 import com.earlybird.ticket.venue.application.dto.request.SeatPreemptCommand;
 import com.earlybird.ticket.venue.application.dto.response.ProcessSeatCheckQuery;
 import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
+import com.earlybird.ticket.venue.application.dto.response.SeatListQueryV2;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.event.dto.response.ReservationCreateEvent;
-import com.earlybird.ticket.venue.common.dto.RedisReadResult;
 import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.common.exception.RedisException;
 import com.earlybird.ticket.venue.common.exception.SeatUnavailableException;
@@ -80,17 +82,15 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public SeatListQuery findSeatList(UUID concertSequenceId, String section) {
-
-        List<String> keys = redisKeyFactory.convertSeatIndexKeysToSeatInstanceKeys(
+    public SeatListQueryV2 findSeatList(UUID concertSequenceId, String section) {
+        String seatIndexKey = redisKeyFactory.generateSeatIndexKey(
             concertSequenceId,
-            section,
-            0L,
-            -1L
+            section
         );
+        List<String> seatQueries = getSeatQueries(seatIndexKey, section);
 
-        if (keys.isEmpty()) {
-            return SeatListQuery.from(
+        if (seatQueries.isEmpty()) {
+            return SeatListQueryV2.from(
                 null,
                 concertSequenceId,
                 section,
@@ -99,27 +99,41 @@ public class SeatServiceImpl implements SeatService {
                 Collections.emptyList()
             );
         }
-        long startRead = System.currentTimeMillis();
-        RedisReadResult<SeatListQuery.SeatQuery> readResult = redisSeatListReader.readWithRaw(keys);
 
-        meterRegistry.timer("sectionListSelectTimeMillis", ":" , section)
-                .record(System.currentTimeMillis() - startRead, TimeUnit.MILLISECONDS);
+        String seatQuery = seatQueries.get(0);
 
-        Map<String, String> firstMap = readResult.rawMap();
+        String seatInstanceKey = redisKeyFactory.generateSeatInstanceKey(concertSequenceId, extractSeatInstanceId(seatQuery));
+        List<Object> objects = stringRedisTemplate.opsForHash()
+                .multiGet(seatInstanceKey, List.of("concertId", "grade", "floor"));
 
-        UUID concertId = UUID.fromString(firstMap.get("concertId"));
-        String grade = firstMap.get("grade");
-        Integer floor = Integer.parseInt(firstMap.get("floor"));
-
-        return SeatListQuery.from(
-            concertId,
+        return SeatListQueryV2.from(
+            UUID.fromString((String)objects.get(0)),
             concertSequenceId,
             section,
-            grade,
-            floor,
-            readResult.results()
+            (String)objects.get(1),
+            Integer.parseInt((String)objects.get(2)),
+            seatQueries
         );
 
+    }
+
+    private UUID extractSeatInstanceId(String seatQuery) {
+        String keyPattern = "\"seat_instance_id\":\"";
+        int startIdx = seatQuery.indexOf(keyPattern) + keyPattern.length();
+        int endIdx = seatQuery.indexOf("\"", startIdx);
+        String uuidString =  seatQuery.substring(startIdx, endIdx);
+        return UUID.fromString(uuidString);
+    }
+
+    private List<String> getSeatQueries(String seatIndexKey, String section) {
+        long startRead = System.currentTimeMillis();
+        Set<String> range = stringRedisTemplate.opsForZSet()
+                .range(seatIndexKey, 0, -1);
+        meterRegistry.timer("sectionListSelectTimeMillis", ":" , section)
+                .record(System.currentTimeMillis() - startRead, TimeUnit.MILLISECONDS);
+        return Optional.ofNullable(range)
+                .orElse(Collections.emptySet())
+                .stream().toList();
     }
 
     @Override
@@ -193,10 +207,17 @@ public class SeatServiceImpl implements SeatService {
 
                 for (Seat seat : seats) {
                     for (SeatInstance seatInstance : seat.getSeatInstances()) {
-                        makeSeatInstanceOnRedis(seat, seatInstance, stringConn, ticketDeadline,
+                        PrepareSeatIndexCommand seatIndexCommand = PrepareSeatIndexCommand.fromSeatInstance(seatInstance);
+                        String value = DataUtil.serialize(seatIndexCommand);
+
+                        if(value == null){
+                           continue;
+                        }
+
+                        makeSeatInstanceOnRedis(seat, seatInstance, value, stringConn, ticketDeadline,
                             vipTicketDeadline);
                         makeSectionListOnRedis(seat, seatInstance, stringConn);
-                        makeSeatIndexOnRedis(seat, seatInstance, stringConn);
+                        makeSeatIndexOnRedis(seat, seatInstance, value, stringConn);
                     }
                 }
 
@@ -295,13 +316,12 @@ public class SeatServiceImpl implements SeatService {
             .build());
     }
 
-    private void makeSeatIndexOnRedis(Seat seat, SeatInstance seatInstance,
+    private void makeSeatIndexOnRedis(Seat seat, SeatInstance seatInstance, String value,
         StringRedisConnection stringConn) {
         String seatIndexKey = redisKeyFactory.generateSeatIndexKey(
             seatInstance.getConcertSequenceId(), seat.getSection().getValue());
 
-        stringConn.zAdd(seatIndexKey, seat.getRow() * 10000 + seat.getCol(),
-            String.valueOf(seatInstance.getId()));
+        stringConn.zAdd(seatIndexKey, seat.getRow() * 10000 + seat.getCol(), value);
     }
 
     private void makeSectionListOnRedis(Seat seat, SeatInstance seatInstance,
@@ -321,6 +341,7 @@ public class SeatServiceImpl implements SeatService {
     private void makeSeatInstanceOnRedis(
         Seat seat,
         SeatInstance seatInstance,
+        String value,
         StringRedisConnection stringConn,
         Map<UUID, LocalDateTime> ticketDeadline,
         Map<UUID, LocalDateTime> vipTicketDeadline
@@ -343,6 +364,7 @@ public class SeatServiceImpl implements SeatService {
         stringConn.hSet(seatInstanceKey, "vipExpiredAt", CommonUtil.LocalDateTimetoString(
             vipTicketDeadline.get(seatInstance.getConcertSequenceId())));
         stringConn.hSet(seatInstanceKey, "updatedAt", "");
+        stringConn.hSet(seatInstanceKey, "seatIndexValue", value);
     }
 }
 

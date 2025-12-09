@@ -1,6 +1,8 @@
 package com.earlybird.ticket.venue.presentation.dto.response;
 
 import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
+import com.earlybird.ticket.venue.application.dto.response.SeatListQueryV2;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import lombok.Builder;
 
 import java.math.BigDecimal;
@@ -14,7 +16,8 @@ public record SeatListResponse(
         String section,
         String grade,
         Integer floor,
-        List<SeatResponse> seatList
+        //List<SeatResponse> seatList
+        String seatList
 ) {
     @Builder
     private record SeatResponse(
@@ -27,26 +30,21 @@ public record SeatListResponse(
 
     }
 
-    public static SeatListResponse from(SeatListQuery seatListQuery) {
+    public static SeatListResponse from(SeatListQueryV2 seatListQuery) {
         return SeatListResponse.builder()
                 .concertId(seatListQuery.concertId())
                 .concertSequenceId(seatListQuery.concertSequenceId())
                 .section(seatListQuery.section())
                 .grade(seatListQuery.grade())
                 .floor(seatListQuery.floor())
-                .seatList(seatListQuery.seatList()
-                        .stream()
-                        .map(seat -> SeatResponse.builder()
-                                .seatInstanceId(seat.seatInstanceId())
-                                .row(seat.row())
-                                .col(seat.col())
-                                .seatStatus(seat.status())
-                                .price(seat.price())
-                                .build())
-                        .toList()
-                )
+                .seatList(seatListQuery.seatJsonList())
                 .build();
     }
 
+    @Override
+    @JsonRawValue
+    public String seatList() {
+        return seatList;
+    }
 
 }

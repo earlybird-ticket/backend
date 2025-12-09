@@ -3,6 +3,7 @@ package com.earlybird.ticket.venue.presentation.controller;
 import com.earlybird.ticket.common.entity.CommonDto;
 import com.earlybird.ticket.venue.application.dto.response.ProcessSeatCheckQuery;
 import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
+import com.earlybird.ticket.venue.application.dto.response.SeatListQueryV2;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.service.SeatService;
 import com.earlybird.ticket.venue.presentation.dto.request.ProcessSeatCheckRequest;
@@ -43,7 +44,7 @@ public class SeatController {
             @PathVariable(name = "concert_sequence_id") UUID concertSequenceId,
             @PathVariable(name = "section") String section
     ) {
-        SeatListQuery seatListQuery = seatService.findSeatList(concertSequenceId, section);
+        SeatListQueryV2 seatListQuery = seatService.findSeatList(concertSequenceId, section);
 
         return ResponseEntity.ok().body(
                 CommonDto.ok(
