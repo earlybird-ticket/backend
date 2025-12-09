@@ -20,7 +20,7 @@ public class VenueKafkaOutboxProducer {
     private final KafkaTemplate<String, String> kafkaTemplate;
 
     @Transactional
-    @Scheduled(fixedDelay = 500)
+    @Scheduled(fixedDelay = 1000)
     public void publishUnsentEvents() {
         List<Outbox> outboxes = outboxRepository.findTop100ByOrderByCreatedAtAsc();
 

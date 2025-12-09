@@ -21,7 +21,7 @@ public class PaymentKafkaOutboxProducer {
     private final OutboxRepository outboxRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    @Scheduled(fixedDelay = 500)
+    @Scheduled(fixedDelay = 1000)
     @Transactional
     public void publishOutbox() {
         List<Outbox> outboxes = outboxRepository.findTop100UnmarkedOutboxOrderByCreatedAt();
