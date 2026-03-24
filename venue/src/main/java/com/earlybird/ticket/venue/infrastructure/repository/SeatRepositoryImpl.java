@@ -2,6 +2,7 @@ package com.earlybird.ticket.venue.infrastructure.repository;
 
 import com.earlybird.ticket.venue.domain.dto.SeatListResult;
 import com.earlybird.ticket.venue.domain.dto.SectionListResult;
+import com.earlybird.ticket.venue.domain.dto.WarmupSeatResult;
 import com.earlybird.ticket.venue.domain.entity.Seat;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.domain.repository.SeatRepository;
@@ -54,7 +55,7 @@ public class SeatRepositoryImpl implements SeatRepository {
     }
 
     @Override
-    public List<Seat> findSeatListWithSeatInstanceInConcertSequenceIdList(List<UUID> concertSequenceIdList) {
-        return seatQueryRepository.findSeatListWithSeatInstanceInConcertSequenceIdList(concertSequenceIdList);
+    public List<WarmupSeatResult> findSeatInfoByConcertSequenceIdList(List<UUID> concertSequenceIdList) {
+        return seatQueryRepository.findSeatInfoByConcertSequenceIdList(concertSequenceIdList);
     }
 }

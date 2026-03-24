@@ -2,6 +2,7 @@ package com.earlybird.ticket.venue.infrastructure.repository;
 
 import com.earlybird.ticket.venue.domain.dto.SeatListResult;
 import com.earlybird.ticket.venue.domain.dto.SectionListResult;
+import com.earlybird.ticket.venue.domain.dto.WarmupSeatResult;
 import com.earlybird.ticket.venue.domain.entity.Seat;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import org.springframework.stereotype.Repository;
@@ -21,5 +22,5 @@ public interface SeatQueryRepository {
 
     List<Seat> findSeatListWithSeatInstanceByVenueId(UUID venueId);
 
-    List<Seat> findSeatListWithSeatInstanceInConcertSequenceIdList(List<UUID> concertSequenceIdList);
+    List<WarmupSeatResult> findSeatInfoByConcertSequenceIdList(List<UUID> concertSequenceIdList);
 }

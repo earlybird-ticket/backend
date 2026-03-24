@@ -15,13 +15,12 @@ import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.common.exception.RedisException;
 import com.earlybird.ticket.venue.common.exception.SeatUnavailableException;
 import com.earlybird.ticket.venue.common.util.EventConverter;
+import com.earlybird.ticket.venue.domain.dto.WarmupSeatResult;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisKeyFactory;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSeatListReader;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSectionListReader;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.domain.entity.Outbox;
-import com.earlybird.ticket.venue.domain.entity.Seat;
-import com.earlybird.ticket.venue.domain.entity.SeatInstance;
 import com.earlybird.ticket.venue.domain.repository.OutboxRepository;
 import com.earlybird.ticket.venue.domain.repository.SeatRepository;
 import com.earlybird.ticket.venue.infrastructure.redis.config.RedisConfig;
@@ -184,19 +183,27 @@ public class SeatServiceImpl implements SeatService {
 
         List<UUID> concertSequenceIdList = new ArrayList<>(vipTicketDeadline.keySet());
 
-        List<Seat> seats = seatRepository.findSeatListWithSeatInstanceInConcertSequenceIdList(
-            concertSequenceIdList);
+        Map<UUID, List<WarmupSeatResult>> collected = seatRepository.findSeatInfoByConcertSequenceIdList(
+                concertSequenceIdList)
+            .stream()
+            .collect(
+                Collectors.groupingBy(
+                    WarmupSeatResult::concertSequenceId,
+                    LinkedHashMap::new,
+                    Collectors.toList()
+                )
+            );
 
         List<Object> results = stringRedisTemplate.executePipelined(
             (RedisCallback<Object>) connection -> {
                 StringRedisConnection stringConn = (StringRedisConnection) connection;
 
-                for (Seat seat : seats) {
-                    for (SeatInstance seatInstance : seat.getSeatInstances()) {
-                        makeSeatInstanceOnRedis(seat, seatInstance, stringConn, ticketDeadline,
+                for (List<WarmupSeatResult> seatResults : collected.values()) {
+                    for (WarmupSeatResult seatInfo : seatResults){
+                        makeSeatInstanceOnRedis(seatInfo, stringConn, ticketDeadline,
                             vipTicketDeadline);
-                        makeSectionListOnRedis(seat, seatInstance, stringConn);
-                        makeSeatIndexOnRedis(seat, seatInstance, stringConn);
+                        makeSectionListOnRedis(seatInfo, stringConn);
+                        makeSeatIndexOnRedis(seatInfo, stringConn);
                     }
                 }
 
@@ -295,53 +302,52 @@ public class SeatServiceImpl implements SeatService {
             .build());
     }
 
-    private void makeSeatIndexOnRedis(Seat seat, SeatInstance seatInstance,
+    private void makeSeatIndexOnRedis(WarmupSeatResult seatInfo,
         StringRedisConnection stringConn) {
         String seatIndexKey = redisKeyFactory.generateSeatIndexKey(
-            seatInstance.getConcertSequenceId(), seat.getSection().getValue());
+            seatInfo.concertSequenceId(), seatInfo.section().getValue());
 
-        stringConn.zAdd(seatIndexKey, seat.getRow() * 10000 + seat.getCol(),
-            String.valueOf(seatInstance.getId()));
+        stringConn.zAdd(seatIndexKey, seatInfo.row() * 10000 + seatInfo.col(),
+            String.valueOf(seatInfo.seatInstanceId()));
     }
 
-    private void makeSectionListOnRedis(Seat seat, SeatInstance seatInstance,
+    private void makeSectionListOnRedis(WarmupSeatResult seatInfo,
         StringRedisConnection stringConn) {
         String sectionKey = redisKeyFactory.generateSectionListKey(
-            seatInstance.getConcertId(),
-            seatInstance.getConcertSequenceId(),
-            seat.getSection().getValue()
+            seatInfo.concertId(),
+            seatInfo.concertSequenceId(),
+            seatInfo.section().getValue()
         );
 
         stringConn.hIncrBy(sectionKey, "remainingSeat", 1);
-        stringConn.hSet(sectionKey, "floor", seat.getFloor().toString());
-        stringConn.hSet(sectionKey, "grade", seatInstance.getGrade().getValue());
-        stringConn.hSet(sectionKey, "price", seatInstance.getPrice().toString());
+        stringConn.hSet(sectionKey, "floor", seatInfo.floor().toString());
+        stringConn.hSet(sectionKey, "grade", seatInfo.grade().getValue());
+        stringConn.hSet(sectionKey, "price", seatInfo.price().toString());
     }
 
     private void makeSeatInstanceOnRedis(
-        Seat seat,
-        SeatInstance seatInstance,
+        WarmupSeatResult seatInfo,
         StringRedisConnection stringConn,
         Map<UUID, LocalDateTime> ticketDeadline,
         Map<UUID, LocalDateTime> vipTicketDeadline
     ) {
         String seatInstanceKey = redisKeyFactory.generateSeatInstanceKey(
-            seatInstance.getConcertSequenceId(), seatInstance.getId());
+            seatInfo.concertSequenceId(), seatInfo.seatInstanceId());
 
-        stringConn.hSet(seatInstanceKey, "status", seatInstance.getStatus().getValue());
+        stringConn.hSet(seatInstanceKey, "status", seatInfo.status().getValue());
         stringConn.hSet(seatInstanceKey, "userId", "");
         stringConn.hSet(seatInstanceKey, "reservationId", "");
-        stringConn.hSet(seatInstanceKey, "concertId", seatInstance.getConcertId().toString());
-        stringConn.hSet(seatInstanceKey, "col", seat.getCol().toString());
-        stringConn.hSet(seatInstanceKey, "row", seat.getRow().toString());
-        stringConn.hSet(seatInstanceKey, "section", seat.getSection().getValue());
-        stringConn.hSet(seatInstanceKey, "floor", seat.getFloor().toString());
-        stringConn.hSet(seatInstanceKey, "grade", seatInstance.getGrade().getValue());
-        stringConn.hSet(seatInstanceKey, "price", seatInstance.getPrice().toString());
+        stringConn.hSet(seatInstanceKey, "concertId", seatInfo.concertId().toString());
+        stringConn.hSet(seatInstanceKey, "col", seatInfo.col().toString());
+        stringConn.hSet(seatInstanceKey, "row", seatInfo.row().toString());
+        stringConn.hSet(seatInstanceKey, "section", seatInfo.section().getValue());
+        stringConn.hSet(seatInstanceKey, "floor", seatInfo.floor().toString());
+        stringConn.hSet(seatInstanceKey, "grade", seatInfo.grade().getValue());
+        stringConn.hSet(seatInstanceKey, "price", seatInfo.price().toString());
         stringConn.hSet(seatInstanceKey, "expiredAt", CommonUtil.LocalDateTimetoString(
-            ticketDeadline.get(seatInstance.getConcertSequenceId())));
+            ticketDeadline.get(seatInfo.concertSequenceId())));
         stringConn.hSet(seatInstanceKey, "vipExpiredAt", CommonUtil.LocalDateTimetoString(
-            vipTicketDeadline.get(seatInstance.getConcertSequenceId())));
+            vipTicketDeadline.get(seatInfo.concertSequenceId())));
         stringConn.hSet(seatInstanceKey, "updatedAt", "");
     }
 }

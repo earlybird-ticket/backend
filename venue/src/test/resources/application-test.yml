@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 32
+      max-lifetime: 1800000
+      minimum-idle: 8
+      idle-timeout: 600000
+      connection-timeout: 3000
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_VENUE_PORT:15006}/${POSTGRES_DB:earlybird}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}

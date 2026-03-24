@@ -5,6 +5,7 @@ import static com.earlybird.ticket.venue.domain.entity.QSeatInstance.seatInstanc
 
 import com.earlybird.ticket.venue.domain.dto.SeatListResult;
 import com.earlybird.ticket.venue.domain.dto.SeatListResult.SeatResult;
+import com.earlybird.ticket.venue.domain.dto.WarmupSeatResult;
 import com.earlybird.ticket.venue.domain.entity.Seat;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.domain.entity.constant.Status;
@@ -167,16 +168,35 @@ public class SeatQueryRepositoryImpl implements SeatQueryRepository {
     }
 
     @Override
-    public List<Seat> findSeatListWithSeatInstanceInConcertSequenceIdList(List<UUID> concertSequenceIdList) {
+    public List<WarmupSeatResult> findSeatInfoByConcertSequenceIdList(List<UUID> concertSequenceIdList) {
         return queryFactory
-                .selectDistinct(seat)
+                .selectDistinct(Projections.constructor(
+                    WarmupSeatResult.class,
+                    seat.id,
+                    seatInstance.id,
+                    seatInstance.concertId,
+                    seatInstance.concertSequenceId,
+                    seat.section,
+                    seat.row,
+                    seat.col,
+                    seat.floor,
+                    seatInstance.grade,
+                    seatInstance.price,
+                    seatInstance.status
+                ))
                 .from(seat)
-                .join(seat.seatInstances, seatInstance).fetchJoin()
+                .join(seat.seatInstances, seatInstance)
                 .where(
                         seatInstance.concertSequenceId.in(concertSequenceIdList),
                         seatInstance.deletedAt.isNull(),
                         seat.deletedAt.isNull()
                 )
+                .orderBy(
+                    seatInstance.concertSequenceId.asc(),
+                    seat.section.asc(),
+                    seat.row.asc(),
+                    seat.col.asc()
+                    )
                 .fetch();
     }
 }
