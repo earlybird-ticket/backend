@@ -49,6 +49,15 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA_HOST}:${KAFKA_PORT_2}
 
+  flyway:
+    enabled: true
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    locations: classpath:db/migration/local
+    baseline-on-migrate: true
+    baseline-version: 1
+
 eureka:
   instance:
     instance-id: ${spring.application.name}:${server.port}
