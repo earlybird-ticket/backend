@@ -101,3 +101,11 @@ api:
   connection-timeout: 3000
   read-timeout: 120000
   max-buffer-size-MB: 300
+
+ncp:
+  object-storage:
+    endpoint: ${NCP_OBJECT_STORAGE_END_POINT}
+    region: ${NCP_OBJECT_STORAGE_REGION_NAME}
+    bucket: ${NCP_OBJECT_STORAGE_BUCKET}
+    access-key: ${NCP_OBJECT_STORAGE_ACCESS_KEY}
+    secret-key: ${NCP_OBJECT_STORAGE_SECRET_KEY}
