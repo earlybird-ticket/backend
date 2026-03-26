@@ -28,11 +28,8 @@ import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
-import org.springframework.data.redis.connection.StringRedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -165,26 +162,8 @@ public class SeatServiceImpl implements SeatService {
             redisConfig.waitingSeatPreemptByVIPScript());
     }
 
-    // TODO : 추후 배치로 고도화 고려 vs Kafka Consumer
-    @Scheduled(cron = "0 26 16 * * *", zone = "Asia/Seoul")
-    public void warmUpSeatInstance() {
-        //Mock Data
-        Map<UUID, LocalDateTime> ticketDeadline = new HashMap<>();
-        ticketDeadline.put(UUID.fromString("2d6d2381-a295-46fa-b798-a891f523c726"),
-            LocalDateTime.now());
-        ticketDeadline.put(UUID.fromString("52aab2c6-82e4-4c10-b983-e26bdb8550de"),
-            LocalDateTime.now().minusMinutes(10));
-
-        Map<UUID, LocalDateTime> vipTicketDeadline = new HashMap<>();
-        vipTicketDeadline.put(UUID.fromString("2d6d2381-a295-46fa-b798-a891f523c726"),
-            LocalDateTime.now());
-        vipTicketDeadline.put(UUID.fromString("52aab2c6-82e4-4c10-b983-e26bdb8550de"),
-            LocalDateTime.now().minusMinutes(10));
-
-        List<UUID> concertSequenceIdList = new ArrayList<>(vipTicketDeadline.keySet());
-
-        Map<UUID, List<WarmupSeatResult>> collected = seatRepository.findSeatInfoByConcertSequenceIdList(
-                concertSequenceIdList)
+    public Map<UUID, List<WarmupSeatResult>> collectWarmupSeatData(List<UUID> concertSequenceIds) {
+        return seatRepository.findSeatInfoByConcertSequenceIdList(concertSequenceIds)
             .stream()
             .collect(
                 Collectors.groupingBy(
@@ -193,23 +172,6 @@ public class SeatServiceImpl implements SeatService {
                     Collectors.toList()
                 )
             );
-
-        List<Object> results = stringRedisTemplate.executePipelined(
-            (RedisCallback<Object>) connection -> {
-                StringRedisConnection stringConn = (StringRedisConnection) connection;
-
-                for (List<WarmupSeatResult> seatResults : collected.values()) {
-                    for (WarmupSeatResult seatInfo : seatResults){
-                        makeSeatInstanceOnRedis(seatInfo, stringConn, ticketDeadline,
-                            vipTicketDeadline);
-                        makeSectionListOnRedis(seatInfo, stringConn);
-                        makeSeatIndexOnRedis(seatInfo, stringConn);
-                    }
-                }
-
-                return null;
-            });
-
     }
 
     private String preemptSeatInternal(String passport, SeatPreemptCommand seatPreemptCommand,
@@ -300,55 +262,6 @@ public class SeatServiceImpl implements SeatService {
             .eventType(eventType)
             .payload(eventConverter.serializeEvent(event))
             .build());
-    }
-
-    private void makeSeatIndexOnRedis(WarmupSeatResult seatInfo,
-        StringRedisConnection stringConn) {
-        String seatIndexKey = redisKeyFactory.generateSeatIndexKey(
-            seatInfo.concertSequenceId(), seatInfo.section().getValue());
-
-        stringConn.zAdd(seatIndexKey, seatInfo.row() * 10000 + seatInfo.col(),
-            String.valueOf(seatInfo.seatInstanceId()));
-    }
-
-    private void makeSectionListOnRedis(WarmupSeatResult seatInfo,
-        StringRedisConnection stringConn) {
-        String sectionKey = redisKeyFactory.generateSectionListKey(
-            seatInfo.concertId(),
-            seatInfo.concertSequenceId(),
-            seatInfo.section().getValue()
-        );
-
-        stringConn.hIncrBy(sectionKey, "remainingSeat", 1);
-        stringConn.hSet(sectionKey, "floor", seatInfo.floor().toString());
-        stringConn.hSet(sectionKey, "grade", seatInfo.grade().getValue());
-        stringConn.hSet(sectionKey, "price", seatInfo.price().toString());
-    }
-
-    private void makeSeatInstanceOnRedis(
-        WarmupSeatResult seatInfo,
-        StringRedisConnection stringConn,
-        Map<UUID, LocalDateTime> ticketDeadline,
-        Map<UUID, LocalDateTime> vipTicketDeadline
-    ) {
-        String seatInstanceKey = redisKeyFactory.generateSeatInstanceKey(
-            seatInfo.concertSequenceId(), seatInfo.seatInstanceId());
-
-        stringConn.hSet(seatInstanceKey, "status", seatInfo.status().getValue());
-        stringConn.hSet(seatInstanceKey, "userId", "");
-        stringConn.hSet(seatInstanceKey, "reservationId", "");
-        stringConn.hSet(seatInstanceKey, "concertId", seatInfo.concertId().toString());
-        stringConn.hSet(seatInstanceKey, "col", seatInfo.col().toString());
-        stringConn.hSet(seatInstanceKey, "row", seatInfo.row().toString());
-        stringConn.hSet(seatInstanceKey, "section", seatInfo.section().getValue());
-        stringConn.hSet(seatInstanceKey, "floor", seatInfo.floor().toString());
-        stringConn.hSet(seatInstanceKey, "grade", seatInfo.grade().getValue());
-        stringConn.hSet(seatInstanceKey, "price", seatInfo.price().toString());
-        stringConn.hSet(seatInstanceKey, "expiredAt", CommonUtil.LocalDateTimetoString(
-            ticketDeadline.get(seatInfo.concertSequenceId())));
-        stringConn.hSet(seatInstanceKey, "vipExpiredAt", CommonUtil.LocalDateTimetoString(
-            vipTicketDeadline.get(seatInfo.concertSequenceId())));
-        stringConn.hSet(seatInstanceKey, "updatedAt", "");
     }
 }
 
