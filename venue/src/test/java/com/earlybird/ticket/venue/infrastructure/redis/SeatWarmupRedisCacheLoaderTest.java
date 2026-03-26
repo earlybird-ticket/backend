@@ -10,6 +10,7 @@ import com.earlybird.ticket.venue.infrastructure.redis.util.RedisKeyFactory;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisKeyScanner;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -169,7 +170,7 @@ class SeatWarmupRedisCacheLoaderTest {
     }
 
     @Test
-    void 섹션별_좌석_인덱스_zset을_적재한다() {
+    void 섹션별_좌석_인덱스_set을_적재한다() {
         // given
         UUID concertId = UUID.randomUUID();
         UUID concertSequenceId = UUID.randomUUID();
@@ -182,17 +183,18 @@ class SeatWarmupRedisCacheLoaderTest {
         // when
         seatWarmupRedisCacheLoader.load(seatResults, ticketDeadline, vipTicketDeadline);
 
+        Map<Section, Integer> countsBySection = new HashMap<>();
+
         // then
         for (WarmupSeatResult seat : seatResults) {
             String seatIndexKey = redisKeyFactory.generateSeatIndexKey(
                 concertSequenceId, seat.section().getValue()
             );
 
-            BDDMockito.then(stringRedisConnection).should().zAdd(
-                seatIndexKey,
-                seat.row() * 10000 + seat.col(),
-                String.valueOf(seat.seatInstanceId())
-            );
+            int cnt = countsBySection.getOrDefault(seat.section(), 0);
+            BDDMockito.then(stringRedisConnection).should().sAdd(seatIndexKey, String.valueOf(cnt));
+
+            countsBySection.put(seat.section(), cnt + 1);
         }
     }
 

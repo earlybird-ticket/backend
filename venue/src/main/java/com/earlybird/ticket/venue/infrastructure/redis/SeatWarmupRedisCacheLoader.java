@@ -3,6 +3,7 @@ package com.earlybird.ticket.venue.infrastructure.redis;
 import com.earlybird.ticket.common.util.CommonUtil;
 import com.earlybird.ticket.venue.application.SeatWarmupCacheLoader;
 import com.earlybird.ticket.venue.domain.dto.WarmupSeatResult;
+import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisKeyFactory;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +22,9 @@ public class SeatWarmupRedisCacheLoader implements SeatWarmupCacheLoader {
     private final StringRedisTemplate stringRedisTemplate;
     private final RedisKeyFactory redisKeyFactory;
 
+    /**
+     반드시 동일 회차 공연이며, 섹션/행/열 순으로 정렬된 입력이 들어와야 한다.
+     */
     @Override
     public void load(
         List<WarmupSeatResult> seats,
@@ -31,11 +35,19 @@ public class SeatWarmupRedisCacheLoader implements SeatWarmupCacheLoader {
             (RedisCallback<Object>) connection -> {
                 StringRedisConnection stringConn = (StringRedisConnection) connection;
 
+                Section currentSection = null;
+                int layoutIndex = 0;
+
                 for (WarmupSeatResult seatInfo : seats) {
+                    if (currentSection == null || seatInfo.section() != currentSection) {
+                        currentSection = seatInfo.section();
+                        layoutIndex = 0;
+                    }
                     makeSeatInstanceOnRedis(seatInfo, stringConn, ticketDeadline,
                         vipTicketDeadline);
                     makeSectionListOnRedis(seatInfo, stringConn);
-                    makeSeatIndexOnRedis(seatInfo, stringConn);
+                    makeSeatIndexOnRedis(seatInfo, stringConn, layoutIndex);
+                    layoutIndex++;
                 }
                 return null;
             }
@@ -44,13 +56,12 @@ public class SeatWarmupRedisCacheLoader implements SeatWarmupCacheLoader {
     }
 
     private void makeSeatIndexOnRedis(
-        WarmupSeatResult seatInfo, StringRedisConnection stringConn) {
-
+        WarmupSeatResult seatInfo, StringRedisConnection stringConn, int layoutIndex
+    ) {
         String seatIndexKey = redisKeyFactory.generateSeatIndexKey(
             seatInfo.concertSequenceId(), seatInfo.section().getValue());
 
-        stringConn.zAdd(seatIndexKey, seatInfo.row() * 10000 + seatInfo.col(),
-            String.valueOf(seatInfo.seatInstanceId()));
+        stringConn.sAdd(seatIndexKey, String.valueOf(layoutIndex));
     }
 
     private void makeSectionListOnRedis(WarmupSeatResult seatInfo,
