@@ -11,6 +11,7 @@ import lombok.Builder;
 
 public record SeatLayoutV1(
     String schemaVersion,
+    UUID concertId,
     UUID concertSequenceId,
     Section section,
     List<SeatLayoutItem> seats
@@ -21,9 +22,9 @@ public record SeatLayoutV1(
     }
 
     @Builder
-    public SeatLayoutV1(UUID concertSequenceId, Section section,
-        List<SeatLayoutItem> seats) {
-        this("seat-layout-v1", concertSequenceId, section, seats);
+    public SeatLayoutV1(
+        UUID concertId, UUID concertSequenceId, Section section, List<SeatLayoutItem> seats) {
+        this("seat-layout-v1", concertId, concertSequenceId, section, seats);
     }
 
     @Builder

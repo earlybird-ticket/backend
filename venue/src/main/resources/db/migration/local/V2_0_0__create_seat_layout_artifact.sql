@@ -11,19 +11,20 @@ CREATE TABLE p_seat_layout_artifact
     is_active           BOOLEAN      NOT NULL DEFAULT FALSE,
     is_ready            BOOLEAN      NOT NULL DEFAULT FALSE,
     created_by          BIGINT,
-    created_at          TIMESTAMP(6) NOT NULL,
+    created_at          TIMESTAMP(6),
     updated_by          BIGINT,
-    updated_at          TIMESTAMP(6) NOT NULL,
+    updated_at          TIMESTAMP(6),
     deleted_by          BIGINT,
-    deleted_at          TIMESTAMP(6) NOT NULL
+    deleted_at          TIMESTAMP(6)
 );
 
 CREATE INDEX idx_seat_layout_artifact_scope
     ON p_seat_layout_artifact (concert_id, concert_sequence_id, section);
 
-CREATE INDEX idx_seat_layout_artifact_ready
-    ON p_seat_layout_artifact (concert_id, concert_sequence_id, section, is_ready);
-
 CREATE UNIQUE INDEX uk_seat_layout_artifact_active
     ON p_seat_layout_artifact (concert_id, concert_sequence_id, section)
     WHERE is_active = true AND deleted_at IS NULL;
+
+CREATE UNIQUE INDEX uk_seat_layout_artifact
+    ON p_seat_layout_artifact (concert_id, concert_sequence_id, section, hash, schema_version)
+    WHERE deleted_at IS NULL;

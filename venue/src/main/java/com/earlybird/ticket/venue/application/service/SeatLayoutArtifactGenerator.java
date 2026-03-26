@@ -34,6 +34,7 @@ public class SeatLayoutArtifactGenerator {
             if (currentSection != null && currentSection != warmupSeatResult.section()) {
                 bucket.add(
                     SeatLayoutV1.builder()
+                        .concertId(concertId)
                         .concertSequenceId(concertSequenceId)
                         .section(currentSection)
                         .seats(items)
@@ -43,12 +44,14 @@ public class SeatLayoutArtifactGenerator {
                 items.clear();
             }
             currentSection = warmupSeatResult.section();
+            concertId = warmupSeatResult.concertId();
             items.add(SeatLayoutV1.SeatLayoutItem.toSeatLayoutItem(warmupSeatResult));
         }
 
         if (currentSection != null && !items.isEmpty()) {
             bucket.add(
                 SeatLayoutV1.builder()
+                    .concertId(concertId)
                     .concertSequenceId(concertSequenceId)
                     .section(currentSection)
                     .seats(items)

@@ -97,6 +97,11 @@ class SeatLayoutArtifactGeneratorTest {
             .orElseThrow();
 
         // then
+        assertThat(sectionA.concertId()).isEqualTo(concertId);
+        assertThat(sectionA.concertSequenceId()).isEqualTo(concertSequenceId);
+        assertThat(sectionB.concertId()).isEqualTo(concertId);
+        assertThat(sectionB.concertSequenceId()).isEqualTo(concertSequenceId);
+
         assertThat(artifacts).filteredOn(artifact -> artifact.section() == Section.A)
             .hasSize(1);
         assertThat(artifacts).filteredOn(artifact -> artifact.section() == Section.B)
