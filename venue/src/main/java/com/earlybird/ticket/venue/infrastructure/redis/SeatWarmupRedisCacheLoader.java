@@ -3,12 +3,9 @@ package com.earlybird.ticket.venue.infrastructure.redis;
 import com.earlybird.ticket.common.util.CommonUtil;
 import com.earlybird.ticket.venue.application.SeatWarmupCacheLoader;
 import com.earlybird.ticket.venue.domain.dto.WarmupSeatResult;
-import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisKeyFactory;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
@@ -23,31 +20,28 @@ public class SeatWarmupRedisCacheLoader implements SeatWarmupCacheLoader {
     private final RedisKeyFactory redisKeyFactory;
 
     /**
-     반드시 동일 회차 공연이며, 섹션/행/열 순으로 정렬된 입력이 들어와야 한다.
+     반드시 동일 공연 회차 및 섹션이며, 행/열 순으로 정렬된 입력이 들어와야 한다.
      */
     @Override
     public void load(
         List<WarmupSeatResult> seats,
-        Map<UUID, LocalDateTime> ticketDeadline,
-        Map<UUID, LocalDateTime> vipTicketDeadline
+        LocalDateTime ticketDeadline,
+        LocalDateTime vipTicketDeadline
     ) {
+        if (seats == null || seats.isEmpty()) {
+            throw new IllegalArgumentException("좌석 warmup 캐시 적재 입력은 비어 있을 수 없습니다.");
+        }
+
         stringRedisTemplate.executePipelined(
             (RedisCallback<Object>) connection -> {
                 StringRedisConnection stringConn = (StringRedisConnection) connection;
 
-                Section currentSection = null;
-                int layoutIndex = 0;
+                for (int layoutIndex = 0; layoutIndex < seats.size(); layoutIndex++) {
+                    WarmupSeatResult seatInfo = seats.get(layoutIndex);
 
-                for (WarmupSeatResult seatInfo : seats) {
-                    if (currentSection == null || seatInfo.section() != currentSection) {
-                        currentSection = seatInfo.section();
-                        layoutIndex = 0;
-                    }
-                    makeSeatInstanceOnRedis(seatInfo, stringConn, ticketDeadline,
-                        vipTicketDeadline);
+                    makeSeatInstanceOnRedis(seatInfo, stringConn, ticketDeadline, vipTicketDeadline);
                     makeSectionListOnRedis(seatInfo, stringConn);
                     makeSeatIndexOnRedis(seatInfo, stringConn, layoutIndex);
-                    layoutIndex++;
                 }
                 return null;
             }
@@ -81,8 +75,8 @@ public class SeatWarmupRedisCacheLoader implements SeatWarmupCacheLoader {
     private void makeSeatInstanceOnRedis(
         WarmupSeatResult seatInfo,
         StringRedisConnection stringConn,
-        Map<UUID, LocalDateTime> ticketDeadline,
-        Map<UUID, LocalDateTime> vipTicketDeadline
+        LocalDateTime ticketDeadline,
+        LocalDateTime vipTicketDeadline
     ) {
         String seatInstanceKey = redisKeyFactory.generateSeatInstanceKey(
             seatInfo.concertSequenceId(), seatInfo.seatInstanceId());
@@ -97,10 +91,12 @@ public class SeatWarmupRedisCacheLoader implements SeatWarmupCacheLoader {
         stringConn.hSet(seatInstanceKey, "floor", seatInfo.floor().toString());
         stringConn.hSet(seatInstanceKey, "grade", seatInfo.grade().getValue());
         stringConn.hSet(seatInstanceKey, "price", seatInfo.price().toString());
-        stringConn.hSet(seatInstanceKey, "expiredAt", CommonUtil.LocalDateTimetoString(
-            ticketDeadline.get(seatInfo.concertSequenceId())));
-        stringConn.hSet(seatInstanceKey, "vipExpiredAt", CommonUtil.LocalDateTimetoString(
-            vipTicketDeadline.get(seatInfo.concertSequenceId())));
+        stringConn.hSet(
+            seatInstanceKey, "expiredAt", CommonUtil.LocalDateTimetoString(ticketDeadline)
+        );
+        stringConn.hSet(
+            seatInstanceKey, "vipExpiredAt", CommonUtil.LocalDateTimetoString(vipTicketDeadline)
+        );
         stringConn.hSet(seatInstanceKey, "updatedAt", "");
 
     }

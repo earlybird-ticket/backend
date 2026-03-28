@@ -5,7 +5,6 @@ import com.earlybird.ticket.venue.domain.dto.WarmupSeatResult;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -19,47 +18,30 @@ public class SeatLayoutArtifactGenerator {
     private final ObjectMapper artifactObjectMapper;
 
     /**
-     * 반드시 동일 회차 공연이며, 섹션/행/열 순으로 정렬된 입력이 들어와야 한다.
+     * 반드시 동일 공연 회차 및 동일 섹션이며, 행/열 순으로 정렬된 입력이 들어와야 한다.
      */
-    public List<SeatLayoutV1> makeArtifacts(
+    public SeatLayoutV1 makeArtifact(
         UUID concertSequenceId,
         List<WarmupSeatResult> warmupSeatResults
     ) {
-        List<SeatLayoutV1> bucket = new ArrayList<>();
-        List<SeatLayoutV1.SeatLayoutItem> items = new ArrayList<>();
-        Section currentSection = null;
-        UUID concertId = null;
 
-        for (WarmupSeatResult warmupSeatResult : warmupSeatResults) {
-            if (currentSection != null && currentSection != warmupSeatResult.section()) {
-                bucket.add(
-                    SeatLayoutV1.builder()
-                        .concertId(concertId)
-                        .concertSequenceId(concertSequenceId)
-                        .section(currentSection)
-                        .seats(items)
-                        .build()
-                );
-
-                items.clear();
-            }
-            currentSection = warmupSeatResult.section();
-            concertId = warmupSeatResult.concertId();
-            items.add(SeatLayoutV1.SeatLayoutItem.toSeatLayoutItem(warmupSeatResult));
+        if (warmupSeatResults == null || warmupSeatResults.isEmpty()) {
+            throw new IllegalArgumentException("좌석 레이아웃 생성 입력은 비어 있을 수 없습니다.");
         }
 
-        if (currentSection != null && !items.isEmpty()) {
-            bucket.add(
-                SeatLayoutV1.builder()
-                    .concertId(concertId)
-                    .concertSequenceId(concertSequenceId)
-                    .section(currentSection)
-                    .seats(items)
-                    .build()
-            );
-        }
+        Section currentSection = warmupSeatResults.get(0).section();
+        UUID concertId = warmupSeatResults.get(0).concertId();
 
-        return bucket;
+        List<SeatLayoutV1.SeatLayoutItem> items = warmupSeatResults.stream()
+            .map(SeatLayoutV1.SeatLayoutItem::toSeatLayoutItem)
+            .toList();
+
+        return SeatLayoutV1.builder()
+            .concertId(concertId)
+            .concertSequenceId(concertSequenceId)
+            .section(currentSection)
+            .seats(items)
+            .build();
     }
 
     public byte[] toCanonicalJsonBytes(SeatLayoutV1 seatLayoutV1) {

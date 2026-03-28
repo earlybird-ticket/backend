@@ -10,7 +10,7 @@ import com.earlybird.ticket.venue.infrastructure.redis.util.RedisKeyFactory;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisKeyScanner;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -24,7 +24,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.lang.NonNull;
 
 @ExtendWith(MockitoExtension.class)
 class SeatWarmupRedisCacheLoaderTest {
@@ -55,50 +54,55 @@ class SeatWarmupRedisCacheLoaderTest {
         // given
         UUID concertId = UUID.randomUUID();
         UUID concertSequenceId = UUID.randomUUID();
-        List<WarmupSeatResult> seatResults = warmupSeatResults(concertId, concertSequenceId);
-        Map<UUID, LocalDateTime> ticketDeadline = deadline(concertSequenceId, 10, 0);
-        Map<UUID, LocalDateTime> vipTicketDeadline = deadline(concertSequenceId, 9, 50);
+        LinkedHashMap<Section, List<WarmupSeatResult>> warmupSeatResultsBySection =
+            getWarmupSeatResultsBySection(concertId, concertSequenceId);
+        LocalDateTime ticketDeadline = deadline(10, 0);
+        LocalDateTime vipTicketDeadline = deadline(9, 50);
 
         stubPipelinedExecution();
 
         // when
-        seatWarmupRedisCacheLoader.load(seatResults, ticketDeadline, vipTicketDeadline);
 
-        // then
-        for (WarmupSeatResult seat : seatResults) {
-            String seatInstanceKey = redisKeyFactory.generateSeatInstanceKey(
-                seat.concertSequenceId(), seat.seatInstanceId()
-            );
+        for (Section section : warmupSeatResultsBySection.keySet()) {
+            List<WarmupSeatResult> seatResults = warmupSeatResultsBySection.get(section);
+            seatWarmupRedisCacheLoader.load(seatResults, ticketDeadline, vipTicketDeadline);
 
-            BDDMockito.then(stringRedisConnection).should().hSet(
-                seatInstanceKey,
-                "concertId",
-                seat.concertId().toString()
-            );
+            // then
+            for (WarmupSeatResult seat : seatResults) {
+                String seatInstanceKey = redisKeyFactory.generateSeatInstanceKey(
+                    seat.concertSequenceId(), seat.seatInstanceId()
+                );
 
-            BDDMockito.then(stringRedisConnection).should().hSet(
-                seatInstanceKey,
-                "section",
-                seat.section().getValue()
-            );
+                BDDMockito.then(stringRedisConnection).should().hSet(
+                    seatInstanceKey,
+                    "concertId",
+                    seat.concertId().toString()
+                );
 
-            BDDMockito.then(stringRedisConnection).should().hSet(
-                seatInstanceKey,
-                "status",
-                seat.status().getValue()
-            );
+                BDDMockito.then(stringRedisConnection).should().hSet(
+                    seatInstanceKey,
+                    "section",
+                    seat.section().getValue()
+                );
 
-            BDDMockito.then(stringRedisConnection).should().hSet(
-                seatInstanceKey,
-                "expiredAt",
-                CommonUtil.LocalDateTimetoString(ticketDeadline.get(seat.concertSequenceId()))
-            );
+                BDDMockito.then(stringRedisConnection).should().hSet(
+                    seatInstanceKey,
+                    "status",
+                    seat.status().getValue()
+                );
 
-            BDDMockito.then(stringRedisConnection).should().hSet(
-                seatInstanceKey,
-                "vipExpiredAt",
-                CommonUtil.LocalDateTimetoString(vipTicketDeadline.get(seat.concertSequenceId()))
-            );
+                BDDMockito.then(stringRedisConnection).should().hSet(
+                    seatInstanceKey,
+                    "expiredAt",
+                    CommonUtil.LocalDateTimetoString(ticketDeadline)
+                );
+
+                BDDMockito.then(stringRedisConnection).should().hSet(
+                    seatInstanceKey,
+                    "vipExpiredAt",
+                    CommonUtil.LocalDateTimetoString(vipTicketDeadline)
+                );
+            }
         }
     }
 
@@ -107,9 +111,11 @@ class SeatWarmupRedisCacheLoaderTest {
         // given
         UUID concertId = UUID.randomUUID();
         UUID concertSequenceId = UUID.randomUUID();
-        List<WarmupSeatResult> seatResults = warmupSeatResults(concertId, concertSequenceId);
-        Map<UUID, LocalDateTime> ticketDeadline = deadline(concertSequenceId, 10, 0);
-        Map<UUID, LocalDateTime> vipTicketDeadline = deadline(concertSequenceId, 9, 50);
+        LinkedHashMap<Section, List<WarmupSeatResult>> warmupSeatResultsBySection =
+            getWarmupSeatResultsBySection(concertId, concertSequenceId);
+
+        LocalDateTime ticketDeadline = deadline(10, 0);
+        LocalDateTime vipTicketDeadline = deadline(9, 50);
 
         stubPipelinedExecution();
 
@@ -129,19 +135,17 @@ class SeatWarmupRedisCacheLoaderTest {
         );
 
         // when
-        seatWarmupRedisCacheLoader.load(seatResults, ticketDeadline, vipTicketDeadline);
+        for (Section section : warmupSeatResultsBySection.keySet()) {
+            List<WarmupSeatResult> seatResults = warmupSeatResultsBySection.get(section);
+            seatWarmupRedisCacheLoader.load(seatResults, ticketDeadline, vipTicketDeadline);
 
-        Map<Section, Long> counts = seatResults.stream()
-            .collect(
-                Collectors.groupingBy(WarmupSeatResult::section, Collectors.counting()));
+            int count = seatResults.size();
 
-        // then
-        for (Map.Entry<Section, Long> entry : counts.entrySet()) {
             String sectionListKey = redisKeyFactory.generateSectionListKey(
-                concertId, concertSequenceId, entry.getKey().getValue()
+                concertId, concertSequenceId, section.getValue()
             );
 
-            int count = entry.getValue().intValue();
+            // then
             BDDMockito.then(stringRedisConnection).should(BDDMockito.times(count)).hIncrBy(
                 BDDMockito.eq(sectionListKey),
                 BDDMockito.eq("remainingSeat"),
@@ -151,21 +155,20 @@ class SeatWarmupRedisCacheLoaderTest {
             BDDMockito.then(stringRedisConnection).should(BDDMockito.times(count)).hSet(
                 BDDMockito.eq(sectionListKey),
                 BDDMockito.eq("floor"),
-                BDDMockito.eq(expectedFloor.get(entry.getKey()))
+                BDDMockito.eq(expectedFloor.get(section))
             );
 
             BDDMockito.then(stringRedisConnection).should(BDDMockito.times(count)).hSet(
                 BDDMockito.eq(sectionListKey),
                 BDDMockito.eq("grade"),
-                BDDMockito.eq(expectedGrade.get(entry.getKey()).getValue())
+                BDDMockito.eq(expectedGrade.get(section).getValue())
             );
 
             BDDMockito.then(stringRedisConnection).should(BDDMockito.times(count)).hSet(
                 BDDMockito.eq(sectionListKey),
                 BDDMockito.eq("price"),
-                BDDMockito.eq(expectedPrice.get(entry.getKey()).toString())
+                BDDMockito.eq(expectedPrice.get(section).toString())
             );
-
         }
     }
 
@@ -174,35 +177,33 @@ class SeatWarmupRedisCacheLoaderTest {
         // given
         UUID concertId = UUID.randomUUID();
         UUID concertSequenceId = UUID.randomUUID();
-        List<WarmupSeatResult> seatResults = warmupSeatResults(concertId, concertSequenceId);
-        Map<UUID, LocalDateTime> ticketDeadline = deadline(concertSequenceId, 10, 0);
-        Map<UUID, LocalDateTime> vipTicketDeadline = deadline(concertSequenceId, 9, 50);
+        LinkedHashMap<Section, List<WarmupSeatResult>> warmupSeatResultsBySection = getWarmupSeatResultsBySection(
+            concertId, concertSequenceId
+        );
+        LocalDateTime ticketDeadline = deadline(10, 0);
+        LocalDateTime vipTicketDeadline = deadline(9, 50);
 
         stubPipelinedExecution();
 
-        // when
-        seatWarmupRedisCacheLoader.load(seatResults, ticketDeadline, vipTicketDeadline);
+        // when & then
+        for (Section section : warmupSeatResultsBySection.keySet()) {
+            List<WarmupSeatResult> seatResults = warmupSeatResultsBySection.get(section);
+            seatWarmupRedisCacheLoader.load(seatResults, ticketDeadline, vipTicketDeadline);
 
-        Map<Section, Integer> countsBySection = new HashMap<>();
-
-        // then
-        for (WarmupSeatResult seat : seatResults) {
             String seatIndexKey = redisKeyFactory.generateSeatIndexKey(
-                concertSequenceId, seat.section().getValue()
+                concertSequenceId, section.getValue()
             );
 
-            int cnt = countsBySection.getOrDefault(seat.section(), 0);
-            BDDMockito.then(stringRedisConnection).should().sAdd(seatIndexKey, String.valueOf(cnt));
-
-            countsBySection.put(seat.section(), cnt + 1);
+            for (int layoutIndex = 0; layoutIndex < seatResults.size(); layoutIndex++) {
+                BDDMockito.then(stringRedisConnection).should().sAdd(
+                    seatIndexKey, String.valueOf(layoutIndex)
+                );
+            }
         }
     }
 
-    @NonNull
-    private static Map<UUID, LocalDateTime> deadline(UUID concertSequenceId, int hour, int minute) {
-        return Map.of(
-            concertSequenceId, LocalDateTime.of(2026, 3, 26, hour, minute)
-        );
+    private LocalDateTime deadline(int hour, int minute) {
+        return LocalDateTime.of(2026, 3, 26, hour, minute);
     }
 
     private void stubPipelinedExecution() {
@@ -272,6 +273,19 @@ class SeatWarmupRedisCacheLoaderTest {
                 Status.FREE
             )
         );
+    }
+
+    private LinkedHashMap<Section, List<WarmupSeatResult>> getWarmupSeatResultsBySection(
+        UUID concertId,
+        UUID concertSequenceId
+    ) {
+        return warmupSeatResults(concertId, concertSequenceId).stream()
+            .collect(Collectors.groupingBy(
+                    WarmupSeatResult::section,
+                    LinkedHashMap::new,
+                    Collectors.toList()
+                )
+            );
     }
 
 }

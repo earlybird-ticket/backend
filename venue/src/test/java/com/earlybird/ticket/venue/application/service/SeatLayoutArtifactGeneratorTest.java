@@ -13,8 +13,10 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -37,90 +39,97 @@ class SeatLayoutArtifactGeneratorTest {
         // given
         UUID concertId = UUID.randomUUID();
         UUID concertSequenceId = UUID.randomUUID();
-        List<WarmupSeatResult> firstData = warmupSeatResults(concertId, concertSequenceId);
-        List<WarmupSeatResult> secondData = warmupSeatResults(concertId, concertSequenceId);
+        LinkedHashMap<Section, List<WarmupSeatResult>> firstBySection = getWarmupSeatResultsBySection(
+            concertId, concertSequenceId
+        );
+        LinkedHashMap<Section, List<WarmupSeatResult>> secondBySection = getWarmupSeatResultsBySection(
+            concertId, concertSequenceId
+        );
 
-        // when
-        List<SeatLayoutV1> firstArtifacts = seatLayoutArtifactGenerator.makeArtifacts(
-            concertSequenceId, firstData);
-        List<SeatLayoutV1> secondArtifacts = seatLayoutArtifactGenerator.makeArtifacts(
-            concertSequenceId, secondData);
+        // when & then
+        assertThat(firstBySection.keySet()).containsExactlyElementsOf(secondBySection.keySet());
 
-        List<String> firstHashes = firstArtifacts.stream()
-            .map(seatLayoutArtifactGenerator::generateHash)
-            .toList();
+        for (Section section : firstBySection.keySet()) {
+            SeatLayoutV1 firstArtifact = seatLayoutArtifactGenerator.makeArtifact(
+                concertSequenceId, firstBySection.get(section)
+            );
 
-        List<String> secondHashes = secondArtifacts.stream()
-            .map(seatLayoutArtifactGenerator::generateHash)
-            .toList();
+            SeatLayoutV1 secondArtifact = seatLayoutArtifactGenerator.makeArtifact(
+                concertSequenceId, secondBySection.get(section)
+            );
 
-        List<String> firstKeys = firstArtifacts.stream()
-            .map(artifact ->
-                seatLayoutArtifactGenerator.generateStorageKey(
-                    artifact, seatLayoutArtifactGenerator.generateHash(artifact)
-                )
-            ).toList();
+            String firstHash = seatLayoutArtifactGenerator.generateHash(firstArtifact);
+            String secondHash = seatLayoutArtifactGenerator.generateHash(secondArtifact);
 
-        List<String> secondKeys = secondArtifacts.stream()
-            .map(artifact ->
-                seatLayoutArtifactGenerator.generateStorageKey(
-                    artifact, seatLayoutArtifactGenerator.generateHash(artifact)
-                )
-            ).toList();
+            String firstKey = seatLayoutArtifactGenerator.generateStorageKey(
+                firstArtifact, firstHash
+            );
 
-        // then
-        assertThat(firstArtifacts).containsExactlyElementsOf(secondArtifacts);
-        assertThat(firstHashes).containsExactlyElementsOf(secondHashes);
-        assertThat(firstKeys).containsExactlyElementsOf(secondKeys);
+            String secondKey = seatLayoutArtifactGenerator.generateStorageKey(
+                secondArtifact, secondHash
+            );
+
+            assertThat(firstArtifact).isEqualTo(secondArtifact);
+            assertThat(firstHash).isEqualTo(secondHash);
+            assertThat(firstKey).isEqualTo(secondKey);
+        }
 
     }
 
     @Test
-    void 서로_다른_섹션이_포함되면_섹션별_아티팩트로_분리된다() {
+    void 동일_섹션_입력으로_아티팩트_필드를_생성한다() {
         // given
         UUID concertId = UUID.randomUUID();
         UUID concertSequenceId = UUID.randomUUID();
-        List<WarmupSeatResult> data = warmupSeatResults(concertId, concertSequenceId);
+        Section section = Section.A;
+
+        List<WarmupSeatResult> warmupSeatResults = List.of(
+            new WarmupSeatResult(
+                UUID.fromString("50000000-0000-0000-0000-000000000001"),
+                UUID.fromString("40000000-0000-0000-0000-000000000001"),
+                concertId,
+                concertSequenceId,
+                section,
+                1,
+                1,
+                1,
+                Grade.R,
+                BigDecimal.valueOf(10000),
+                Status.FREE
+            ),
+            new WarmupSeatResult(
+                UUID.fromString("50000000-0000-0000-0000-000000000002"),
+                UUID.fromString("40000000-0000-0000-0000-000000000002"),
+                concertId,
+                concertSequenceId,
+                section,
+                1,
+                2,
+                1,
+                Grade.R,
+                BigDecimal.valueOf(10000),
+                Status.FREE
+            )
+        );
 
         // when
-        List<SeatLayoutV1> artifacts = seatLayoutArtifactGenerator.makeArtifacts(
-            concertSequenceId, data);
-
-        SeatLayoutV1 sectionA = artifacts.stream()
-            .filter(artifact -> artifact.section().equals(Section.A))
-            .findFirst()
-            .orElseThrow();
-
-        SeatLayoutV1 sectionB = artifacts.stream()
-            .filter(artifact -> artifact.section().equals(Section.B))
-            .findFirst()
-            .orElseThrow();
+        SeatLayoutV1 artifact = seatLayoutArtifactGenerator.makeArtifact(
+            concertSequenceId, warmupSeatResults);
 
         // then
-        assertThat(sectionA.concertId()).isEqualTo(concertId);
-        assertThat(sectionA.concertSequenceId()).isEqualTo(concertSequenceId);
-        assertThat(sectionB.concertId()).isEqualTo(concertId);
-        assertThat(sectionB.concertSequenceId()).isEqualTo(concertSequenceId);
+        assertThat(artifact.section()).isEqualTo(Section.A);
+        assertThat(artifact.concertId()).isEqualTo(concertId);
+        assertThat(artifact.concertSequenceId()).isEqualTo(concertSequenceId);
+        assertThat(artifact.schemaVersion()).isEqualTo("seat-layout-v1");
 
-        assertThat(artifacts).filteredOn(artifact -> artifact.section() == Section.A)
-            .hasSize(1);
-        assertThat(artifacts).filteredOn(artifact -> artifact.section() == Section.B)
-            .hasSize(1);
+        assertThat(artifact.seats()).hasSize(warmupSeatResults.size());
 
-        assertThat(sectionA.seats()).extracting(
+        assertThat(artifact.seats()).extracting(
             SeatLayoutItem::row,
             SeatLayoutItem::col
         ).containsExactly(
             tuple(1, 1),
             tuple(1, 2)
-        );
-
-        assertThat(sectionB.seats()).extracting(
-            SeatLayoutItem::row,
-            SeatLayoutItem::col
-        ).containsExactly(
-            tuple(1, 1),
-            tuple(2, 1)
         );
 
     }
@@ -131,14 +140,16 @@ class SeatLayoutArtifactGeneratorTest {
         // given
         UUID concertId = UUID.randomUUID();
         UUID concertSequenceId = UUID.randomUUID();
-        List<WarmupSeatResult> seatResults = warmupSeatResults(concertId, concertSequenceId);
+        LinkedHashMap<Section, List<WarmupSeatResult>> warmupSeatResultsBySection =
+            getWarmupSeatResultsBySection(concertId, concertSequenceId);
 
-        // when
-        List<SeatLayoutV1> artifacts = seatLayoutArtifactGenerator.makeArtifacts(
-            concertSequenceId, seatResults);
+        for (Section section : warmupSeatResultsBySection.keySet()) {
+            // when
+            SeatLayoutV1 artifact = seatLayoutArtifactGenerator.makeArtifact(
+                concertSequenceId, warmupSeatResultsBySection.get(section)
+            );
 
-        // then
-        assertThat(artifacts).allSatisfy(artifact -> {
+            // then
             String hash = seatLayoutArtifactGenerator.generateHash(artifact);
             String storageKey = seatLayoutArtifactGenerator.generateStorageKey(artifact, hash);
 
@@ -150,8 +161,7 @@ class SeatLayoutArtifactGeneratorTest {
                     hash
                 )
             );
-        });
-
+        }
     }
 
     private List<WarmupSeatResult> warmupSeatResults(
@@ -195,7 +205,7 @@ class SeatLayoutArtifactGeneratorTest {
                 1,
                 1,
                 Grade.R,
-                BigDecimal.valueOf(10000),
+                BigDecimal.valueOf(12000),
                 Status.FREE
             )
             , new WarmupSeatResult(
@@ -212,5 +222,18 @@ class SeatLayoutArtifactGeneratorTest {
                 Status.FREE
             )
         );
+    }
+
+    private LinkedHashMap<Section, List<WarmupSeatResult>> getWarmupSeatResultsBySection(
+        UUID concertId,
+        UUID concertSequenceId
+    ) {
+        return warmupSeatResults(concertId, concertSequenceId).stream()
+            .collect(Collectors.groupingBy(
+                    WarmupSeatResult::section,
+                    LinkedHashMap::new,
+                    Collectors.toList()
+                )
+            );
     }
 }
