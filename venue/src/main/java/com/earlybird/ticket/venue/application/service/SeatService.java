@@ -5,10 +5,11 @@ import com.earlybird.ticket.venue.application.dto.request.SeatPreemptCommand;
 import com.earlybird.ticket.venue.application.dto.response.ProcessSeatCheckQuery;
 import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
-import com.earlybird.ticket.venue.application.event.dto.request.*;
-import org.springframework.stereotype.Service;
-
+import com.earlybird.ticket.venue.domain.dto.WarmupSeatResult;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import org.springframework.stereotype.Service;
 
 @Service
 public interface SeatService {
@@ -23,4 +24,6 @@ public interface SeatService {
     String preemptSeatByVIP(SeatPreemptCommand seatPreemptCommand, String passport);
 
     String preemptWaitingSeatByVIP(SeatPreemptCommand seatPreemptCommand, String passport);
+
+    Map<UUID, List<WarmupSeatResult>> collectWarmupSeatData(List<UUID> concertSequenceIds);
 }

@@ -162,6 +162,7 @@ public class SeatServiceImpl implements SeatService {
             redisConfig.waitingSeatPreemptByVIPScript());
     }
 
+    @Override
     public Map<UUID, List<WarmupSeatResult>> collectWarmupSeatData(List<UUID> concertSequenceIds) {
         return seatRepository.findSeatInfoByConcertSequenceIdList(concertSequenceIds)
             .stream()
