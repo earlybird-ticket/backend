@@ -9,6 +9,7 @@ import com.earlybird.ticket.venue.application.dto.request.SeatPreemptCommand;
 import com.earlybird.ticket.venue.application.dto.response.ProcessSeatCheckQuery;
 import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
+import com.earlybird.ticket.venue.application.dto.response.SectionListQuery.SectionQuery;
 import com.earlybird.ticket.venue.application.event.dto.response.ReservationCreateEvent;
 import com.earlybird.ticket.venue.common.dto.RedisReadResult;
 import com.earlybird.ticket.venue.common.event.EventType;
@@ -16,6 +17,8 @@ import com.earlybird.ticket.venue.common.exception.RedisException;
 import com.earlybird.ticket.venue.common.exception.SeatUnavailableException;
 import com.earlybird.ticket.venue.common.util.EventConverter;
 import com.earlybird.ticket.venue.domain.dto.WarmupSeatResult;
+import com.earlybird.ticket.venue.domain.entity.SeatLayoutArtifact;
+import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisKeyFactory;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSeatListReader;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSectionListReader;
@@ -55,6 +58,7 @@ public class SeatServiceImpl implements SeatService {
     private final RedisSeatListReader redisSeatListReader; //하나로 합치기 (예 : 전략패턴)
     private final RedisSectionListReader redisSectionListReader;
     private final MeterRegistry meterRegistry;
+    private final SeatLayoutArtifactService seatLayoutArtifactService;
 
     @Override
     public SectionListQuery findSectionList(UUID concertSequenceId) {
@@ -65,14 +69,37 @@ public class SeatServiceImpl implements SeatService {
             return SectionListQuery.from(
                 null,
                 concertSequenceId,
-                Collections.emptyList());
+                Collections.emptyList()
+            );
         }
 
         List<SectionListQuery.SectionQuery> sectionQueryList = redisSectionListReader.read(keys);
 
+        Map<Section, SeatLayoutArtifact> activeArtifactsBySection =
+            seatLayoutArtifactService.findActiveArtifactsByConcertSequenceId(concertSequenceId);
+
+        List<SectionQuery> enriched = sectionQueryList.stream()
+            .map(sectionQuery -> {
+                SeatLayoutArtifact artifact = activeArtifactsBySection.get(
+                    Section.valueOf(sectionQuery.section())
+                );
+
+                return SectionQuery.from(
+                    sectionQuery.section(),
+                    sectionQuery.remainingNumberOfSeats(),
+                    sectionQuery.floor(),
+                    sectionQuery.grade(),
+                    sectionQuery.price(),
+                    artifact != null ? artifact.getCdnUrl() : null,
+                    artifact != null ? artifact.getSchemaVersion() : null
+                );
+            })
+            .toList();
+
         String concertId = keys.get(0).split(":")[1];
-        return SectionListQuery.from(UUID.fromString(concertId), concertSequenceId,
-            sectionQueryList);
+        return SectionListQuery.from(
+            UUID.fromString(concertId), concertSequenceId, enriched
+        );
     }
 
     @Override
@@ -98,8 +125,8 @@ public class SeatServiceImpl implements SeatService {
         long startRead = System.currentTimeMillis();
         RedisReadResult<SeatListQuery.SeatQuery> readResult = redisSeatListReader.readWithRaw(keys);
 
-        meterRegistry.timer("sectionListSelectTimeMillis", ":" , section)
-                .record(System.currentTimeMillis() - startRead, TimeUnit.MILLISECONDS);
+        meterRegistry.timer("sectionListSelectTimeMillis", ":", section)
+            .record(System.currentTimeMillis() - startRead, TimeUnit.MILLISECONDS);
 
         Map<String, String> firstMap = readResult.rawMap();
 

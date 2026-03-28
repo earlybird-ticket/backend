@@ -19,7 +19,9 @@ public record SectionListResponse(
             long remainingNumberOfSeats,
             int floor,
             String grade,
-            BigDecimal price
+            BigDecimal price,
+            String cdnUrl,
+            String schemaVersion
     ) {
 
     }
@@ -36,6 +38,8 @@ public record SectionListResponse(
                                 .floor(section.floor())
                                 .grade(section.grade())
                                 .price(section.price())
+                                .cdnUrl(section.cdnUrl())
+                                .schemaVersion(section.schemaVersion())
                                 .build()
                         )
                         .toList()

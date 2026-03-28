@@ -9,66 +9,90 @@ import java.util.UUID;
 
 @Builder
 public record SectionListQuery(
-        UUID concertId,
-        UUID concertSequenceId,
-        List<SectionQuery> sectionList
+    UUID concertId,
+    UUID concertSequenceId,
+    List<SectionQuery> sectionList
 ) {
+
     @Builder
     public record SectionQuery(
+        String section,
+        long remainingNumberOfSeats,
+        int floor,
+        String grade,
+        BigDecimal price,
+        String cdnUrl,
+        String schemaVersion
+    ) {
+
+        public static SectionQuery from(
             String section,
             long remainingNumberOfSeats,
             int floor,
             String grade,
             BigDecimal price
-    ) {
-        public static SectionQuery from(
-                String section,
-                long remainingNumberOfSeats,
-                int floor,
-                String grade,
-                BigDecimal price
         ) {
             return SectionQuery.builder()
-                    .section(section)
-                    .remainingNumberOfSeats(remainingNumberOfSeats)
-                    .floor(floor)
-                    .grade(grade)
-                    .price(price)
-                    .build();
+                .section(section)
+                .remainingNumberOfSeats(remainingNumberOfSeats)
+                .floor(floor)
+                .grade(grade)
+                .price(price)
+                .build();
         }
 
+
+        public static SectionQuery from(
+            String section,
+            long remainingNumberOfSeats,
+            int floor,
+            String grade,
+            BigDecimal price,
+            String cdnUrl,
+            String schemaVersion
+        ) {
+            return SectionQuery.builder()
+                .section(section)
+                .remainingNumberOfSeats(remainingNumberOfSeats)
+                .floor(floor)
+                .grade(grade)
+                .price(price)
+                .cdnUrl(cdnUrl)
+                .schemaVersion(schemaVersion)
+                .build();
+        }
     }
 
     public static SectionListQuery from(SectionListResult sectionListResult) {
         return SectionListQuery.builder()
-                .concertId(sectionListResult.concertId())
-                .concertSequenceId(sectionListResult.concertSequenceId())
-                .sectionList(sectionListResult.sectionList().stream()
-                        .map(sectionQueryDsl ->
-                                SectionQuery.builder()
-                                        .section(sectionQueryDsl.section().getValue())
-                                        .remainingNumberOfSeats(sectionQueryDsl.remainingNumberOfSeats())
-                                        .floor(sectionQueryDsl.floor())
-                                        .grade(sectionQueryDsl.grade().getValue())
-                                        .price(sectionQueryDsl.price())
-                                        .build()
+            .concertId(sectionListResult.concertId())
+            .concertSequenceId(sectionListResult.concertSequenceId())
+            .sectionList(sectionListResult.sectionList().stream()
+                .map(sectionQueryDsl ->
+                    SectionQuery.builder()
+                        .section(sectionQueryDsl.section().getValue())
+                        .remainingNumberOfSeats(sectionQueryDsl.remainingNumberOfSeats())
+                        .floor(sectionQueryDsl.floor())
+                        .grade(sectionQueryDsl.grade().getValue())
+                        .price(sectionQueryDsl.price())
+                        .build()
 
-                        )
-                        .toList()
                 )
-                .build();
+                .toList()
+            )
+            .build();
     }
 
     public static SectionListQuery from(
-            UUID concertId,
-            UUID concertSequenceId,
-            List<SectionQuery> sectionList
+        UUID concertId,
+        UUID concertSequenceId,
+        List<SectionQuery> sectionList
     ) {
         return SectionListQuery.builder()
-                .concertId(concertId)
-                .concertSequenceId(concertSequenceId)
-                .sectionList(sectionList)
-                .build();
+            .concertId(concertId)
+            .concertSequenceId(concertSequenceId)
+            .sectionList(sectionList)
+            .build();
     }
 }
 

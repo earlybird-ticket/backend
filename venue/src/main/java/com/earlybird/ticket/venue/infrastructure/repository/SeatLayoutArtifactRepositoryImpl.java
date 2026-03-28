@@ -3,6 +3,7 @@ package com.earlybird.ticket.venue.infrastructure.repository;
 import com.earlybird.ticket.venue.domain.entity.SeatLayoutArtifact;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.domain.repository.SeatLayoutArtifactRepository;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,15 @@ public class SeatLayoutArtifactRepositoryImpl implements SeatLayoutArtifactRepos
     @Override
     public SeatLayoutArtifact save(SeatLayoutArtifact seatLayoutArtifact) {
         return seatLayoutArtifactJpaRepository.save(seatLayoutArtifact);
+    }
+
+    @Override
+    public List<SeatLayoutArtifact> findActiveArtifactByConcertSequenceId(
+        UUID concertSequenceId
+    ) {
+        return seatLayoutArtifactJpaRepository.findByConcertSequenceIdAndIsActiveIsTrue(
+            concertSequenceId
+        );
     }
 
 }

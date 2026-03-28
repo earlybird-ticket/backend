@@ -4,7 +4,10 @@ import com.earlybird.ticket.venue.domain.entity.SeatLayoutArtifact;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.domain.repository.SeatLayoutArtifactRepository;
 import jakarta.transaction.Transactional;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +62,18 @@ public class SeatLayoutArtifactService {
 
         return artifact;
 
+    }
+
+    public Map<Section, SeatLayoutArtifact> findActiveArtifactsByConcertSequenceId(
+        UUID concertSequenceId) {
+        return seatLayoutArtifactRepository.findActiveArtifactByConcertSequenceId(
+                concertSequenceId
+            )
+            .stream()
+            .collect(Collectors.toMap(
+                SeatLayoutArtifact::getSection,
+                Function.identity()
+            ));
     }
 
 }

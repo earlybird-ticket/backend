@@ -6,6 +6,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.earlybird.ticket.venue.domain.entity.SeatLayoutArtifact;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.domain.repository.SeatLayoutArtifactRepository;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -227,6 +229,50 @@ class SeatLayoutArtifactServiceTest {
 
         BDDMockito.then(seatLayoutArtifactRepository).should()
             .findActiveArtifact(concertId, concertSequenceId, section);
+        BDDMockito.then(seatLayoutArtifactRepository).shouldHaveNoMoreInteractions();
+    }
+
+    @Test
+    void 활성_아티팩트를_섹션별_맵으로_반환한다() {
+        // given
+        UUID concertId = UUID.randomUUID();
+        UUID concertSequenceId = UUID.randomUUID();
+        SeatLayoutArtifact artifactA = seatLayoutArtifact(
+            UUID.randomUUID(),
+            concertId,
+            concertSequenceId,
+            Section.A,
+            "hash-A",
+            "seat-layout-v1",
+            true
+        );
+        SeatLayoutArtifact artifactB = seatLayoutArtifact(
+            UUID.randomUUID(),
+            concertId,
+            concertSequenceId,
+            Section.B,
+            "hash-B",
+            "seat-layout-v1",
+            true
+        );
+
+        BDDMockito.given(seatLayoutArtifactRepository.findActiveArtifactByConcertSequenceId(
+                concertSequenceId
+            ))
+            .willReturn(List.of(artifactA, artifactB));
+
+        // when
+        Map<Section, SeatLayoutArtifact> activeArtifactsBySection =
+            seatLayoutArtifactService.findActiveArtifactsByConcertSequenceId(concertSequenceId);
+
+        // then
+        assertThat(activeArtifactsBySection).hasSize(2);
+        assertThat(activeArtifactsBySection).containsKeys(Section.A, Section.B);
+        assertThat(activeArtifactsBySection.get(Section.A)).isSameAs(artifactA);
+        assertThat(activeArtifactsBySection.get(Section.B)).isSameAs(artifactB);
+
+        BDDMockito.then(seatLayoutArtifactRepository).should()
+            .findActiveArtifactByConcertSequenceId(concertSequenceId);
         BDDMockito.then(seatLayoutArtifactRepository).shouldHaveNoMoreInteractions();
     }
 

@@ -58,8 +58,9 @@ public class SeatWarmupRedisCacheLoader implements SeatWarmupCacheLoader {
         stringConn.sAdd(seatIndexKey, String.valueOf(layoutIndex));
     }
 
-    private void makeSectionListOnRedis(WarmupSeatResult seatInfo,
-        StringRedisConnection stringConn) {
+    private void makeSectionListOnRedis(
+        WarmupSeatResult seatInfo, StringRedisConnection stringConn
+    ) {
         String sectionKey = redisKeyFactory.generateSectionListKey(
             seatInfo.concertId(),
             seatInfo.concertSequenceId(),
