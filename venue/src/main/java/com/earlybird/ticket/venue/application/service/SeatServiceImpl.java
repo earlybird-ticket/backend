@@ -7,7 +7,7 @@ import com.earlybird.ticket.common.util.PassportUtil;
 import com.earlybird.ticket.venue.application.dto.request.ProcessSeatCheckCommand;
 import com.earlybird.ticket.venue.application.dto.request.SeatPreemptCommand;
 import com.earlybird.ticket.venue.application.dto.response.ProcessSeatCheckQuery;
-import com.earlybird.ticket.venue.application.dto.response.SeatListQueryV2;
+import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery.SectionQuery;
 import com.earlybird.ticket.venue.application.event.dto.response.ReservationCreateEvent;
@@ -24,9 +24,7 @@ import com.earlybird.ticket.venue.domain.repository.OutboxRepository;
 import com.earlybird.ticket.venue.domain.repository.SeatRepository;
 import com.earlybird.ticket.venue.infrastructure.redis.config.RedisConfig;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisKeyFactory;
-import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSeatListReader;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSectionListReader;
-import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -38,7 +36,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
@@ -53,13 +50,10 @@ public class SeatServiceImpl implements SeatService {
     private final OutboxRepository outboxRepository;
     private final PassportUtil passportUtil;
     private final EventConverter eventConverter;
-    private final RedissonClient redissonClient;
     private final StringRedisTemplate stringRedisTemplate;
     private final RedisConfig redisConfig;
     private final RedisKeyFactory redisKeyFactory;
-    private final RedisSeatListReader redisSeatListReader; //하나로 합치기 (예 : 전략패턴)
     private final RedisSectionListReader redisSectionListReader;
-    private final MeterRegistry meterRegistry;
     private final SeatLayoutArtifactService seatLayoutArtifactService;
 
     @Override
@@ -105,12 +99,12 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public SeatListQueryV2 findSeatList(UUID concertSequenceId, String section) {
+    public SeatListQuery findSeatList(UUID concertSequenceId, String section) {
         String seatIndexKey = redisKeyFactory.generateSeatIndexKey(concertSequenceId, section);
 
         Set<String> availableIndexesSet = stringRedisTemplate.opsForSet().members(seatIndexKey);
         if (availableIndexesSet == null || availableIndexesSet.isEmpty()) {
-            return SeatListQueryV2.builder()
+            return SeatListQuery.builder()
                 .section(section)
                 .availableIndexes(Collections.emptyList())
                 .build();
@@ -120,7 +114,7 @@ public class SeatServiceImpl implements SeatService {
             .map(Integer::valueOf)
             .toList();
 
-        return SeatListQueryV2.builder()
+        return SeatListQuery.builder()
             .section(section)
             .availableIndexes(availableIndexes)
             .build();

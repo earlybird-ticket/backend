@@ -3,7 +3,7 @@ package com.earlybird.ticket.venue.application.service;
 import com.earlybird.ticket.venue.application.dto.request.ProcessSeatCheckCommand;
 import com.earlybird.ticket.venue.application.dto.request.SeatPreemptCommand;
 import com.earlybird.ticket.venue.application.dto.response.ProcessSeatCheckQuery;
-import com.earlybird.ticket.venue.application.dto.response.SeatListQueryV2;
+import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.domain.dto.WarmupSeatResult;
 import java.util.List;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public interface SeatService {
     SectionListQuery findSectionList(UUID concertSequenceId);
 
-    SeatListQueryV2 findSeatList(UUID concertSequenceId, String section);
+    SeatListQuery findSeatList(UUID concertSequenceId, String section);
 
     ProcessSeatCheckQuery checkSeat(ProcessSeatCheckCommand processSeatCheckCommand);
 

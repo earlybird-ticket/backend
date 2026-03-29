@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
 import com.earlybird.ticket.common.util.PassportUtil;
-import com.earlybird.ticket.venue.application.dto.response.SeatListQueryV2;
+import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery.SectionQuery;
 import com.earlybird.ticket.venue.common.util.EventConverter;
@@ -14,9 +14,7 @@ import com.earlybird.ticket.venue.domain.repository.OutboxRepository;
 import com.earlybird.ticket.venue.domain.repository.SeatRepository;
 import com.earlybird.ticket.venue.infrastructure.redis.config.RedisConfig;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisKeyFactory;
-import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSeatListReader;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSectionListReader;
-import io.micrometer.core.instrument.MeterRegistry;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +30,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
@@ -50,8 +47,6 @@ class SeatServiceImplTest {
     @Mock
     private EventConverter eventConverter;
     @Mock
-    private RedissonClient redissonClient;
-    @Mock
     private StringRedisTemplate stringRedisTemplate;
     @Mock
     private SetOperations<String, String> setOperations;
@@ -60,11 +55,7 @@ class SeatServiceImplTest {
     @Mock
     private RedisKeyFactory redisKeyFactory;
     @Mock
-    private RedisSeatListReader redisSeatListReader;
-    @Mock
     private RedisSectionListReader redisSectionListReader;
-    @Mock
-    private MeterRegistry meterRegistry;
     @Mock
     private SeatLayoutArtifactService seatLayoutArtifactService;
 
@@ -75,13 +66,10 @@ class SeatServiceImplTest {
             outboxRepository,
             passportUtil,
             eventConverter,
-            redissonClient,
             stringRedisTemplate,
             redisConfig,
             redisKeyFactory,
-            redisSeatListReader,
             redisSectionListReader,
-            meterRegistry,
             seatLayoutArtifactService
         );
     }
@@ -256,7 +244,7 @@ class SeatServiceImplTest {
         BDDMockito.given(setOperations.members(seatIndexKey)).willReturn(indexes);
 
         // when
-        SeatListQueryV2 seatList = seatService.findSeatList(concertSequenceId, section.getValue());
+        SeatListQuery seatList = seatService.findSeatList(concertSequenceId, section.getValue());
 
         // then
         assertThat(seatList.availableIndexes()).containsExactlyInAnyOrder(123, 1, 3);
@@ -288,7 +276,7 @@ class SeatServiceImplTest {
         BDDMockito.given(setOperations.members(seatIndexKey)).willReturn(members);
 
         // when
-        SeatListQueryV2 seatList = seatService.findSeatList(concertSequenceId, section.getValue());
+        SeatListQuery seatList = seatService.findSeatList(concertSequenceId, section.getValue());
 
         // then
         assertThat(seatList.availableIndexes()).isEmpty();

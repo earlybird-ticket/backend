@@ -2,13 +2,13 @@ package com.earlybird.ticket.venue.presentation.controller;
 
 import com.earlybird.ticket.common.entity.CommonDto;
 import com.earlybird.ticket.venue.application.dto.response.ProcessSeatCheckQuery;
-import com.earlybird.ticket.venue.application.dto.response.SeatListQueryV2;
+import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.service.SeatService;
 import com.earlybird.ticket.venue.presentation.dto.request.ProcessSeatCheckRequest;
 import com.earlybird.ticket.venue.presentation.dto.request.SeatPreemptRequest;
 import com.earlybird.ticket.venue.presentation.dto.response.ProcessSeatCheckResponse;
-import com.earlybird.ticket.venue.presentation.dto.response.SeatListResponseV2;
+import com.earlybird.ticket.venue.presentation.dto.response.SeatListResponse;
 import com.earlybird.ticket.venue.presentation.dto.response.SectionListResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,15 +38,15 @@ public class SeatController {
     }
 
     @GetMapping("/{concert_sequence_id}/sections/{section}")
-    public ResponseEntity<CommonDto<SeatListResponseV2>> findSeatList(
+    public ResponseEntity<CommonDto<SeatListResponse>> findSeatList(
             @PathVariable(name = "concert_sequence_id") UUID concertSequenceId,
             @PathVariable(name = "section") String section
     ) {
-        SeatListQueryV2 seatListQuery = seatService.findSeatList(concertSequenceId, section);
+        SeatListQuery seatListQuery = seatService.findSeatList(concertSequenceId, section);
 
         return ResponseEntity.ok().body(
             CommonDto.ok(
-                    SeatListResponseV2.from(seatListQuery),
+                    SeatListResponse.from(seatListQuery),
                     "좌석 리스트 조회 완료"
             )
         );

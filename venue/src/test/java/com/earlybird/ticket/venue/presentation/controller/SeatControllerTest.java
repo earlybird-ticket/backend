@@ -4,7 +4,7 @@ package com.earlybird.ticket.venue.presentation.controller;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.earlybird.ticket.venue.application.dto.response.SeatListQueryV2;
+import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery.SectionQuery;
 import com.earlybird.ticket.venue.application.service.SeatService;
@@ -87,7 +87,7 @@ class SeatControllerTest {
         // given
         UUID concertSequenceId = UUID.randomUUID();
         Section section = Section.A;
-        SeatListQueryV2 responseV2 = SeatListQueryV2.builder()
+        SeatListQuery responseV2 = SeatListQuery.builder()
             .section(section.getValue())
             .availableIndexes(List.of(13, 1, 3, 5))
             .build();
