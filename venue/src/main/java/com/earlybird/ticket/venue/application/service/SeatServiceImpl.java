@@ -7,39 +7,41 @@ import com.earlybird.ticket.common.util.PassportUtil;
 import com.earlybird.ticket.venue.application.dto.request.ProcessSeatCheckCommand;
 import com.earlybird.ticket.venue.application.dto.request.SeatPreemptCommand;
 import com.earlybird.ticket.venue.application.dto.response.ProcessSeatCheckQuery;
-import com.earlybird.ticket.venue.application.dto.response.SeatListQuery;
+import com.earlybird.ticket.venue.application.dto.response.SeatListQueryV2;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery.SectionQuery;
 import com.earlybird.ticket.venue.application.event.dto.response.ReservationCreateEvent;
-import com.earlybird.ticket.venue.common.dto.RedisReadResult;
 import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.common.exception.RedisException;
 import com.earlybird.ticket.venue.common.exception.SeatUnavailableException;
 import com.earlybird.ticket.venue.common.util.EventConverter;
 import com.earlybird.ticket.venue.domain.dto.WarmupSeatResult;
-import com.earlybird.ticket.venue.domain.entity.SeatLayoutArtifact;
-import com.earlybird.ticket.venue.domain.entity.constant.Section;
-import com.earlybird.ticket.venue.infrastructure.redis.util.RedisKeyFactory;
-import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSeatListReader;
-import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSectionListReader;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import com.earlybird.ticket.venue.domain.entity.Outbox;
+import com.earlybird.ticket.venue.domain.entity.SeatLayoutArtifact;
+import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.domain.repository.OutboxRepository;
 import com.earlybird.ticket.venue.domain.repository.SeatRepository;
 import com.earlybird.ticket.venue.infrastructure.redis.config.RedisConfig;
+import com.earlybird.ticket.venue.infrastructure.redis.util.RedisKeyFactory;
+import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSeatListReader;
+import com.earlybird.ticket.venue.infrastructure.redis.util.RedisSectionListReader;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Service;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -103,46 +105,25 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public SeatListQuery findSeatList(UUID concertSequenceId, String section) {
+    public SeatListQueryV2 findSeatList(UUID concertSequenceId, String section) {
+        String seatIndexKey = redisKeyFactory.generateSeatIndexKey(concertSequenceId, section);
 
-        List<String> keys = redisKeyFactory.convertSeatIndexKeysToSeatInstanceKeys(
-            concertSequenceId,
-            section,
-            0L,
-            -1L
-        );
-
-        if (keys.isEmpty()) {
-            return SeatListQuery.from(
-                null,
-                concertSequenceId,
-                section,
-                null,
-                null,
-                Collections.emptyList()
-            );
+        Set<String> availableIndexesSet = stringRedisTemplate.opsForSet().members(seatIndexKey);
+        if (availableIndexesSet == null || availableIndexesSet.isEmpty()) {
+            return SeatListQueryV2.builder()
+                .section(section)
+                .availableIndexes(Collections.emptyList())
+                .build();
         }
-        long startRead = System.currentTimeMillis();
-        RedisReadResult<SeatListQuery.SeatQuery> readResult = redisSeatListReader.readWithRaw(keys);
 
-        meterRegistry.timer("sectionListSelectTimeMillis", ":", section)
-            .record(System.currentTimeMillis() - startRead, TimeUnit.MILLISECONDS);
+        List<Integer> availableIndexes = availableIndexesSet.stream()
+            .map(Integer::valueOf)
+            .toList();
 
-        Map<String, String> firstMap = readResult.rawMap();
-
-        UUID concertId = UUID.fromString(firstMap.get("concertId"));
-        String grade = firstMap.get("grade");
-        Integer floor = Integer.parseInt(firstMap.get("floor"));
-
-        return SeatListQuery.from(
-            concertId,
-            concertSequenceId,
-            section,
-            grade,
-            floor,
-            readResult.results()
-        );
-
+        return SeatListQueryV2.builder()
+            .section(section)
+            .availableIndexes(availableIndexes)
+            .build();
     }
 
     @Override

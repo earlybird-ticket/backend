@@ -4,6 +4,7 @@ package com.earlybird.ticket.venue.presentation.controller;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.earlybird.ticket.venue.application.dto.response.SeatListQueryV2;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery.SectionQuery;
 import com.earlybird.ticket.venue.application.service.SeatService;
@@ -79,6 +80,37 @@ class SeatControllerTest {
             .andExpect(jsonPath("$.data.section_list[1].cdn_url").value("test-cdn-url-B"))
             .andExpect(jsonPath("$.data.section_list[1].schema_version").value("seat-layout-v1"));
 
+    }
+
+    @Test
+    void 좌석_조회_응답에_가능한_좌석_인덱스_목록을_반환한다() throws Exception {
+        // given
+        UUID concertSequenceId = UUID.randomUUID();
+        Section section = Section.A;
+        SeatListQueryV2 responseV2 = SeatListQueryV2.builder()
+            .section(section.getValue())
+            .availableIndexes(List.of(13, 1, 3, 5))
+            .build();
+
+        BDDMockito.given(seatService.findSeatList(concertSequenceId, section.getValue()))
+            .willReturn(responseV2);
+
+        // when & then
+        mvc.perform(MockMvcRequestBuilders.get(
+                    "/api/v1/external/seats/{concert_sequence_id}/sections/{section}",
+                    concertSequenceId, section.getValue()
+                )
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.section").value(section.getValue()))
+            .andExpect(jsonPath("$.data.available_indexes.length()").value(4))
+            .andExpect(jsonPath("$.data.available_indexes[0]").value(13))
+            .andExpect(jsonPath("$.data.available_indexes[1]").value(1))
+            .andExpect(jsonPath("$.data.available_indexes[2]").value(3))
+            .andExpect(jsonPath("$.data.available_indexes[3]").value(5))
+            .andExpect(jsonPath("$.data.seat_list").doesNotExist())
+            .andExpect(jsonPath("$.data.grade").doesNotExist())
+            .andExpect(jsonPath("$.data.floor").doesNotExist());
     }
 
 

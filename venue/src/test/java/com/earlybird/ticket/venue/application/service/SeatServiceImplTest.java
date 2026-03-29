@@ -1,8 +1,10 @@
 package com.earlybird.ticket.venue.application.service;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 import com.earlybird.ticket.common.util.PassportUtil;
+import com.earlybird.ticket.venue.application.dto.response.SeatListQueryV2;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery;
 import com.earlybird.ticket.venue.application.dto.response.SectionListQuery.SectionQuery;
 import com.earlybird.ticket.venue.common.util.EventConverter;
@@ -19,14 +21,19 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +53,8 @@ class SeatServiceImplTest {
     private RedissonClient redissonClient;
     @Mock
     private StringRedisTemplate stringRedisTemplate;
+    @Mock
+    private SetOperations<String, String> setOperations;
     @Mock
     private RedisConfig redisConfig;
     @Mock
@@ -229,6 +238,74 @@ class SeatServiceImplTest {
         BDDMockito.then(redisKeyFactory).shouldHaveNoMoreInteractions();
         BDDMockito.then(redisSectionListReader).shouldHaveNoMoreInteractions();
         BDDMockito.then(seatLayoutArtifactService).shouldHaveNoMoreInteractions();
+    }
+
+    @Test
+    void 가능한_좌석_인덱스가_있으면_인덱스_목록을_반환한다() {
+        // given
+        UUID concertSequenceId = UUID.randomUUID();
+        Section section = Section.A;
+        String seatIndexKey = "seat-index-key";
+
+        Set<String> indexes = Set.of("123", "1", "3");
+
+        BDDMockito.given(
+                redisKeyFactory.generateSeatIndexKey(concertSequenceId, section.getValue()))
+            .willReturn(seatIndexKey);
+        BDDMockito.given(stringRedisTemplate.opsForSet()).willReturn(setOperations);
+        BDDMockito.given(setOperations.members(seatIndexKey)).willReturn(indexes);
+
+        // when
+        SeatListQueryV2 seatList = seatService.findSeatList(concertSequenceId, section.getValue());
+
+        // then
+        assertThat(seatList.availableIndexes()).containsExactlyInAnyOrder(123, 1, 3);
+        assertThat(seatList.section()).isEqualTo(section.getValue());
+
+        BDDMockito.then(redisKeyFactory).should()
+            .generateSeatIndexKey(concertSequenceId, section.getValue());
+        BDDMockito.then(stringRedisTemplate).should().opsForSet();
+        BDDMockito.then(setOperations).should().members(seatIndexKey);
+
+        BDDMockito.then(setOperations).shouldHaveNoMoreInteractions();
+        BDDMockito.then(redisKeyFactory).shouldHaveNoMoreInteractions();
+        BDDMockito.then(stringRedisTemplate).shouldHaveNoMoreInteractions();
+    }
+
+    @ParameterizedTest
+    @MethodSource("emptyOrNullMembers")
+    void 가능한_좌석_인덱스_조회_결과가_없으면_빈_목록을_반환한다(Set<String> members) {
+        // given
+        UUID concertSequenceId = UUID.randomUUID();
+        Section section = Section.A;
+        String seatIndexKey = "seat-index-key";
+
+        BDDMockito.given(
+                redisKeyFactory.generateSeatIndexKey(concertSequenceId, section.getValue())
+            )
+            .willReturn(seatIndexKey);
+        BDDMockito.given(stringRedisTemplate.opsForSet()).willReturn(setOperations);
+        BDDMockito.given(setOperations.members(seatIndexKey)).willReturn(members);
+
+        // when
+        SeatListQueryV2 seatList = seatService.findSeatList(concertSequenceId, section.getValue());
+
+        // then
+        assertThat(seatList.availableIndexes()).isEmpty();
+        assertThat(seatList.section()).isEqualTo(section.getValue());
+
+        BDDMockito.then(redisKeyFactory).should()
+            .generateSeatIndexKey(concertSequenceId, section.getValue());
+        BDDMockito.then(stringRedisTemplate).should().opsForSet();
+        BDDMockito.then(setOperations).should().members(seatIndexKey);
+
+        BDDMockito.then(setOperations).shouldHaveNoMoreInteractions();
+        BDDMockito.then(redisKeyFactory).shouldHaveNoMoreInteractions();
+        BDDMockito.then(stringRedisTemplate).shouldHaveNoMoreInteractions();
+    }
+
+    private static Stream<Set<String>> emptyOrNullMembers() {
+        return Stream.of(null, Collections.emptySet());
     }
 
     private static SeatLayoutArtifact getSeatLayoutArtifact(
