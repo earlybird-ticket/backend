@@ -22,8 +22,8 @@ public class NcpSeatLayoutArtifactStorage implements SeatLayoutArtifactStorage {
     private final NcpStorageProperties ncpStorageProperties;
 
     /**
-        TODO: 존재 여부뿐 아니라 metadata의 artifact-hash와 schema-version 일치 여부까지 검증해
-            재사용 가능한 artifact인지 확인하도록 확장
+     TODO: 존재 여부뿐 아니라 metadata의 artifact-hash와 schema-version 일치 여부까지 검증해
+     재사용 가능한 artifact인지 확인하도록 확장
      */
     @Override
     public boolean checkArtifactExists(String objectKey) {
@@ -80,8 +80,11 @@ public class NcpSeatLayoutArtifactStorage implements SeatLayoutArtifactStorage {
 
     @Override
     public String resolveArtifactUrl(String objectKey) {
-        return ncpStorageProperties.endpoint() + "/" +
-            ncpStorageProperties.bucket() + "/"
-            + objectKey;
+        String baseUrl = ncpStorageProperties.baseUrl();
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+
+        return baseUrl + "/" + objectKey;
     }
 }

@@ -135,21 +135,18 @@ class NcpSeatLayoutArtifactStorageTest {
     }
 
     @Test
-    void 스토리지_키를_기반으로_아티팩트_URL을_생성한다() {
+    void baseUrl과_스토리지_키를_기반으로_아티팩트_URL을_생성한다() {
         // given
-        String bucket = "test-bucket";
-        String objectKey = "test-object-key";
-        String endpoint = "http://localhost:8000";
+        String objectKey = "venue/test-object-key.json";
+        String baseUrl = "http://cdn.example.com";
 
-        BDDMockito.given(ncpStorageProperties.bucket()).willReturn(bucket);
-        BDDMockito.given(ncpStorageProperties.endpoint()).willReturn(endpoint);
+        BDDMockito.given(ncpStorageProperties.baseUrl()).willReturn(baseUrl);
 
         // when
         String artifactUrl = ncpSeatLayoutArtifactStorage.resolveArtifactUrl(objectKey);
 
         // then
-        assertThat(artifactUrl).isEqualTo(endpoint + "/" + bucket + "/" + objectKey);
-
+        assertThat(artifactUrl).isEqualTo(baseUrl + "/" + objectKey);
     }
 
 }

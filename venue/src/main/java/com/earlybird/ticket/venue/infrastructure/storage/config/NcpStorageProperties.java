@@ -7,6 +7,7 @@ public record NcpStorageProperties(
     String endpoint,
     String region,
     String bucket,
+    String baseUrl,
     String accessKey,
     String secretKey
 ) {

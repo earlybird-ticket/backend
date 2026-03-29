@@ -107,5 +107,6 @@ ncp:
     endpoint: ${NCP_OBJECT_STORAGE_END_POINT}
     region: ${NCP_OBJECT_STORAGE_REGION_NAME}
     bucket: ${NCP_OBJECT_STORAGE_BUCKET}
+    base-url: ${NCP_OBJECT_STORAGE_BASE_URL}
     access-key: ${NCP_OBJECT_STORAGE_ACCESS_KEY}
     secret-key: ${NCP_OBJECT_STORAGE_SECRET_KEY}
