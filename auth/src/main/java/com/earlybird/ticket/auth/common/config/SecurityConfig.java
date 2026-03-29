@@ -19,13 +19,19 @@ public class SecurityConfig {
         http.formLogin(AbstractHttpConfigurer::disable);
         http.logout(AbstractHttpConfigurer::disable);
         http.cors(AbstractHttpConfigurer::disable);
-        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-        http.authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/external/**",
-                                                                "api/v1/internal/**",
-                                                                "/actuator/prometheus")
-                                               .permitAll()
-                                               .anyRequest()
-                                               .authenticated());
+        http.sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.authorizeHttpRequests(auth ->
+            auth.requestMatchers(
+                    "/api/v1/external/**",
+                    "/api/v1/internal/**",
+                    "/actuator/prometheus",
+                    "/test/**"
+                )
+                .permitAll()
+                .anyRequest()
+                .authenticated()
+        );
 
         return http.build();
     }
