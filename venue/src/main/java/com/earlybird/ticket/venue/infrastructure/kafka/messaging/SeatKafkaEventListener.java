@@ -5,6 +5,7 @@ import com.earlybird.ticket.venue.common.event.EventType;
 import com.earlybird.ticket.venue.domain.entity.Event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Profile("!venue-perf-test")
 public class SeatKafkaEventListener {
     private final EventDispatcher eventDispatcher;
 

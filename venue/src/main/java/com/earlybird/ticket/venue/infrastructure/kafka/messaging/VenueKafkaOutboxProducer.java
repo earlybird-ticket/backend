@@ -4,6 +4,7 @@ import com.earlybird.ticket.venue.domain.entity.Outbox;
 import com.earlybird.ticket.venue.infrastructure.repository.OutboxJpaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Profile("!venue-perf-test")
 public class VenueKafkaOutboxProducer {
 
     private final OutboxJpaRepository outboxRepository;

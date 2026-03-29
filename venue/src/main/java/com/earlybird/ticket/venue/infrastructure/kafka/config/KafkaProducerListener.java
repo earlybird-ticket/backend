@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.support.ProducerListener;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,7 @@ import java.util.Map;
 
 @Component
 @Slf4j
+@Profile("!venue-perf-test")
 public class KafkaProducerListener implements ProducerListener<String, String> {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
