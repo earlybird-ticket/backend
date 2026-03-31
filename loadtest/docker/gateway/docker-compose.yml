@@ -1,7 +1,6 @@
 services:
   gateway-service:
     image: ebt-registry.kr.ncr.ntruss.com/gateway:260318-454ad14
-    container_name: gateway
     platform: linux/amd64
     environment:
       - SPRING_PROFILES_ACTIVE=loadtest
@@ -11,7 +10,7 @@ services:
       - EUREKA_HOST=${EUREKA_HOST}
       - EUREKA_PORT=${EUREKA_PORT}
     ports:
-      - "18081:18081"
+      - "${GATEWAY_SERVER_PORT}:${GATEWAY_SERVER_PORT}"
     restart: on-failure:3
 
   node-exporter:

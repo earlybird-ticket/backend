@@ -20,9 +20,10 @@ services:
       - TOSS_SUCCESS_URL=${TOSS_SUCCESS_URL}
       - TOSS_FAIL_URL=${TOSS_FAIL_URL}
       - PAYMENT_IP_ADDRESS=${PAYMENT_IP_ADDRESS}
+      - PAYMENT_SERVER_PORT=${PAYMENT_SERVER_PORT}
     restart: on-failure:3
     ports:
-      - "18089:18089"
+      - "${PAYMENT_SERVER_PORT}:${PAYMENT_SERVER_PORT}"
 
   node-exporter:
     image: prom/node-exporter
