@@ -23,7 +23,7 @@ spring:
       max-lifetime: 1800000
       minimum-idle: 8
       idle-timeout: 600000
-      connection-timeout: 3000
+      connection-timeout: 2000
   
   jpa:
     hibernate:
@@ -56,12 +56,13 @@ server:
     mbeanregistry:
       enabled: true
     threads:
-      max: 32
-      min-spare: 8
+      max: 100
+      min-spare: 16
     accept-count: 200
-    max-connections: 3000
+    max-connections: 600
     connection-timeout: 5s
-    keep-alive-timeout: 5s
+    keep-alive-timeout: 10s
+    max-keep-alive-requests: 100
 
 toss:
   client-key: ${TOSS_CLIENT_KEY}
@@ -70,9 +71,9 @@ toss:
   fail-url: ${TOSS_FAIL_URL}
 
 api:
-  connection-timeout: 3000
-  read-timeout: 120000
-  max-buffer-size-MB: 300
+  connection-timeout: 2000
+  read-timeout: 10000
+  max-buffer-size-MB: 50
 
 
 management:
