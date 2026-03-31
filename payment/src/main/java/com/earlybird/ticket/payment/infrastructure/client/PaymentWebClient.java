@@ -31,7 +31,7 @@ import reactor.util.retry.Retry;
 @Slf4j
 @Component
 @Primary
-@Profile("!test")
+@Profile("!loadtest")
 public class PaymentWebClient implements PaymentClient {
 
     private static final String IDEMPOTENCY_KEY = "Idempotency-key";

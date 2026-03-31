@@ -4,6 +4,7 @@ services:
     container_name: gateway
     platform: linux/amd64
     environment:
+      - SPRING_PROFILES_ACTIVE=loadtest
       - GATEWAY_IP_ADDRESS=${GATEWAY_IP_ADDRESS}
       - GATEWAY_SERVER_PORT=${GATEWAY_SERVER_PORT}
       - AUTH_JWT_SECRET=${AUTH_JWT_SECRET}

@@ -1,14 +1,6 @@
-eureka:
-  client:
+management:
+  tracing:
     enabled: false
-
-spring:
-  cloud:
-    discovery:
-      enabled: false
-  kafka:
-    listener:
-      auto-startup: false
 
 logging:
   level:
