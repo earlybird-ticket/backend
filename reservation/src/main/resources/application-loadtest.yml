@@ -1,3 +1,23 @@
+server:
+  tomcat:
+    threads:
+      max: 120
+      min-spare: 10
+    accept-count: 250
+    max-connections: 800
+    connection-timeout: 3s
+    keep-alive-timeout: 5s
+    max-keep-alive-requests: 50
+
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 32
+      max-lifetime: 1800000
+      minimum-idle: 6
+      idle-timeout: 600000
+      connection-timeout: 1500
+
 management:
   tracing:
     enabled: false

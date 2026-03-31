@@ -11,11 +11,11 @@ spring:
       port: ${REDIS_PORT:6379}
   datasource:
     hikari:
-      maximum-pool-size: 32
+      maximum-pool-size: 40
       max-lifetime: 1800000
       minimum-idle: 8
       idle-timeout: 600000
-      connection-timeout: 3000
+      connection-timeout: 2000
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_RESERVATION_PORT:5432}/${POSTGRES_DB}
     username: ${POSTGRES_USER:postgres}
@@ -36,12 +36,13 @@ server:
     mbeanregistry:
       enabled: true
     threads:
-      max: 32
-      min-spare: 8
-    accept-count: 200
-    max-connections: 3000
+      max: 160
+      min-spare: 20
+    accept-count: 400
+    max-connections: 1200
     connection-timeout: 5s
-    keep-alive-timeout: 5s
+    keep-alive-timeout: 10s
+    max-keep-alive-requests: 100
 
 
 management:
