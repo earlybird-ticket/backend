@@ -31,7 +31,7 @@ spring:
     open-in-view: false
 
 server:
-  port: 18088
+  port: ${RESERVATION_SERVER_PORT:18088}
   tomcat:
     mbeanregistry:
       enabled: true
