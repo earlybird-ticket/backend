@@ -12,6 +12,30 @@
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
         "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "yellow",
+        "name": "load-test",
+        "target": {
+          "expr": "",
+          "interval": "",
+          "limit": 100,
+          "matchAny": true,
+          "queryType": "annotations",
+          "refId": "Anno",
+          "tags": [
+            "load-test",
+            "start",
+            "end"
+          ],
+          "type": "tags"
+        }
       }
     ]
   },
@@ -19,7 +43,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
   "links": [],
   "panels": [
     {
@@ -56,6 +79,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": true,
             "stacking": {
               "group": "A",
@@ -71,7 +95,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -107,7 +132,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "datasource": {
@@ -158,6 +183,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": true,
             "stacking": {
               "group": "A",
@@ -172,7 +198,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -208,7 +235,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "datasource": {
@@ -259,6 +286,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": true,
             "stacking": {
               "group": "A",
@@ -273,7 +301,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -309,7 +338,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "datasource": {
@@ -360,6 +389,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": true,
             "stacking": {
               "group": "A",
@@ -375,7 +405,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -411,7 +442,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "datasource": {
@@ -445,7 +476,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -490,7 +522,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "datasource": {
@@ -510,7 +542,7 @@
   ],
   "preload": false,
   "refresh": "",
-  "schemaVersion": 41,
+  "schemaVersion": 42,
   "tags": [
     "Kafka"
   ],
@@ -521,7 +553,6 @@
           "text": "",
           "value": ""
         },
-        "datasource": "prometheus-main",
         "includeAll": false,
         "label": "Job",
         "name": "job",
@@ -529,6 +560,7 @@
         "query": "label_values(kafka_consumergroup_current_offset, job)",
         "refresh": 1,
         "regex": "",
+        "regexApplyTo": "value",
         "type": "query"
       },
       {
@@ -536,7 +568,6 @@
           "text": "",
           "value": ""
         },
-        "datasource": "prometheus-main",
         "includeAll": false,
         "label": "Instance",
         "name": "instance",
@@ -544,6 +575,7 @@
         "query": "label_values(kafka_consumergroup_current_offset{job=~\"$job\"}, instance)",
         "refresh": 1,
         "regex": "",
+        "regexApplyTo": "value",
         "type": "query"
       },
       {
@@ -551,7 +583,6 @@
           "text": "All",
           "value": "$__all"
         },
-        "datasource": "prometheus-main",
         "includeAll": true,
         "label": "Topic",
         "multi": true,
@@ -560,6 +591,7 @@
         "query": "label_values(kafka_topic_partition_current_offset{instance='$instance',topic!='__consumer_offsets',topic!='--kafka'}, topic)",
         "refresh": 1,
         "regex": "",
+        "regexApplyTo": "value",
         "sort": 1,
         "type": "query"
       }
@@ -572,6 +604,7 @@
   "timepicker": {},
   "timezone": "browser",
   "title": "Kafka Exporter Overview",
-  "uid": "jwPKIsniz",
-  "version": 2
+  "uid": "kafka-exporter-overview",
+  "version": 1,
+  "weekStart": ""
 }
