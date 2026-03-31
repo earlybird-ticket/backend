@@ -31,7 +31,7 @@ import reactor.util.retry.Retry;
 
 @Slf4j
 @Component
-@Profile("test")
+@Profile("loadtest")
 @Qualifier("paymentWebClient")
 public class TestPaymentWebClient implements PaymentClient {
 

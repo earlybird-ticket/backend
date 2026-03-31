@@ -3,6 +3,7 @@ package com.earlybird.ticket.common.aop;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -11,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+@Profile("!loadtest & !venue-perf-test")
 @Component
 public class LoggingTracer {
 

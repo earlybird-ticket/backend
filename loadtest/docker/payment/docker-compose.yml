@@ -4,7 +4,7 @@ services:
     container_name: payment
     platform: linux/amd64
     environment:
-      - SPRING_PROFILES_ACTIVE=test
+      - SPRING_PROFILES_ACTIVE=loadtest
       - EUREKA_HOST=${EUREKA_HOST}
       - EUREKA_PORT=${EUREKA_PORT}
       - REDIS_HOST=${REDIS_HOST}
