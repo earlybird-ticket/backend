@@ -1,0 +1,32 @@
+services:
+  reservation-service:
+    image: ebt-registry.kr.ncr.ntruss.com/reservation:260318-454ad14
+    container_name: reservation
+    platform: linux/amd64
+    environment:
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - POSTGRES_HOST=${POSTGRES_RESERVATION_HOST}
+      - POSTGRES_RESERVATION_PORT=${POSTGRES_RESERVATION_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_RESERVATION_PASSWORD}
+      - KAFKA_HOST=${KAFKA_HOST_1}
+      - KAFKA_PORT=${KAFKA_PORT_1}
+    ports:
+      - "18088:18088"
+    restart: on-failure:3
+
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    profiles: [ "loadtest" ]
+    network_mode: host
+    pid: host
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - '/:/host:ro,rslave'
+    restart: always

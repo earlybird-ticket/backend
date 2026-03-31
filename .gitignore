@@ -35,8 +35,12 @@ out/
 
 ### VS Code ###
 .vscode/
-.env
+
+.env*
+!.env.example
+!.env.*.example
 **/.DS_Store
 
 **/generated
 *.log
+/loadtest/**/*-targets.json

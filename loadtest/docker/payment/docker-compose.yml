@@ -1,0 +1,37 @@
+services:
+  payment-service:
+    image: ebt-registry.kr.ncr.ntruss.com/payment:260318-454ad14
+    container_name: payment
+    platform: linux/amd64
+    environment:
+      - SPRING_PROFILES_ACTIVE=test
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - POSTGRES_HOST=${POSTGRES_PAYMENT_HOST}
+      - POSTGRES_PAYMENT_PORT=${POSTGRES_PAYMENT_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PAYMENT_PASSWORD}
+      - KAFKA_HOST=${KAFKA_HOST_1}
+      - KAFKA_PORT=${KAFKA_PORT_1}
+      - TOSS_CLIENT_KEY=${TOSS_CLIENT_KEY}
+      - TOSS_SECRET_KEY=${TOSS_SECRET_KEY}
+      - TOSS_SUCCESS_URL=${TOSS_SUCCESS_URL}
+      - TOSS_FAIL_URL=${TOSS_FAIL_URL}
+      - PAYMENT_IP_ADDRESS=${PAYMENT_IP_ADDRESS}
+    restart: on-failure:3
+    ports:
+      - "18089:18089"
+
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    network_mode: host
+    pid: host
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - '/:/host:ro,rslave'
+    restart: always

@@ -1,0 +1,41 @@
+services:
+  venue-service:
+    image: ebt-registry.kr.ncr.ntruss.com/venue:260318-454ad14
+    container_name: venue
+    profiles: [ "loadtest", "venue-perf-test" ]
+    platform: linux/amd64
+    environment:
+      - SPRING_PROFILES_ACTIVE=${VENUE_PROFILES}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - POSTGRES_HOST=${POSTGRES_VENUE_HOST}
+      - POSTGRES_VENUE_PORT=${POSTGRES_VENUE_PORT}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_VENUE_PASSWORD}
+      - KAFKA_HOST=${KAFKA_HOST_1}
+      - KAFKA_PORT=${KAFKA_PORT_1}
+      - VENUE_IP_ADDRESS=${VENUE_IP_ADDRESS}
+      - NCP_OBJECT_STORAGE_END_POINT=${NCP_OBJECT_STORAGE_END_POINT}
+      - NCP_OBJECT_STORAGE_REGION=${NCP_OBJECT_STORAGE_REGION}
+      - NCP_OBJECT_STORAGE_BUCKET=${NCP_OBJECT_STORAGE_BUCKET}
+      - NCP_CDN_BASE_URL=${NCP_CDN_BASE_URL}
+      - NCP_OBJECT_STORAGE_ACCESS_KEY=${NCP_OBJECT_STORAGE_ACCESS_KEY}
+      - NCP_OBJECT_STORAGE_SECRET_KEY=${NCP_OBJECT_STORAGE_SECRET_KEY}
+    ports:
+      - "18086:18086"
+    restart: on-failure:3
+
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    profiles: [ "loadtest" ]
+    network_mode: host
+    pid: host
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - '/:/host:ro,rslave'
+    restart: always
