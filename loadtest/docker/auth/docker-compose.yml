@@ -1,0 +1,15 @@
+services:
+  auth-service:
+    image: ebt-registry.kr.ncr.ntruss.com/auth:260318-454ad14
+    platform: linux/amd64
+    environment:
+      - SPRING_PROFILES_ACTIVE=loadtest
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+      - AUTH_SERVER_PORT=${AUTH_SERVER_PORT}
+      - AUTH_JWT_SECRET=${AUTH_JWT_SECRET}
+      - AUTH_JWT_ACCESS_EXP=${AUTH_JWT_ACCESS_EXP}
+      - AUTH_IP_ADDRESS=${AUTH_IP_ADDRESS}
+    ports:
+      - "${AUTH_SERVER_PORT}:${AUTH_SERVER_PORT}"
+    restart: on-failure:3
