@@ -9,15 +9,14 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 @Configuration
 @EnableScheduling
-@Profile("!loadtest & !venue-perf-test")
-public class SchedulerConfig implements SchedulingConfigurer {
+@Profile("loadtest | venue-perf-test")
+public class SchedulerLoadtestConfig implements SchedulingConfigurer {
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar registrar) {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(5);
         scheduler.setThreadNamePrefix("Scheduled-Thread-");
-        scheduler.setTaskDecorator(new MdcTaskDecorator());
         scheduler.initialize();
 
         registrar.setTaskScheduler(scheduler);

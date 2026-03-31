@@ -1,7 +1,9 @@
 package com.earlybird.ticket.common.aop;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
+@Profile("!loadtest & !venue-perf-test")
 @Component
 public class LoggingStatusManager {
 

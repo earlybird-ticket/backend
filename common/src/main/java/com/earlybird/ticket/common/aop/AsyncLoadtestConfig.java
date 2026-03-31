@@ -1,5 +1,7 @@
 package com.earlybird.ticket.common.aop;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Configuration;
@@ -8,14 +10,11 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
-
 @Configuration
 @EnableAsync
 @Slf4j
-@Profile("!loadtest & !venue-perf-test")
-public class AsyncConfig implements AsyncConfigurer {
+@Profile("loadtest | venue-perf-test")
+public class AsyncLoadtestConfig implements AsyncConfigurer {
 
     @Override
     public Executor getAsyncExecutor() {
@@ -24,7 +23,6 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setMaxPoolSize(100);
         executor.setQueueCapacity(30);
         executor.setThreadNamePrefix("Async-Thread-");
-        executor.setTaskDecorator(new MdcTaskDecorator());
         executor.setRejectedExecutionHandler(new CallerRunsPolicy());
         executor.initialize();
         return executor;
@@ -33,6 +31,6 @@ public class AsyncConfig implements AsyncConfigurer {
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
         return (throwable, method, objects) -> log.error(
-                "Async Exception in method {} exception {} objects {}", method, throwable, objects);
+            "Async Exception in method {} exception {} objects {}", method, throwable, objects);
     }
 }
