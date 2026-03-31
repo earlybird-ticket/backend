@@ -98,7 +98,7 @@ public class WarmupSeatOrchestrator {
                     warmupSeatCommand.vipTicketExpiredAt()
                 );
 
-                seatLayoutArtifactService.markReadyAndActivate(artifactMetadata);
+                seatLayoutArtifactService.markReadyAndActivate(artifactMetadata.getId());
             }
         }
     }

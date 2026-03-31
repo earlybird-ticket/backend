@@ -16,6 +16,11 @@ public class SeatLayoutArtifactRepositoryImpl implements SeatLayoutArtifactRepos
     private final SeatLayoutArtifactJpaRepository seatLayoutArtifactJpaRepository;
 
     @Override
+    public Optional<SeatLayoutArtifact> findById(UUID artifactId) {
+        return seatLayoutArtifactJpaRepository.findById(artifactId);
+    }
+
+    @Override
     public Optional<SeatLayoutArtifact> findActiveArtifact(
         UUID concertId, UUID concertSequenceId, Section section
     ) {

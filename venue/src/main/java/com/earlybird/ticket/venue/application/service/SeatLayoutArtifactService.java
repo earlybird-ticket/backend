@@ -48,7 +48,12 @@ public class SeatLayoutArtifactService {
     }
 
     @Transactional
-    public SeatLayoutArtifact markReadyAndActivate(SeatLayoutArtifact artifact) {
+    public SeatLayoutArtifact markReadyAndActivate(UUID artifactId) {
+        SeatLayoutArtifact artifact = seatLayoutArtifactRepository.findById(artifactId)
+            .orElseThrow(() ->
+                new IllegalArgumentException("아티팩트를 찾을 수 없습니다. artifactId=" + artifactId)
+            );
+
         seatLayoutArtifactRepository.findActiveArtifact(
                 artifact.getConcertId(),
                 artifact.getConcertSequenceId(),

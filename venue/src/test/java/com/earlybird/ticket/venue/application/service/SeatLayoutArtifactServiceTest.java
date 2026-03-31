@@ -2,6 +2,7 @@ package com.earlybird.ticket.venue.application.service;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.earlybird.ticket.venue.domain.entity.SeatLayoutArtifact;
 import com.earlybird.ticket.venue.domain.entity.constant.Section;
@@ -145,15 +146,19 @@ class SeatLayoutArtifactServiceTest {
                 )
             )
             .willReturn(Optional.empty());
+        BDDMockito.given(seatLayoutArtifactRepository.findById(artifactId))
+            .willReturn(Optional.of(artifact));
 
         // when
-        SeatLayoutArtifact activated = seatLayoutArtifactService.markReadyAndActivate(artifact);
+        SeatLayoutArtifact activated =
+            seatLayoutArtifactService.markReadyAndActivate(artifact.getId());
 
         // then
         assertThat(activated.isReady()).isTrue();
         assertThat(activated.isActive()).isTrue();
         assertThat(activated).isSameAs(artifact);
 
+        BDDMockito.then(seatLayoutArtifactRepository).should().findById(artifactId);
         BDDMockito.then(seatLayoutArtifactRepository).should().findActiveArtifact(
             concertId, concertSequenceId, section
         );
@@ -180,13 +185,16 @@ class SeatLayoutArtifactServiceTest {
             artifactId, concertId, concertSequenceId, section, hash, schemaVersion, false
         );
 
+        BDDMockito.given(seatLayoutArtifactRepository.findById(artifactId))
+            .willReturn(Optional.of(artifact));
         BDDMockito.given(
                 seatLayoutArtifactRepository.findActiveArtifact(concertId, concertSequenceId, section)
             )
             .willReturn(Optional.of(existing));
 
         // when
-        SeatLayoutArtifact current = seatLayoutArtifactService.markReadyAndActivate(artifact);
+        SeatLayoutArtifact current =
+            seatLayoutArtifactService.markReadyAndActivate(artifact.getId());
 
         // then
         assertThat(existing.isActive()).isFalse();
@@ -194,6 +202,7 @@ class SeatLayoutArtifactServiceTest {
         assertThat(current.isReady()).isTrue();
         assertThat(current).isSameAs(artifact);
 
+        BDDMockito.then(seatLayoutArtifactRepository).should().findById(artifactId);
         BDDMockito.then(seatLayoutArtifactRepository).should()
             .findActiveArtifact(concertId, concertSequenceId, section);
         BDDMockito.then(seatLayoutArtifactRepository).shouldHaveNoMoreInteractions();
@@ -213,6 +222,8 @@ class SeatLayoutArtifactServiceTest {
             artifactId, concertId, concertSequenceId, section, hash, schemaVersion, true
         );
 
+        BDDMockito.given(seatLayoutArtifactRepository.findById(artifactId))
+                .willReturn(Optional.of(existing));
         BDDMockito.given(seatLayoutArtifactRepository.findActiveArtifact(
                     concertId, concertSequenceId, section
                 )
@@ -220,7 +231,8 @@ class SeatLayoutArtifactServiceTest {
             .willReturn(Optional.of(existing));
 
         // when
-        SeatLayoutArtifact current = seatLayoutArtifactService.markReadyAndActivate(existing);
+        SeatLayoutArtifact current =
+            seatLayoutArtifactService.markReadyAndActivate(existing.getId());
 
         // then
         assertThat(existing.isReady()).isTrue();
@@ -231,6 +243,24 @@ class SeatLayoutArtifactServiceTest {
             .findActiveArtifact(concertId, concertSequenceId, section);
         BDDMockito.then(seatLayoutArtifactRepository).shouldHaveNoMoreInteractions();
     }
+
+    @Test
+    void 아티팩트를_찾지_못하면_예외를_던진다() {
+        // given
+        UUID artifactId = UUID.randomUUID();
+
+        BDDMockito.given(seatLayoutArtifactRepository.findById(artifactId))
+            .willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> seatLayoutArtifactService.markReadyAndActivate(artifactId))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("아티팩트를 찾을 수 없습니다.");
+
+        BDDMockito.then(seatLayoutArtifactRepository).should().findById(artifactId);
+        BDDMockito.then(seatLayoutArtifactRepository).shouldHaveNoMoreInteractions();
+    }
+
 
     @Test
     void 활성_아티팩트를_섹션별_맵으로_반환한다() {

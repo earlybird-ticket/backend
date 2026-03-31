@@ -68,10 +68,10 @@ class WarmupSeatOrchestratorTest {
     @Test
     void 새_구조로_섹션별_warmup을_끝까지_수행한다() {
         // given
-        WarmupFixture fixture = createFixture();
+        WarmupFixture fixture = createFixture(false);
         stubCollectedData(fixture);
         stubArtifactStorage(false);
-        stubPrepareArtifactMetadata(false);
+        stubPrepareArtifactMetadata(fixture);
 
         // when
         assertThatCode(() -> warmupSeatOrchestrator.warmup(fixture.warmupSeatCommands()))
@@ -112,13 +112,7 @@ class WarmupSeatOrchestratorTest {
             );
 
             BDDMockito.then(seatLayoutArtifactService).should().markReadyAndActivate(
-                BDDMockito.argThat(metadata ->
-                    metadata.getConcertId().equals(fixture.concertId())
-                        && metadata.getConcertSequenceId().equals(fixture.concertSequenceId())
-                        && metadata.getSection() == section
-                        && metadata.getStorageKey().equals(storageKey)
-                        && metadata.getHash().equals(hash)
-                )
+                fixture.preparedArtifactsBySection().get(section).getId()
             );
         }
 
@@ -131,10 +125,10 @@ class WarmupSeatOrchestratorTest {
     @Test
     void CDN에_아티팩트가_이미_있으면_업로드를_건너뛰고_이후_단계를_수행한다() {
         // given
-        WarmupFixture fixture = createFixture();
+        WarmupFixture fixture = createFixture(false);
         stubCollectedData(fixture);
         stubArtifactStorage(true);
-        stubPrepareArtifactMetadata(false);
+        stubPrepareArtifactMetadata(fixture);
 
         // when
         assertThatCode(() -> warmupSeatOrchestrator.warmup(fixture.warmupSeatCommands()))
@@ -169,13 +163,7 @@ class WarmupSeatOrchestratorTest {
             );
 
             BDDMockito.then(seatLayoutArtifactService).should().markReadyAndActivate(
-                BDDMockito.argThat(metadata ->
-                    metadata.getConcertId().equals(fixture.concertId())
-                        && metadata.getConcertSequenceId().equals(fixture.concertSequenceId())
-                        && metadata.getSection() == section
-                        && metadata.getStorageKey().equals(storageKey)
-                        && metadata.getHash().equals(hash)
-                )
+                fixture.preparedArtifactsBySection().get(section).getId()
             );
         }
 
@@ -193,10 +181,10 @@ class WarmupSeatOrchestratorTest {
     @Test
     void 메타데이터가_ready_상태면_Redis_적재와_active_전환을_건너뛴다() {
         // given
-        WarmupFixture fixture = createFixture();
+        WarmupFixture fixture = createFixture(true);
         stubCollectedData(fixture);
         stubArtifactStorage(false);
-        stubPrepareArtifactMetadata(true);
+        stubPrepareArtifactMetadata(fixture);
 
         // when
         assertThatCode(() -> warmupSeatOrchestrator.warmup(fixture.warmupSeatCommands()))
@@ -237,9 +225,8 @@ class WarmupSeatOrchestratorTest {
             BDDMockito.any(LocalDateTime.class)
         );
         BDDMockito.then(seatWarmupCacheLoader).shouldHaveNoMoreInteractions();
-        BDDMockito.then(seatLayoutArtifactService).should(BDDMockito.never()).markReadyAndActivate(
-            BDDMockito.any(SeatLayoutArtifact.class)
-        );
+        BDDMockito.then(seatLayoutArtifactService).should(BDDMockito.never())
+            .markReadyAndActivate(BDDMockito.any(UUID.class));
         BDDMockito.then(seatLayoutArtifactService).shouldHaveNoMoreInteractions();
 
     }
@@ -316,7 +303,7 @@ class WarmupSeatOrchestratorTest {
             );
     }
 
-    private void stubPrepareArtifactMetadata(boolean ready) {
+    private void stubPrepareArtifactMetadata(WarmupFixture fixture) {
         BDDMockito.given(seatLayoutArtifactService.prepareArtifactMetadata(
             BDDMockito.any(UUID.class),
             BDDMockito.any(UUID.class),
@@ -325,18 +312,10 @@ class WarmupSeatOrchestratorTest {
             BDDMockito.anyString(),
             BDDMockito.anyString(),
             BDDMockito.anyString()
-        )).willAnswer(invocation -> SeatLayoutArtifact.builder()
-            .id(UUID.randomUUID())
-            .concertId(invocation.getArgument(0))
-            .concertSequenceId(invocation.getArgument(1))
-            .section(invocation.getArgument(2))
-            .cdnUrl(invocation.getArgument(3))
-            .storageKey(invocation.getArgument(4))
-            .hash(invocation.getArgument(5))
-            .schemaVersion(invocation.getArgument(6))
-            .isActive(ready)
-            .isReady(ready)
-            .build()
+        )).willAnswer(invocation -> {
+                Section section = invocation.getArgument(2);
+                return fixture.preparedArtifactsBySection().get(section);
+            }
         );
     }
 
@@ -360,7 +339,7 @@ class WarmupSeatOrchestratorTest {
         BDDMockito.then(seatService).shouldHaveNoMoreInteractions();
     }
 
-    private WarmupFixture createFixture() {
+    private WarmupFixture createFixture(boolean ready) {
         UUID concertId = UUID.randomUUID();
         UUID concertSequenceId = UUID.randomUUID();
 
@@ -380,6 +359,7 @@ class WarmupSeatOrchestratorTest {
         Map<Section, SeatLayoutV1> artifactsBySection = new LinkedHashMap<>();
         Map<Section, String> hashBySection = new LinkedHashMap<>();
         Map<Section, String> storageKeyBySection = new LinkedHashMap<>();
+        Map<Section, SeatLayoutArtifact> preparedArtifactsBySection = new LinkedHashMap<>();
 
         for (Map.Entry<Section, List<WarmupSeatResult>> entry : seatResultsBySection.entrySet()) {
             SeatLayoutV1 artifact = seatLayoutArtifactGenerator.makeArtifact(
@@ -391,6 +371,19 @@ class WarmupSeatOrchestratorTest {
             artifactsBySection.put(entry.getKey(), artifact);
             hashBySection.put(entry.getKey(), hash);
             storageKeyBySection.put(entry.getKey(), storageKey);
+            preparedArtifactsBySection.put(entry.getKey(), SeatLayoutArtifact.builder()
+                .id(UUID.randomUUID())
+                .concertId(concertId)
+                .concertSequenceId(concertSequenceId)
+                .section(entry.getKey())
+                .cdnUrl("url:" + storageKey)
+                .storageKey(storageKey)
+                .hash(hash)
+                .schemaVersion(artifact.schemaVersion())
+                .isActive(ready)
+                .isReady(ready)
+                .build()
+            );
         }
         return new WarmupFixture(
             concertId,
@@ -402,7 +395,8 @@ class WarmupSeatOrchestratorTest {
             seatResultsBySection,
             artifactsBySection,
             hashBySection,
-            storageKeyBySection
+            storageKeyBySection,
+            preparedArtifactsBySection
         );
     }
 
@@ -416,7 +410,8 @@ class WarmupSeatOrchestratorTest {
         LinkedHashMap<Section, List<WarmupSeatResult>> seatResultsBySection,
         Map<Section, SeatLayoutV1> artifactsBySection,
         Map<Section, String> hashBySection,
-        Map<Section, String> storageKeyBySection
+        Map<Section, String> storageKeyBySection,
+        Map<Section, SeatLayoutArtifact> preparedArtifactsBySection
     ) {
 
     }

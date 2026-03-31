@@ -21,4 +21,6 @@ public interface SeatLayoutArtifactRepository {
     SeatLayoutArtifact save(SeatLayoutArtifact seatLayoutArtifact);
 
     List<SeatLayoutArtifact> findActiveArtifactByConcertSequenceId(UUID concertSequenceId);
+
+    Optional<SeatLayoutArtifact> findById(UUID artifactId);
 }
