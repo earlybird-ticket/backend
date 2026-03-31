@@ -12,6 +12,29 @@
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
         "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "yellow",
+        "name": "load-test",
+        "target": {
+          "expr": "",
+          "interval": "",
+          "limit": 100,
+          "matchAny": true,
+          "refId": "Anno",
+          "tags": [
+            "load-test",
+            "start",
+            "end"
+          ],
+          "type": "tags"
+        }
       }
     ]
   },
@@ -19,7 +42,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 3,
   "links": [],
   "panels": [
     {
@@ -69,6 +91,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -83,7 +106,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -114,7 +138,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "editorMode": "code",
@@ -161,6 +185,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -175,7 +200,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -206,7 +232,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "editorMode": "code",
@@ -266,6 +292,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": true,
             "stacking": {
               "group": "A",
@@ -280,7 +307,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -313,7 +341,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "datasource": {
@@ -366,6 +394,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": true,
             "stacking": {
               "group": "A",
@@ -380,7 +409,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -434,7 +464,7 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "datasource": {
@@ -487,6 +517,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": true,
             "stacking": {
               "group": "A",
@@ -502,7 +533,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -584,7 +616,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "datasource": {
@@ -592,7 +624,6 @@
           },
           "expr": "avg(irate(redis_keyspace_hits_total{instance=~\"$instance\"}[1m]) / (irate(redis_keyspace_misses_total{instance=~\"$instance\"}[1m]) + irate(redis_keyspace_hits_total{instance=~\"$instance\"}[1m]))) by (instance)",
           "format": "time_series",
-          "hide": false,
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{instance}}",
@@ -661,6 +692,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -676,7 +708,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -758,7 +791,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "datasource": {
@@ -780,7 +813,6 @@
           },
           "expr": "sum(redis_memory_max_bytes{instance=~\"$instance\"})",
           "format": "time_series",
-          "hide": false,
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "Configured max memory",
@@ -835,6 +867,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": true,
             "stacking": {
               "group": "A",
@@ -849,7 +882,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -931,14 +965,13 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "datasource": {
             "uid": "$datasource"
           },
           "expr": "redis_memory_fragmentation_ratio{instance=~\"$instance\"}",
-          "hide": false,
           "interval": "",
           "legendFormat": "{{instance}}",
           "refId": "C"
@@ -980,6 +1013,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": true,
             "stacking": {
               "group": "A",
@@ -994,7 +1028,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -1130,7 +1165,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "datasource": {
@@ -1195,6 +1230,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -1209,7 +1245,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -1242,7 +1279,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "datasource": {
@@ -1304,6 +1341,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -1318,7 +1356,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -1387,7 +1426,7 @@
           "sort": "asc"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "datasource": {
@@ -1440,6 +1479,7 @@
               "type": "linear"
             },
             "showPoints": "never",
+            "showValues": false,
             "spanNulls": true,
             "stacking": {
               "group": "A",
@@ -1454,7 +1494,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -1487,7 +1528,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.6.0",
+      "pluginVersion": "12.4.0",
       "targets": [
         {
           "datasource": {
@@ -1495,7 +1536,6 @@
           },
           "expr": "sum (redis_db_keys{instance=~\"$instance\"}) - sum (redis_db_keys_expiring{instance=~\"$instance\"})",
           "format": "time_series",
-          "hide": false,
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "Not expiring",
@@ -1719,7 +1759,7 @@
   ],
   "preload": false,
   "refresh": "",
-  "schemaVersion": 41,
+  "schemaVersion": 42,
   "tags": [
     "prometheus",
     "redis"
@@ -1735,7 +1775,9 @@
             "redis-exporter:9121"
           ]
         },
-        "datasource": "${datasource}",
+        "datasource": {
+          "uid": "${datasource}"
+        },
         "definition": "label_values(redis_up, instance)",
         "includeAll": false,
         "multi": true,
@@ -1744,6 +1786,7 @@
         "query": "label_values(redis_up, instance)",
         "refresh": 2,
         "regex": "",
+        "regexApplyTo": "value",
         "sort": 1,
         "type": "query"
       },
@@ -1781,6 +1824,7 @@
   },
   "timezone": "browser",
   "title": "Redis Exporter Quickstart and Dashboard",
-  "uid": "bRd48yKMdd",
-  "version": 1
+  "uid": "redis-exporter-overview",
+  "version": 1,
+  "weekStart": ""
 }
