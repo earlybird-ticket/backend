@@ -1,3 +1,23 @@
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 40
+      max-lifetime: 1800000
+      minimum-idle: 8
+      idle-timeout: 600000
+      connection-timeout: 1500
+
+server:
+  tomcat:
+    threads:
+      max: 160
+      min-spare: 10
+    accept-count: 300
+    max-connections: 1000
+    connection-timeout: 3s
+    keep-alive-timeout: 5s
+    max-keep-alive-requests: 50
+
 management:
   tracing:
     enabled: false

@@ -10,11 +10,11 @@ spring:
   cloud:
     gateway:
       httpclient:
-        connect-timeout: 5000
-        response-timeout: 60s
+        connect-timeout: 2000
+        response-timeout: 10s
         pool:
-          max-connections: 5000
-          acquire-timeout: 6000
+          max-connections: 4000
+          acquire-timeout: 2000
       discovery:
         locator:
           enabled: true
@@ -105,17 +105,7 @@ eureka:
 server:
   port: ${GATEWAY_SERVER_PORT:18081}
   netty:
-    connection-timeout: 30s
-  jetty:
-    max-connections: 5000
-  tomcat:
-    mbeanregistry:
-      enabled: true
-    threads:
-      min-spare: 100
-      max: 5000
-    connection-timeout: 60s
-    max-connections: 5000
+    connection-timeout: 10s
 
 jwt:
   secret: ${AUTH_JWT_SECRET}
