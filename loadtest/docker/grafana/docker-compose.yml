@@ -9,8 +9,11 @@ services:
     volumes:
       - ../../grafana/provisioning:/etc/grafana/provisioning
       - ../../grafana/provisioning/dashboards:/var/lib/grafana/dashboards
-      - ../../grafana/data:/var/lib/grafana
+      - grafana_data:/var/lib/grafana
     environment:
       - PROMETHEUS_HOST=${PROMETHEUS_HOST}
       - PROMETHEUS_PORT=${PROMETHEUS_PORT}
     restart: always
+
+volumes:
+  grafana_data:
