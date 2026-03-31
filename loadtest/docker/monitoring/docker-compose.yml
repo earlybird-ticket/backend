@@ -33,19 +33,22 @@ services:
   kafka-exporter:
     image: danielqsj/kafka-exporter
     container_name: kafka-exporter
-    profiles: ["loadtest"]
+    profiles: [ "loadtest" ]
     networks:
       - earlybird_network
     ports:
       - "${KAFKA_EXPORTER_PORT}:9308"
-    command:
-      - "--kafka.server=${KAFKA_ADDR}"
+    command: [
+      "--kafka.server=${KAFKA_BROKER_1}",
+      "--kafka.server=${KAFKA_BROKER_2}",
+      "--kafka.server=${KAFKA_BROKER_3}"
+    ]
     restart: always
 
   postgres-exporter-reservation:
     image: prometheuscommunity/postgres-exporter
     container_name: postgres-exporter-reservation
-    profiles: ["loadtest"]
+    profiles: [ "loadtest" ]
     networks:
       - earlybird_network
     ports:
@@ -57,7 +60,7 @@ services:
   postgres-exporter-payment:
     image: prometheuscommunity/postgres-exporter
     container_name: postgres-exporter-payment
-    profiles: ["loadtest"]
+    profiles: [ "loadtest" ]
     networks:
       - earlybird_network
     ports:

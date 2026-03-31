@@ -21,7 +21,7 @@ spring:
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
   kafka:
-    bootstrap-servers: ${KAFKA_HOST:localhost}:29092 #포트 및 호스트 수정 필요
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -58,12 +58,12 @@ management:
         all: true
     enable:
       jvm: true
-#  zipkin:
-#    tracing:
-#      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
-#  tracing:
-#    sampling:
-#      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
+  #  zipkin:
+  #    tracing:
+  #      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
+  #  tracing:
+  #    sampling:
+  #      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
   prometheus:
     metrics:
       export:
