@@ -1,0 +1,11 @@
+services:
+  eureka-service:
+    image: ebt-registry.kr.ncr.ntruss.com/server:260318-454ad14
+    container_name: eureka
+    platform: linux/amd64
+    environment:
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+    ports:
+      - "18080:18080"
+    restart: on-failure:3

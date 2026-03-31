@@ -1,0 +1,25 @@
+services:
+  gateway-service:
+    image: ebt-registry.kr.ncr.ntruss.com/gateway:260318-454ad14
+    container_name: gateway
+    platform: linux/amd64
+    environment:
+      - GATEWAY_IP_ADDRESS=${GATEWAY_IP_ADDRESS}
+      - GATEWAY_SERVER_PORT=${GATEWAY_SERVER_PORT}
+      - AUTH_JWT_SECRET=${AUTH_JWT_SECRET}
+      - EUREKA_HOST=${EUREKA_HOST}
+      - EUREKA_PORT=${EUREKA_PORT}
+    ports:
+      - "18081:18081"
+    restart: on-failure:3
+
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    network_mode: host
+    pid: host
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - '/:/host:ro,rslave'
+    restart: always

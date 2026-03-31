@@ -1,0 +1,83 @@
+services:
+  earlybird-prometheus:
+    image: prom/prometheus
+    container_name: earlybird-prometheus
+    profiles: [ "loadtest", "venue-perf-test" ]
+    networks:
+      - earlybird_network
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/targets:/etc/prometheus/targets
+      - ./prometheus/prometheus-data:/prometheus
+    command: [
+      '--config.file=/etc/prometheus/prometheus.yml',
+      '--storage.tsdb.path=/prometheus'
+    ]
+    restart: always
+    platform: linux/amd64
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.55.0
+    container_name: redis-exporter
+    profiles: [ "loadtest", "venue-perf-test" ]
+    networks:
+      - earlybird_network
+    ports:
+      - "${REDIS_EXPORTER_PORT}:9121"
+    environment:
+      - REDIS_ADDR=${REDIS_ADDR}
+    restart: always
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter
+    container_name: kafka-exporter
+    profiles: ["loadtest"]
+    networks:
+      - earlybird_network
+    ports:
+      - "${KAFKA_EXPORTER_PORT}:9308"
+    command:
+      - "--kafka.server=${KAFKA_ADDR}"
+    restart: always
+
+  postgres-exporter-reservation:
+    image: prometheuscommunity/postgres-exporter
+    container_name: postgres-exporter-reservation
+    profiles: ["loadtest"]
+    networks:
+      - earlybird_network
+    ports:
+      - "19191:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_RESERVATION_PASSWORD}@${POSTGRES_RESERVATION_HOST}:${POSTGRES_RESERVATION_PORT}/${POSTGRES_DB}?sslmode=disable
+    restart: always
+
+  postgres-exporter-payment:
+    image: prometheuscommunity/postgres-exporter
+    container_name: postgres-exporter-payment
+    profiles: ["loadtest"]
+    networks:
+      - earlybird_network
+    ports:
+      - "19192:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_PAYMENT_PASSWORD}@${POSTGRES_PAYMENT_HOST}:${POSTGRES_PAYMENT_PORT}/${POSTGRES_DB}?sslmode=disable
+    restart: always
+
+  postgres-exporter-venue:
+    image: prometheuscommunity/postgres-exporter
+    container_name: postgres-exporter-venue
+    profiles: [ "loadtest", "venue-perf-test" ]
+    networks:
+      - earlybird_network
+    ports:
+      - "19193:9187"
+    environment:
+      - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER}:${POSTGRES_VENUE_PASSWORD}@${POSTGRES_VENUE_HOST}:${POSTGRES_VENUE_PORT}/${POSTGRES_DB}?sslmode=disable
+    restart: always
+
+networks:
+  earlybird_network:
+    driver: bridge
