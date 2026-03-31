@@ -4,21 +4,13 @@ services:
   earlybird-grafana:
     image: grafana/grafana
     container_name: earlybird-grafana
-    networks:
-      - earlybird_network
     ports:
       - "${GRAFANA_PORT}:3000"
     volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/provisioning/dashboards:/var/lib/grafana/dashboards
+      - ../../grafana/provisioning:/etc/grafana/provisioning
+      - ../../grafana/provisioning/dashboards:/var/lib/grafana/dashboards
+      - ../../grafana/data:/var/lib/grafana
     environment:
       - PROMETHEUS_HOST=${PROMETHEUS_HOST}
       - PROMETHEUS_PORT=${PROMETHEUS_PORT}
     restart: always
-
-volumes:
-  grafana_data:
-
-networks:
-  earlybird_network:
-    driver: bridge
