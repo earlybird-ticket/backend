@@ -22,6 +22,7 @@ import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.connection.StringRedisConnection;
+import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
@@ -40,6 +41,9 @@ class SeatWarmupRedisCacheLoaderTest {
 
     @Mock
     private StringRedisConnection stringRedisConnection;
+
+    @Mock
+    private HashOperations<String, Object, Object> hashOperations;
 
     @BeforeEach
     void setUp() {
@@ -60,6 +64,7 @@ class SeatWarmupRedisCacheLoaderTest {
         LocalDateTime vipTicketDeadline = deadline(9, 50);
 
         stubPipelinedExecution();
+        BDDMockito.given(stringRedisTemplate.opsForHash()).willReturn(hashOperations);
 
         // when
 
@@ -73,31 +78,31 @@ class SeatWarmupRedisCacheLoaderTest {
                     seat.concertSequenceId(), seat.seatInstanceId()
                 );
 
-                BDDMockito.then(stringRedisConnection).should().hSet(
+                BDDMockito.then(stringRedisConnection).should(BDDMockito.times(1)).hSet(
                     seatInstanceKey,
                     "concertId",
                     seat.concertId().toString()
                 );
 
-                BDDMockito.then(stringRedisConnection).should().hSet(
+                BDDMockito.then(stringRedisConnection).should(BDDMockito.times(1)).hSet(
                     seatInstanceKey,
                     "section",
                     seat.section().getValue()
                 );
 
-                BDDMockito.then(stringRedisConnection).should().hSet(
+                BDDMockito.then(stringRedisConnection).should(BDDMockito.times(1)).hSet(
                     seatInstanceKey,
                     "status",
                     seat.status().getValue()
                 );
 
-                BDDMockito.then(stringRedisConnection).should().hSet(
+                BDDMockito.then(stringRedisConnection).should(BDDMockito.times(1)).hSet(
                     seatInstanceKey,
                     "expiredAt",
                     CommonUtil.LocalDateTimetoString(ticketDeadline)
                 );
 
-                BDDMockito.then(stringRedisConnection).should().hSet(
+                BDDMockito.then(stringRedisConnection).should(BDDMockito.times(1)).hSet(
                     seatInstanceKey,
                     "vipExpiredAt",
                     CommonUtil.LocalDateTimetoString(vipTicketDeadline)
@@ -118,6 +123,7 @@ class SeatWarmupRedisCacheLoaderTest {
         LocalDateTime vipTicketDeadline = deadline(9, 50);
 
         stubPipelinedExecution();
+        BDDMockito.given(stringRedisTemplate.opsForHash()).willReturn(hashOperations);
 
         Map<Section, BigDecimal> expectedPrice = Map.of(
             Section.A, BigDecimal.valueOf(20_000),
@@ -146,30 +152,16 @@ class SeatWarmupRedisCacheLoaderTest {
             );
 
             // then
-            BDDMockito.then(stringRedisConnection).should(BDDMockito.times(count)).hIncrBy(
+            BDDMockito.then(hashOperations).should(BDDMockito.times(1)).putAll(
                 BDDMockito.eq(sectionListKey),
-                BDDMockito.eq("remainingSeat"),
-                BDDMockito.eq(1L)
-            );
-
-            BDDMockito.then(stringRedisConnection).should(BDDMockito.times(count)).hSet(
-                BDDMockito.eq(sectionListKey),
-                BDDMockito.eq("floor"),
-                BDDMockito.eq(expectedFloor.get(section))
-            );
-
-            BDDMockito.then(stringRedisConnection).should(BDDMockito.times(count)).hSet(
-                BDDMockito.eq(sectionListKey),
-                BDDMockito.eq("grade"),
-                BDDMockito.eq(expectedGrade.get(section).getValue())
-            );
-
-            BDDMockito.then(stringRedisConnection).should(BDDMockito.times(count)).hSet(
-                BDDMockito.eq(sectionListKey),
-                BDDMockito.eq("price"),
-                BDDMockito.eq(expectedPrice.get(section).toString())
-            );
+                BDDMockito.argThat((Map<String, String> map) ->
+                    expectedGrade.get(section).getValue().equals(map.get("grade"))
+                        && String.valueOf(count).equals(map.get("remainingSeat"))
+                        && expectedPrice.get(section).toString().equals(map.get("price"))
+                        && expectedFloor.get(section).equals(map.get("floor"))
+                ));
         }
+        BDDMockito.then(hashOperations).shouldHaveNoMoreInteractions();
     }
 
     @Test
@@ -177,13 +169,13 @@ class SeatWarmupRedisCacheLoaderTest {
         // given
         UUID concertId = UUID.randomUUID();
         UUID concertSequenceId = UUID.randomUUID();
-        LinkedHashMap<Section, List<WarmupSeatResult>> warmupSeatResultsBySection = getWarmupSeatResultsBySection(
-            concertId, concertSequenceId
-        );
+        LinkedHashMap<Section, List<WarmupSeatResult>> warmupSeatResultsBySection =
+            getWarmupSeatResultsBySection(concertId, concertSequenceId);
         LocalDateTime ticketDeadline = deadline(10, 0);
         LocalDateTime vipTicketDeadline = deadline(9, 50);
 
         stubPipelinedExecution();
+        BDDMockito.given(stringRedisTemplate.opsForHash()).willReturn(hashOperations);
 
         // when & then
         for (Section section : warmupSeatResultsBySection.keySet()) {
@@ -195,11 +187,51 @@ class SeatWarmupRedisCacheLoaderTest {
             );
 
             for (int layoutIndex = 0; layoutIndex < seatResults.size(); layoutIndex++) {
-                BDDMockito.then(stringRedisConnection).should().sAdd(
-                    seatIndexKey, String.valueOf(layoutIndex)
-                );
+                BDDMockito.then(stringRedisConnection).should(BDDMockito.times(1))
+                    .sAdd(seatIndexKey, String.valueOf(layoutIndex));
             }
         }
+    }
+
+    @Test
+    void 같은_섹션_warmup을_재실행해도_remainingSeat는_누적되지_않는다() {
+        // given
+        UUID concertId = UUID.randomUUID();
+        UUID concertSequenceId = UUID.randomUUID();
+        LinkedHashMap<Section, List<WarmupSeatResult>> warmupSeatResultsBySection =
+            getWarmupSeatResultsBySection(concertId, concertSequenceId);
+
+        List<WarmupSeatResult> seatResults = warmupSeatResultsBySection.get(Section.A);
+        WarmupSeatResult firstSeat = seatResults.get(0);
+        Integer floor = firstSeat.floor();
+        BigDecimal price = firstSeat.price();
+        Grade grade = firstSeat.grade();
+
+        LocalDateTime ticketDeadline = deadline(10, 0);
+        LocalDateTime vipTicketDeadline = deadline(9, 50);
+
+        stubPipelinedExecution();
+        BDDMockito.given(stringRedisTemplate.opsForHash()).willReturn(hashOperations);
+
+        String sectionListKey = redisKeyFactory.generateSectionListKey(
+            concertId, concertSequenceId, Section.A.getValue()
+        );
+
+        // when
+        seatWarmupRedisCacheLoader.load(seatResults, ticketDeadline, vipTicketDeadline);
+        seatWarmupRedisCacheLoader.load(seatResults, ticketDeadline, vipTicketDeadline);
+
+        // then
+        BDDMockito.then(hashOperations).should(BDDMockito.times(2))
+            .putAll(
+                BDDMockito.eq(sectionListKey),
+                BDDMockito.argThat((Map<String, String> actual) ->
+                    grade.getValue().equals(actual.get("grade"))
+                        && floor.toString().equals(actual.get("floor"))
+                        && price.toString().equals(actual.get("price"))
+                        && String.valueOf(seatResults.size()).equals(actual.get("remainingSeat"))
+                )
+            );
     }
 
     private LocalDateTime deadline(int hour, int minute) {

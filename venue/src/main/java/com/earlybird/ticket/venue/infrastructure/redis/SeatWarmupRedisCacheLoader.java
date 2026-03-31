@@ -6,6 +6,7 @@ import com.earlybird.ticket.venue.domain.dto.WarmupSeatResult;
 import com.earlybird.ticket.venue.infrastructure.redis.util.RedisKeyFactory;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.connection.StringRedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
@@ -32,6 +33,8 @@ public class SeatWarmupRedisCacheLoader implements SeatWarmupCacheLoader {
             throw new IllegalArgumentException("좌석 warmup 캐시 적재 입력은 비어 있을 수 없습니다.");
         }
 
+        WarmupSeatResult firstSeat = seats.get(0);
+
         stringRedisTemplate.executePipelined(
             (RedisCallback<Object>) connection -> {
                 StringRedisConnection stringConn = (StringRedisConnection) connection;
@@ -39,13 +42,19 @@ public class SeatWarmupRedisCacheLoader implements SeatWarmupCacheLoader {
                 for (int layoutIndex = 0; layoutIndex < seats.size(); layoutIndex++) {
                     WarmupSeatResult seatInfo = seats.get(layoutIndex);
 
-                    makeSeatInstanceOnRedis(seatInfo, stringConn, ticketDeadline, vipTicketDeadline);
-                    makeSectionListOnRedis(seatInfo, stringConn);
+                    makeSeatInstanceOnRedis(
+                        seatInfo,
+                        stringConn,
+                        ticketDeadline,
+                        vipTicketDeadline
+                    );
                     makeSeatIndexOnRedis(seatInfo, stringConn, layoutIndex);
                 }
                 return null;
             }
         );
+
+        makeSectionListOnRedis(seats.size(), firstSeat);
 
     }
 
@@ -58,19 +67,21 @@ public class SeatWarmupRedisCacheLoader implements SeatWarmupCacheLoader {
         stringConn.sAdd(seatIndexKey, String.valueOf(layoutIndex));
     }
 
-    private void makeSectionListOnRedis(
-        WarmupSeatResult seatInfo, StringRedisConnection stringConn
-    ) {
+    private void makeSectionListOnRedis(int seatCount, WarmupSeatResult seatInfo) {
         String sectionKey = redisKeyFactory.generateSectionListKey(
             seatInfo.concertId(),
             seatInfo.concertSequenceId(),
             seatInfo.section().getValue()
         );
 
-        stringConn.hIncrBy(sectionKey, "remainingSeat", 1);
-        stringConn.hSet(sectionKey, "floor", seatInfo.floor().toString());
-        stringConn.hSet(sectionKey, "grade", seatInfo.grade().getValue());
-        stringConn.hSet(sectionKey, "price", seatInfo.price().toString());
+        Map<String, String> sectionSummary = Map.of(
+            "remainingSeat", String.valueOf(seatCount),
+            "floor", seatInfo.floor().toString(),
+            "grade", seatInfo.grade().getValue(),
+            "price", seatInfo.price().toString()
+        );
+
+        stringRedisTemplate.opsForHash().putAll(sectionKey, sectionSummary);
     }
 
     private void makeSeatInstanceOnRedis(
