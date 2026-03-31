@@ -47,7 +47,7 @@ spring:
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
   kafka:
-    bootstrap-servers: ${KAFKA_HOST}:${KAFKA_PORT_2}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
 
 eureka:
   instance:

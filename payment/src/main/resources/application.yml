@@ -36,8 +36,7 @@ spring:
     open-in-view: false
 
   kafka:
-#    bootstrap-servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:29091},${KAFKA_HOST:localhost}:${KAFKA_PORT_2:29092},${KAFKA_HOST:localhost}:${KAFKA_PORT_3:29093}
-    bootstrap-servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT_2:29092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
 
 
 eureka:
@@ -90,12 +89,12 @@ management:
         all: true
     enable:
       jvm: true
-#  zipkin:
-#    tracing:
-#      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
-#  tracing:
-#    sampling:
-#      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
+  #  zipkin:
+  #    tracing:
+  #      endpoint: "http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans"
+  #  tracing:
+  #    sampling:
+  #      probability: ${ZIPKIN_SAMPLING_PROBABILITY:1.0}
   prometheus:
     metrics:
       export:
