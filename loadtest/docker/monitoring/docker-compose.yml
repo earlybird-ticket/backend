@@ -10,7 +10,7 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./prometheus/targets:/etc/prometheus/targets
-      - ./prometheus/prometheus-data:/prometheus
+      - prometheus-data:/prometheus
     command: [
       '--config.file=/etc/prometheus/prometheus.yml',
       '--storage.tsdb.path=/prometheus'
@@ -84,3 +84,6 @@ services:
 networks:
   earlybird_network:
     driver: bridge
+
+volumes:
+  prometheus-data:
