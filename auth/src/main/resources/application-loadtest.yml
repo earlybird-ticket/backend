@@ -3,3 +3,15 @@ server:
     enabled: true
     mime-types: application/json
     min-response-size: 1024
+
+management:
+  tracing:
+    enabled: false
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    com.earlybird: WARN
+    org.hibernate: WARN
+  config: classpath:logback-loadtest.xml
