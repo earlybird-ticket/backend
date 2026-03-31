@@ -80,6 +80,6 @@ eureka:
   instance:
     instance-id: ${spring.application.name}:${server.port}
     prefer-ip-address: true
-    hostname: ${spring.application.name}
+    ip-address: ${RESERVATION_IP_ADDRESS}
     lease-renewal-interval-in-seconds: 10
     lease-expiration-duration-in-seconds: 30
