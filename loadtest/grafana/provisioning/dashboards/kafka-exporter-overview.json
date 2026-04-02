@@ -132,7 +132,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -235,17 +235,19 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus-main"
           },
+          "editorMode": "code",
           "expr": "sum(delta(kafka_consumergroup_current_offset{instance=~'$instance',topic=~\"$topic\"}[5m])/5) by (consumergroup, topic)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{consumergroup}} (topic: {{topic}})",
+          "range": true,
           "refId": "A"
         }
       ],
@@ -338,7 +340,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -442,13 +444,14 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus-main"
           },
+          "editorMode": "code",
           "expr": "sum(kafka_consumergroup_lag{instance=\"$instance\",topic=~\"$topic\"}) by (consumergroup, topic) ",
           "format": "time_series",
           "instant": false,
@@ -522,7 +525,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -549,15 +552,26 @@
   "templating": {
     "list": [
       {
+        "allowCustomValue": false,
         "current": {
           "text": "",
           "value": ""
         },
-        "includeAll": false,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus-main"
+        },
+        "definition": "label_values(kafka_topic_partition_current_offset,job)",
+        "includeAll": true,
         "label": "Job",
+        "multi": true,
         "name": "job",
         "options": [],
-        "query": "label_values(kafka_consumergroup_current_offset, job)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kafka_topic_partition_current_offset,job)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
         "refresh": 1,
         "regex": "",
         "regexApplyTo": "value",
@@ -568,31 +582,48 @@
           "text": "",
           "value": ""
         },
-        "includeAll": false,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus-main"
+        },
+        "definition": "label_values(kafka_topic_partition_current_offset{job=~\"$job\"},instance)",
         "label": "Instance",
         "name": "instance",
         "options": [],
-        "query": "label_values(kafka_consumergroup_current_offset{job=~\"$job\"}, instance)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kafka_topic_partition_current_offset{job=~\"$job\"},instance)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
         "refresh": 1,
         "regex": "",
         "regexApplyTo": "value",
         "type": "query"
       },
       {
+        "allowCustomValue": false,
         "current": {
           "text": "All",
           "value": "$__all"
         },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus-main"
+        },
+        "definition": "label_values(kafka_topic_partition_current_offset{instance=~\"$instance\", topic!=\"__consumer_offsets\"},topic)",
         "includeAll": true,
         "label": "Topic",
         "multi": true,
         "name": "topic",
         "options": [],
-        "query": "label_values(kafka_topic_partition_current_offset{instance='$instance',topic!='__consumer_offsets',topic!='--kafka'}, topic)",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(kafka_topic_partition_current_offset{instance=~\"$instance\", topic!=\"__consumer_offsets\"},topic)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
         "refresh": 1,
         "regex": "",
         "regexApplyTo": "value",
-        "sort": 1,
         "type": "query"
       }
     ]
@@ -604,7 +635,7 @@
   "timepicker": {},
   "timezone": "browser",
   "title": "Kafka Exporter Overview",
-  "uid": "kafka-exporter-overview",
+  "uid": "kafka-exporter-v1",
   "version": 1,
   "weekStart": ""
 }

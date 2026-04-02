@@ -10,6 +10,12 @@
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
         "type": "dashboard"
       },
       {
@@ -19,7 +25,7 @@
         },
         "enable": true,
         "hide": true,
-        "iconColor": "yellow",
+        "iconColor": "red",
         "name": "load-test",
         "target": {
           "expr": "",
@@ -138,7 +144,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "editorMode": "code",
@@ -232,7 +238,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "editorMode": "code",
@@ -329,7 +335,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "editorMode": "code",
@@ -424,7 +430,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "editorMode": "code",
@@ -534,7 +540,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "datasource": {
@@ -636,10 +642,10 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
-          "alias": "deadlocks",
+          "alias": "conflicts",
           "datasource": {
             "uid": "$datasource"
           },
@@ -686,10 +692,17 @@
               }
             ]
           ],
-          "step": 240
+          "step": 240,
+          "tags": [
+            {
+              "key": "instance",
+              "operator": "=~",
+              "value": "/^$instance$/"
+            }
+          ]
         },
         {
-          "alias": "conflicts",
+          "alias": "deadlocks",
           "datasource": {
             "uid": "$datasource"
           },
@@ -736,7 +749,14 @@
               }
             ]
           ],
-          "step": 240
+          "step": 240,
+          "tags": [
+            {
+              "key": "instance",
+              "operator": "=~",
+              "value": "/^$instance$/"
+            }
+          ]
         }
       ],
       "title": "Conflicts/Deadlocks",
@@ -823,7 +843,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "editorMode": "code",
@@ -894,7 +914,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "editorMode": "code",
@@ -978,7 +998,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "editorMode": "code",
@@ -1050,7 +1070,7 @@
         "sizing": "auto",
         "valueMode": "color"
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "editorMode": "code",
@@ -1117,7 +1137,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.1",
       "targets": [
         {
           "editorMode": "code",
@@ -1140,9 +1160,48 @@
   "templating": {
     "list": [
       {
+        "allValue": ".*",
         "current": {
-          "text": "prometheus-main",
-          "value": "prometheus-main"
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "uid": "$datasource"
+        },
+        "definition": "",
+        "includeAll": true,
+        "name": "instance",
+        "options": [],
+        "query": "label_values(up{job=~\"postgres.*\"},instance)",
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "uid": "$datasource"
+        },
+        "definition": "label_values(pg_stat_database_tup_fetched{instance=~\"$instance\",datname!~\"template.*|postgres\"},datname)",
+        "includeAll": true,
+        "label": "db",
+        "name": "db",
+        "options": [],
+        "query": "label_values(pg_stat_database_tup_fetched{instance=~\"$instance\",datname!~\"template.*|postgres\"},datname)",
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "Postgres Overview",
+          "value": "Postgres Overview"
         },
         "includeAll": false,
         "label": "datasource",
@@ -1152,6 +1211,42 @@
         "refresh": 1,
         "regex": "",
         "type": "datasource"
+      },
+      {
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": {
+          "uid": "$datasource"
+        },
+        "definition": "label_values(pg_up, job)",
+        "description": "",
+        "includeAll": true,
+        "label": "job",
+        "multi": true,
+        "name": "job__",
+        "options": [],
+        "query": "label_values(pg_up, job)",
+        "refresh": 1,
+        "regex": "",
+        "regexApplyTo": "value",
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "",
+          "value": ""
+        },
+        "name": "query0",
+        "options": [],
+        "query": "",
+        "type": "custom",
+        "valuesFormat": "csv"
       },
       {
         "allowCustomValue": true,
@@ -1165,7 +1260,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "$datasource"
+          "uid": "prometheus-main"
         },
         "definition": "label_values(pg_stat_database_numbackends,job)",
         "includeAll": true,
@@ -1190,7 +1285,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "$datasource"
+          "uid": "prometheus-main"
         },
         "definition": "label_values(pg_stat_database_numbackends{job=~\"$job_\"},datname)",
         "includeAll": true,
@@ -1216,7 +1311,7 @@
   "timepicker": {},
   "timezone": "browser",
   "title": "PostgreSQL Exporter Quickstart and Dashboard",
-  "uid": "postgres-exporter-overview",
+  "uid": "postgres-exporter-v1",
   "version": 1,
   "weekStart": ""
 }
