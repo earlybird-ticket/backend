@@ -85,8 +85,8 @@ public class RedisConfig {
                    local section = redis.call('HGET', key, 'section')
                    local concertSequenceId = string.match(key, '^SEAT_INSTANCE:([^:]+):')
                    redis.call('HINCRBY', 'SECTION_LIST:' .. concertId .. ':' .. concertSequenceId .. ':' ..section, 'remainingSeat', -1)
-                   local seatInstanceId = string.match(key, '.+:([^:]+)$') -- (1) 좌석 인스턴스 아이디 추출
-                   redis.call('ZREM', 'SEAT_INDEX:' .. concertSequenceId .. ':' ..section .. ':FREE', seatInstanceId) -- (2) 가능한 좌석에서 제거
+                   local layoutIndex = redis.call('HGET', key, 'layoutIndex')
+                   redis.call('SREM', 'SEAT_INDEX:' .. concertSequenceId .. ':' ..section .. ':FREE', layoutIndex) -- 가능한 좌석에서 제거
                 end
                
                 -- 5. 예약 ID TTL 설정
@@ -129,6 +129,8 @@ public class RedisConfig {
                    local section = redis.call('HGET', key, 'section')
                    local concertSequenceId = string.match(key, '^SEAT_INSTANCE:([^:]+):')
                    redis.call('HINCRBY', 'SECTION_LIST:' .. concertId .. ':' .. concertSequenceId .. ':' ..section, 'remainingSeat', -1)
+                   local layoutIndex = redis.call('HGET', key, 'layoutIndex')
+                   redis.call('SREM', 'SEAT_INDEX:' .. concertSequenceId .. ':' ..section .. ':FREE', layoutIndex) -- 가능한 좌석에서 제거
                 end
                
                 -- 5. 예약 ID TTL 설정
@@ -224,11 +226,8 @@ public class RedisConfig {
                    local concertSequenceId = string.match(key, '^SEAT_INSTANCE:([^:]+):')
                    redis.call('HINCRBY', 'SECTION_LIST:' .. concertId .. ':' .. concertSequenceId .. ':' ..section, 'remainingSeat', 1)
                    -- 3-1. 가능한 좌석에 복구
-                   local seatInstanceId = string.match(key, '.+:([^:]+)$')
-                   local row = redis.call('HGET', key, 'row')
-                   local col = redis.call('HGET', key, 'col')
-                   local score = row * 10000 + col
-                   redis.call('ZADD', 'SEAT_INDEX:' .. concertSequenceId .. ':' ..section .. ':FREE', score, seatInstanceId)
+                   local layoutIndex = redis.call('HGET', key, 'layoutIndex')
+                   redis.call('SADD', 'SEAT_INDEX:' .. concertSequenceId .. ':' ..section .. ':FREE', layoutIndex)
                 end
                 
                 -- 4. TTL 삭제

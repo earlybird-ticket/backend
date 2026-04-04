@@ -44,6 +44,7 @@ public class SeatWarmupRedisCacheLoader implements SeatWarmupCacheLoader {
 
                     makeSeatInstanceOnRedis(
                         seatInfo,
+                        layoutIndex,
                         stringConn,
                         ticketDeadline,
                         vipTicketDeadline
@@ -86,6 +87,7 @@ public class SeatWarmupRedisCacheLoader implements SeatWarmupCacheLoader {
 
     private void makeSeatInstanceOnRedis(
         WarmupSeatResult seatInfo,
+        int layoutIndex,
         StringRedisConnection stringConn,
         LocalDateTime ticketDeadline,
         LocalDateTime vipTicketDeadline
@@ -109,6 +111,7 @@ public class SeatWarmupRedisCacheLoader implements SeatWarmupCacheLoader {
         stringConn.hSet(
             seatInstanceKey, "vipExpiredAt", CommonUtil.LocalDateTimetoString(vipTicketDeadline)
         );
+        stringConn.hSet(seatInstanceKey, "layoutIndex", String.valueOf(layoutIndex));
         stringConn.hSet(seatInstanceKey, "updatedAt", "");
 
     }
