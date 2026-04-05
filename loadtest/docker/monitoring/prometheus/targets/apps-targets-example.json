@@ -1,0 +1,12 @@
+[
+  {
+    "targets": [
+      "10.0.1.13:18086"
+    ],
+    "labels": {
+      "layer": "app",
+      "service": "venue",
+      "instance": "venue"
+    }
+  }
+]
