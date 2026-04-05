@@ -1,6 +1,6 @@
 services:
   auth-service:
-    image: ebt-registry.kr.ncr.ntruss.com/auth:260318-454ad14
+    image: ebt-registry.kr.ncr.ntruss.com/auth:loadtest-generate-tokens
     platform: linux/amd64
     environment:
       - SPRING_PROFILES_ACTIVE=loadtest

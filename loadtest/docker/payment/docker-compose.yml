@@ -1,6 +1,6 @@
 services:
   payment-service:
-    image: ebt-registry.kr.ncr.ntruss.com/payment:260318-454ad14
+    image: ebt-registry.kr.ncr.ntruss.com/payment:loadtest
     container_name: payment
     platform: linux/amd64
     environment:
