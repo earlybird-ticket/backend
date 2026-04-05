@@ -99,5 +99,3 @@ FROM p_seat s
 WHERE s.venue_id = '33333333-3333-3333-3333-333333333333'
   AND s.hall_id  = '44444444-4444-4444-4444-444444444444'
   AND s.deleted_at IS NULL;
-
-truncate p_seat_instance;
