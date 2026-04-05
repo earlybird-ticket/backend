@@ -1,6 +1,6 @@
 services:
   gateway-service:
-    image: ebt-registry.kr.ncr.ntruss.com/gateway:260318-454ad14
+    image: ebt-registry.kr.ncr.ntruss.com/gateway:loadtest
     platform: linux/amd64
     environment:
       - SPRING_PROFILES_ACTIVE=loadtest

@@ -1,6 +1,6 @@
 services:
   reservation-service:
-    image: ebt-registry.kr.ncr.ntruss.com/reservation:260318-454ad14
+    image: ebt-registry.kr.ncr.ntruss.com/reservation:loadtest
     container_name: reservation
     platform: linux/amd64
     environment:
