@@ -138,11 +138,11 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.2",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "rate(redis_cpu_user_seconds_total[1m]) + rate(redis_cpu_sys_seconds_total[1m]) * 100",
+          "expr": "(rate(redis_cpu_user_seconds_total[1m]) + rate(redis_cpu_sys_seconds_total[1m])) * 100",
           "legendFormat": "CPU 사용량",
           "range": true,
           "refId": "A"
@@ -232,11 +232,11 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.2",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "redis_memory_used_rss_bytes / redis_memory_max_bytes * 100",
+          "expr": "(redis_memory_used_bytes{instance=~\"$instance\"} / clamp_min(redis_memory_max_bytes{instance=~\"$instance\"}, 1)) * 100",
           "legendFormat": "메모리 사용량(%)",
           "range": true,
           "refId": "A"
@@ -341,18 +341,20 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.2",
       "targets": [
         {
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "avg(irate(redis_commands_total{instance=~\"$instance\"} [1m])) by (cmd)",
+          "editorMode": "code",
+          "expr": "sum(rate(redis_commands_total{instance=~\"$instance\"}[1m])) by (cmd)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{cmd}}",
           "metric": "redis_command_calls_total",
+          "range": true,
           "refId": "A",
           "step": 240
         }
@@ -464,18 +466,20 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.2",
       "targets": [
         {
           "datasource": {
             "uid": "$datasource"
           },
-          "expr": "avg(irate(redis_commands_duration_seconds_total{instance=~\"$instance\"}[1m])) by (cmd)\n  /\navg(irate(redis_commands_total{instance=~\"$instance\"}[1m])) by (cmd)\n",
+          "editorMode": "code",
+          "expr": "sum(rate(redis_commands_duration_seconds_total{instance=~\"$instance\"}[1m])) by (cmd)\n/\nclamp_min(sum(rate(redis_commands_total{instance=~\"$instance\"}[1m])) by (cmd), 1e-9)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{ cmd }}",
           "metric": "redis_command_calls_total",
+          "range": true,
           "refId": "A",
           "step": 240
         }
@@ -616,7 +620,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.2",
       "targets": [
         {
           "datasource": {
@@ -791,7 +795,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.2",
       "targets": [
         {
           "datasource": {
@@ -965,7 +969,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.2",
       "targets": [
         {
           "datasource": {
@@ -1165,7 +1169,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.2",
       "targets": [
         {
           "datasource": {
@@ -1279,7 +1283,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.2",
       "targets": [
         {
           "datasource": {
@@ -1426,7 +1430,7 @@
           "sort": "asc"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.2",
       "targets": [
         {
           "datasource": {
@@ -1528,7 +1532,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.4.0",
+      "pluginVersion": "12.4.2",
       "targets": [
         {
           "datasource": {
@@ -1643,7 +1647,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.3.0",
+      "pluginVersion": "12.4.2",
       "targets": [
         {
           "datasource": {
@@ -1741,7 +1745,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.3.0",
+      "pluginVersion": "12.4.2",
       "targets": [
         {
           "datasource": {
