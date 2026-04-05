@@ -4,12 +4,13 @@ server:
     mbeanregistry:
       enabled: true
     threads:
-      max: 32
-      min-spare: 8
-    accept-count: 200
-    max-connections: 3000
-    connection-timeout: 5s
+      max: 200
+      min-spare: 20
+    accept-count: 500
+    max-connections: 1500
+    connection-timeout: 3s
     keep-alive-timeout: 5s
+    max-keep-alive-requests: 50
 
 spring:
   application:
