@@ -32,7 +32,7 @@ while [ "${start}" -lt "${TOTAL_COUNT}" ]; do
     -H "Accept: application/json" \
     -o "${response_file}"
 
-  python3 - "${OUTPUT_PATH}" "${response_file}" <<'PY'
+python3 - "${OUTPUT_PATH}" "${response_file}" <<'PY'
 import json
 import sys
 
@@ -45,7 +45,13 @@ with open(output_path, "r", encoding="utf-8") as f:
 with open(response_path, "r", encoding="utf-8") as f:
     response = json.load(f)
 
-data = response.get("data")
+if isinstance(response, list):
+    data = response
+elif isinstance(response, dict):
+    data = response.get("data")
+else:
+    raise SystemExit(f"Invalid response format: {response_path}")
+
 if not isinstance(data, list):
     raise SystemExit(f"Invalid response format: {response_path}")
 
