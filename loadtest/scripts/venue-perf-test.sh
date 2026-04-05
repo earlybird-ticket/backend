@@ -16,4 +16,6 @@ k6 run \
   -e VERSION="${VERSION:-local}" \
   -e USER_TOKENS_PATH="${USER_TOKENS_PATH}" \
   -e GRAFANA_URL="${GRAFANA_URL:-}" \
+  -e START_CHAR="${START_CHAR:-A}" \
+  -e END_CHAR="${END_CHAR:-Z}" \
   "${ROOT_DIR}/k6/scenarios/venue-performance-test.js"

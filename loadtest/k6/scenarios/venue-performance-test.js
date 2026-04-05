@@ -3,7 +3,7 @@ import {SharedArray} from 'k6/data';
 import {check, sleep} from 'k6';
 import {Trend, Counter, Rate} from 'k6/metrics';
 
-const USER_TOKENS_PATH = __ENV.USER_TOKENS_PATH || './user_tokens.json';
+const USER_TOKENS_PATH = __ENV.USER_TOKENS_PATH || '../data/user_tokens.json';
 
 const users = new SharedArray('users', function () {
   const parsed = JSON.parse(open(USER_TOKENS_PATH));
@@ -44,6 +44,7 @@ const finalSeatPreemptSuccessCount = new Counter(
     'final_seat_preempt_success_count');
 
 export const options = {
+  discardResponseBodies: true,
   scenarios: {
     seat_preempt_flow: {
       executor: 'shared-iterations',
@@ -95,7 +96,11 @@ function safeJson(res) {
 function requestSeatList(headers, concertSequenceId, section) {
   return http.get(
       `${BASE_URL}/api/v1/external/seats/${concertSequenceId}/sections/${section}`,
-      {headers, tags: {step: 'seat_lookup', name: 'seat_lookup'}}
+      {
+        headers,
+        responseType: 'text',
+        tags: {step: 'seat_lookup', name: 'seat_lookup'}
+      }
   );
 }
 
@@ -139,12 +144,9 @@ function postAnnotation(text, tags = []) {
       });
 
   if (!is2XX(res)) {
-    console.log(`Failed to post annotation: ${res.status} ${res.body}`)
+    console.log(`Failed to post annotation: ${res.status}`)
     return null;
   }
-
-  const body = safeJson(res);
-  return body?.id ?? null;
 }
 
 // 테스트 시작 시 어노테이션
@@ -161,7 +163,7 @@ export default function () {
   const user = users[(__VU - 1 + __ITER) % users.length];
   const headers = {
     'X-User-Passport': JSON.stringify({
-      userId: user.userId,
+      userId: user.user_id,
       userRole: 'USER'
     }),
     'Content-Type': 'application/json',
@@ -258,7 +260,6 @@ export default function () {
   const preemptRes = requestSeatPreempt(headers, preemptPayload);
   seatPreemptDuration.add(Date.now() - preemptStart);
 
-  const preemptBody = safeJson(preemptRes);
   const preemptHttpOk = check(preemptRes, {
     'seat preempt status is 2xx': (r) => is2XX(r),
   });
@@ -266,7 +267,7 @@ export default function () {
   const preemptRejected = preemptRes && preemptRes.status === 409;
   seatPreemptRejectedRate.add(preemptRejected);
 
-  const finalSuccess = preemptHttpOk && !!preemptBody?.data;
+  const finalSuccess = preemptHttpOk;
   finalSeatPreemptSuccessRate.add(finalSuccess);
 
   if (finalSuccess) {
