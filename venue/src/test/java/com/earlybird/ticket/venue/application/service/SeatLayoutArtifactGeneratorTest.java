@@ -11,6 +11,7 @@ import com.earlybird.ticket.venue.domain.entity.constant.Section;
 import com.earlybird.ticket.venue.domain.entity.constant.Status;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
@@ -29,6 +30,7 @@ class SeatLayoutArtifactGeneratorTest {
     void setup() {
         ObjectMapper artifactObjectMapper = JsonMapper.builder()
             .configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
+            .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
             .build();
 
         seatLayoutArtifactGenerator = new SeatLayoutArtifactGenerator(artifactObjectMapper);
