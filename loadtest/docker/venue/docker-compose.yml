@@ -1,6 +1,6 @@
 services:
   venue-service:
-    image: ebt-registry.kr.ncr.ntruss.com/venue:260318-454ad14
+    image: ebt-registry.kr.ncr.ntruss.com/venue:seat-a-baseline
     container_name: venue
     profiles: [ "loadtest", "venue-perf-test" ]
     platform: linux/amd64
@@ -31,7 +31,7 @@ services:
   node-exporter:
     image: prom/node-exporter
     container_name: node-exporter
-    profiles: [ "loadtest" ]
+    profiles: [ "loadtest", "venue-perf-test" ]
     network_mode: host
     pid: host
     command:

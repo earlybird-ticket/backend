@@ -1,6 +1,6 @@
 services:
   eureka-service:
-    image: ebt-registry.kr.ncr.ntruss.com/server:260318-454ad14
+    image: ebt-registry.kr.ncr.ntruss.com/server:loadtest
     platform: linux/amd64
     environment:
       - SPRING_PROFILES_ACTIVE=loadtest
