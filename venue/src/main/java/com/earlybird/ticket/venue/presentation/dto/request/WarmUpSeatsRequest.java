@@ -5,33 +5,27 @@ import com.earlybird.ticket.venue.application.dto.request.WarmupSeatsCommand.Con
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import lombok.Builder;
 
 public record WarmUpSeatsRequest(
-    List<WarmUpSeatRequest> seats
+    UUID concertSequenceId,
+    LocalDateTime ticketExpiredAt,
+    LocalDateTime vipTicketExpiredAt
 ) {
 
-    @Builder
-    record WarmUpSeatRequest(
-        UUID concertSequenceId,
-        LocalDateTime ticketExpiredAt,
-        LocalDateTime vipTicketExpiredAt
-    ) {
-
-    }
-
-    public WarmupSeatsCommand toWarmupSeatCommand() {
+    public static WarmupSeatsCommand toWarmupSeatCommand(List<WarmUpSeatsRequest> requests) {
         return WarmupSeatsCommand.builder()
-            .concertDeadLines(seats.stream().map(
-                    seat -> ConcertDeadLine
-                        .builder()
-                        .concertSequenceId(seat.concertSequenceId)
-                        .ticketExpiredAt(seat.ticketExpiredAt)
-                        .vipTicketExpiredAt(seat.vipTicketExpiredAt)
-                        .build()
-                ).toList()
-            )
-            .build();
+            .concertDeadLines(
+                requests.stream()
+                    .map(
+                        seat -> ConcertDeadLine.builder()
+                            .concertSequenceId(seat.concertSequenceId)
+                            .ticketExpiredAt(seat.ticketExpiredAt)
+                            .vipTicketExpiredAt(seat.vipTicketExpiredAt)
+                            .build()
+                    )
+                    .toList()
+            ).build();
+
     }
 
 }

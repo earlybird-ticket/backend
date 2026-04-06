@@ -2,6 +2,7 @@ package com.earlybird.ticket.venue.presentation.controller;
 
 import com.earlybird.ticket.venue.application.service.SeatService;
 import com.earlybird.ticket.venue.presentation.dto.request.WarmUpSeatsRequest;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class SeatWarmupTestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public void warmup(@RequestBody WarmUpSeatsRequest warmUpSeatsRequest) {
-        seatService.warmUpSeatInstance(warmUpSeatsRequest.toWarmupSeatCommand());
+    public void warmup(@RequestBody List<WarmUpSeatsRequest> warmUpSeatsRequests) {
+        seatService.warmUpSeatInstance(WarmUpSeatsRequest.toWarmupSeatCommand(warmUpSeatsRequests));
     }
 }
