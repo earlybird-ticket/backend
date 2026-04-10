@@ -142,8 +142,8 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by (job, datname) (\n  pg_stat_database_numbackends{\n    job=~\"$job_\",\n    datname=~\"$datname\"\n  }\n)",
-          "legendFormat": "{{job}} - {{datname}}",
+          "expr": "sum by (job, service) (\n  pg_stat_database_numbackends{\n    job=~\"$job_\",\n    datname=~\"$datname\",\n    service=~\"$service\"\n  }\n)",
+          "legendFormat": "{{job}} - {{service}}",
           "range": true,
           "refId": "A"
         }
@@ -237,9 +237,9 @@
         {
           "editorMode": "code",
           "exemplar": false,
-          "expr": "100 *\nsum by (job) (\n  pg_stat_database_numbackends{\n    job=~\"$job_\",\n    datname=~\"$datname\"\n  }\n)\n/\nmax by (job) (\n  pg_settings_max_connections{job=~\"$job_\"}\n)",
+          "expr": "100 *\nsum by (job, service) (\n  pg_stat_database_numbackends{\n    job=~\"$job_\",\n    datname=~\"$datname\",\n    service=~\"$service\"\n  }\n)\n/\nmax by (job, service) (\n  pg_settings_max_connections{job=~\"$job_\", service=~\"$service\"}\n)",
           "instant": false,
-          "legendFormat": "{{job}}-{{datname}}",
+          "legendFormat": "{{job}}-{{service}}",
           "range": true,
           "refId": "A"
         }
@@ -333,8 +333,8 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by (job, datname) (\n  rate(pg_stat_database_xact_commit{job=~\"$job_\", datname=~\"$datname\"}[1m]) +\n  rate(pg_stat_database_xact_rollback{job=~\"$job_\", datname=~\"$datname\"}[1m])\n)",
-          "legendFormat": "{{job}}-{{datname}}",
+          "expr": "sum by (job, service) (\n  rate(pg_stat_database_xact_commit{job=~\"$job_\", datname=~\"$datname\", service=~\"$service\"}[1m]) +\n  rate(pg_stat_database_xact_rollback{job=~\"$job_\", datname=~\"$datname\", service=~\"$service\"}[1m])\n)",
+          "legendFormat": "{{job}}-{{service}}",
           "range": true,
           "refId": "A"
         }
@@ -428,8 +428,8 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by (job, datname) (\n  rate(pg_stat_database_xact_rollback{job=~\"$job_\", datname=~\"$datname\"}[1m])\n)",
-          "legendFormat": "{{job}}-{{datname}}",
+          "expr": "sum by (job, service) (\n  rate(pg_stat_database_xact_rollback{job=~\"$job_\", datname=~\"$datname\", service=~\"$service\"}[1m])\n)",
+          "legendFormat": "{{job}}-{{service}}",
           "range": true,
           "refId": "A"
         }
@@ -509,7 +509,7 @@
               }
             ]
           },
-          "unit": "percentunit"
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -541,10 +541,10 @@
             "uid": "$datasource"
           },
           "editorMode": "code",
-          "expr": "100 *\nsum by (job, datname) (\n  rate(pg_stat_database_blks_hit{job=~\"$job_\", datname=~\"$datname\"}[5m])\n)\n/\n(\n  sum by (job, datname) (\n    rate(pg_stat_database_blks_hit{job=~\"$job_\", datname=~\"$datname\"}[5m])\n  )\n  +\n  sum by (job, datname) (\n    rate(pg_stat_database_blks_read{job=~\"$job_\", datname=~\"$datname\"}[5m])\n  )\n)",
+          "expr": "100 *\nsum by (service) (\n  rate(pg_stat_database_blks_hit{datname=~\"$datname\", service=~\"$service\"}[5m])\n)\n/\n(\n  sum by (service) (\n    rate(pg_stat_database_blks_hit{datname=~\"$datname\", service=~\"$service\"}[5m])\n  )\n  +\n  sum by (service) (\n    rate(pg_stat_database_blks_read{datname=~\"$datname\", service=~\"$service\"}[5m])\n  )\n)",
           "format": "time_series",
           "intervalFactor": 2,
-          "legendFormat": "{{job}}-{{datname}}",
+          "legendFormat": "{{job}}-{{service}}",
           "range": true,
           "refId": "A",
           "step": 240
@@ -645,7 +645,7 @@
           },
           "dsType": "prometheus",
           "editorMode": "code",
-          "expr": "sum by (job, datname) (\n  rate(pg_stat_database_deadlocks{job=~\"$job_\", datname=~\"$datname\"}[5m])\n)",
+          "expr": "sum by (job, service) (\n  rate(pg_stat_database_deadlocks{job=~\"$job_\", datname=~\"$datname\", service=~\"$service\"}[5m])\n)",
           "format": "time_series",
           "groupBy": [
             {
@@ -662,7 +662,7 @@
             }
           ],
           "intervalFactor": 2,
-          "legendFormat": "deadlocks:{{job}}-{{datname}}",
+          "legendFormat": "deadlocks:{{job}}-{{service}}",
           "measurement": "postgresql",
           "policy": "default",
           "range": true,
@@ -695,7 +695,7 @@
           },
           "dsType": "prometheus",
           "editorMode": "code",
-          "expr": "sum by (job, datname) (\n  rate(pg_stat_database_conflicts{job=~\"$job_\", datname=~\"$datname\"}[5m])\n)",
+          "expr": "sum by (job, service) (\n  rate(pg_stat_database_conflicts{job=~\"$job_\", datname=~\"$datname\", service=~\"$service\"}[5m])\n)",
           "format": "time_series",
           "groupBy": [
             {
@@ -712,7 +712,7 @@
             }
           ],
           "intervalFactor": 2,
-          "legendFormat": "conflicts:{{job}}-{{datname}}",
+          "legendFormat": "conflicts:{{job}}-{{service}}",
           "measurement": "postgresql",
           "policy": "default",
           "range": true,
@@ -827,8 +827,8 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by (job, datname) (\n  pg_stat_activity_count{job=~\"$job_\", state=\"active\", datname=~\"$datname\"}\n)",
-          "legendFormat": "{{job}}:{{datname}}",
+          "expr": "sum by (job, service) (\n  pg_stat_activity_count{job=~\"$job_\", state=\"active\", datname=~\"$datname\", service=~\"$service\"}\n)",
+          "legendFormat": "{{job}}:{{service}}",
           "range": true,
           "refId": "A"
         }
@@ -898,8 +898,8 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by (job, datname) (\n  pg_stat_activity_count{job=~\"$job_\", state=\"idle in transaction\", datname=~\"$datname\"}\n)",
-          "legendFormat": "{{job}}-{{datname}}",
+          "expr": "sum by (job, service) (\n  pg_stat_activity_count{job=~\"$job_\", state=\"idle in transaction\", datname=~\"$datname\", service=~\"$service\"}\n)",
+          "legendFormat": "{{job}}-{{service}}",
           "range": true,
           "refId": "A"
         }
@@ -966,7 +966,7 @@
         "minVizHeight": 16,
         "minVizWidth": 8,
         "namePlacement": "auto",
-        "orientation": "auto",
+        "orientation": "horizontal",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -982,8 +982,8 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "topk(\n  10,\n  sum by (job, relname) (\n    rate(pg_stat_user_tables_seq_scan{job=~\"$job_\"}[5m])\n  )\n)",
-          "legendFormat": "{{relname}}-{{job}}",
+          "expr": "topk(\n  10,\n  sum by (service, relname) (\n    rate(pg_stat_user_tables_seq_scan{job=~\"$job_\", datname=~\"$datname\", service=~\"$service\"}[5m])\n  )\n)",
+          "legendFormat": "{{relname}}",
           "range": true,
           "refId": "A"
         }
@@ -1055,9 +1055,9 @@
         {
           "editorMode": "code",
           "exemplar": false,
-          "expr": "topk(\n  10,\n  sum by (job, relname) (\n    rate(pg_stat_user_indexes_idx_scan{job=~\"$job_\"}[5m])\n  )\n)",
+          "expr": "topk(\n  10,\n  sum by (relname) (\n    rate(pg_stat_user_indexes_idx_scan{job=~\"$job_\", datname=~\"$datname\", service=~\"$service\"}[5m])\n  )\n)",
           "instant": false,
-          "legendFormat": "{{job}}",
+          "legendFormat": "{{service}}-{{relname}}",
           "range": true,
           "refId": "A"
         }
@@ -1121,8 +1121,8 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "pg_database_size_bytes{job=~\"$job_\", datname=~\"$datname\"}",
-          "legendFormat": "{{job}}-{{datname}}",
+          "expr": "pg_database_size_bytes{job=~\"$job_\", datname=~\"$datname\", service=~\"$service\"}",
+          "legendFormat": "{{service}}-{{datname}}",
           "range": true,
           "refId": "A"
         }
