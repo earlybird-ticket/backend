@@ -486,7 +486,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "ms"
         },
         "overrides": []
       },
@@ -506,7 +507,7 @@
         },
         "tooltip": {
           "hideZeros": false,
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -516,7 +517,7 @@
           "editorMode": "code",
           "expr": "histogram_quantile(0.95, sum by(le) (rate(hikaricp_connections_acquire_seconds_bucket{instance=\"$instance\"}[1m]))) * 1000",
           "interval": "15",
-          "legendFormat": "db 커넥션 점유 시간 P95",
+          "legendFormat": "db 커넥션 획득 대기시간 P95",
           "range": true,
           "refId": "A"
         },
@@ -528,7 +529,7 @@
           "editorMode": "code",
           "expr": "hikaricp_connections_acquire_seconds_max{instance=\"$instance\"} * 1000",
           "instant": false,
-          "legendFormat": "db 커넥션 점유 최대 시간",
+          "legendFormat": "db 커넥션 획득 최대 대기시간",
           "range": true,
           "refId": "B"
         }
@@ -613,7 +614,7 @@
         },
         "tooltip": {
           "hideZeros": false,
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -711,7 +712,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -740,7 +742,7 @@
         {
           "editorMode": "code",
           "expr": "100 * hikaricp_connections_active{instance=\"$instance\"} / hikaricp_connections_max{instance=\"$instance\"}",
-          "legendFormat": "__auto",
+          "legendFormat": "커넥션 활성률(%)",
           "range": true,
           "refId": "A"
         }
@@ -1311,7 +1313,7 @@
               }
             ]
           },
-          "unit": "ops"
+          "unit": "percent"
         },
         "overrides": [
           {
@@ -1350,7 +1352,7 @@
         "h": 7,
         "w": 6,
         "x": 6,
-        "y": 30
+        "y": 23
       },
       "id": 112,
       "options": {
@@ -1380,6 +1382,30 @@
           "intervalFactor": 1,
           "legendFormat": "HTTP - 5xx",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-main"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(http_server_requests_seconds_count{\n  application=\"$application\",\n  instance=\"$instance\",\n  status=~\"4..|5..\"\n}[1m]))\n/\nsum(rate(http_server_requests_seconds_count{\n  application=\"$application\",\n  instance=\"$instance\"\n}[1m])) * 100",
+          "instant": false,
+          "legendFormat": "전체 에러율",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-main"
+          },
+          "editorMode": "code",
+          "expr": "(\n  sum(rate(http_server_requests_seconds_count{\n    application=\"$application\",\n    instance=\"$instance\",\n    status=~\"4..\"\n  }[1m]))\n/\n  sum(rate(http_server_requests_seconds_count{\n    application=\"$application\",\n    instance=\"$instance\"\n  }[1m]))\n) * 100",
+          "instant": false,
+          "legendFormat": "HTTP-4XX",
+          "range": true,
+          "refId": "C"
         }
       ],
       "title": "Errors",
@@ -1477,10 +1503,12 @@
             "type": "prometheus",
             "uid": "prometheus-main"
           },
-          "expr": "sum(rate(http_server_requests_seconds_sum{application=\"$application\", instance=\"$instance\", status!~\"5..\"}[1m]))/sum(rate(http_server_requests_seconds_count{application=\"$application\", instance=\"$instance\", status!~\"5..\"}[1m]))",
+          "editorMode": "code",
+          "expr": "sum(rate(http_server_requests_seconds_sum{application=\"$application\", instance=\"$instance\", status=~\"2..\"}[1m]))/sum(rate(http_server_requests_seconds_count{application=\"$application\", instance=\"$instance\", status=~\"2..\"}[1m]))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "HTTP - AVG",
+          "range": true,
           "refId": "A"
         },
         {
@@ -1488,11 +1516,25 @@
             "type": "prometheus",
             "uid": "prometheus-main"
           },
-          "expr": "max(http_server_requests_seconds_max{application=\"$application\", instance=\"$instance\", status!~\"5..\"})",
+          "editorMode": "code",
+          "expr": "histogram_quantile(\n  0.95,\n  sum by (le) (\n    rate(http_server_requests_seconds_bucket{\n      application=\"$application\",\n      instance=\"$instance\",\n      status=~\"2..\"\n    }[1m])\n  )\n)",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "HTTP - MAX",
+          "legendFormat": "HTTP - P95",
+          "range": true,
           "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-main"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(\n  0.99,\n  sum by (le) (\n    rate(http_server_requests_seconds_bucket{\n      application=\"$application\",\n      instance=\"$instance\",\n      status=~\"2..\"\n    }[1m])\n  )\n)",
+          "instant": false,
+          "legendFormat": "HTTP - P99",
+          "range": true,
+          "refId": "C"
         }
       ],
       "title": "Duration",
@@ -2317,10 +2359,12 @@
             "type": "prometheus",
             "uid": "prometheus-main"
           },
-          "expr": "avg_over_time(process_cpu_usage{application=\"$application\", instance=\"$instance\"}[15m])",
+          "editorMode": "code",
+          "expr": "avg_over_time(process_cpu_usage{application=\"$application\", instance=\"$instance\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "process-15m",
+          "legendFormat": "process-1m",
+          "range": true,
           "refId": "C"
         }
       ],
@@ -3944,7 +3988,7 @@
   "timepicker": {},
   "timezone": "Asia/Seoul",
   "title": "JVM (Micrometer)",
-  "uid": "ef2zzgdx1ks1se",
+  "uid": "JVM_Overview-v1",
   "version": 1,
   "weekStart": ""
 }

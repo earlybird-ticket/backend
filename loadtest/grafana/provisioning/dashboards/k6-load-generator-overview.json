@@ -312,7 +312,7 @@
         },
         "tooltip": {
           "hideZeros": false,
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -320,8 +320,8 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "rate(node_network_transmit_bytes_total{instance=\"k6\",device!~\"lo\"}[1m])",
-          "legendFormat": "tx {{device}}",
+          "expr": "sum by (instance) (\n  rate(node_network_transmit_bytes_total{\n    instance=~\"k6\",\n    device!~\"lo|docker.*|veth.*|br-.*\"\n  }[1m])\n)",
+          "legendFormat": "tx {{instance}}",
           "range": true,
           "refId": "A"
         },
@@ -331,9 +331,9 @@
             "uid": "prometheus-main"
           },
           "editorMode": "code",
-          "expr": "rate(node_network_receive_bytes_total{instance=\"k6\",device!~\"lo\"}[1m])",
+          "expr": "sum by (instance) (\n  rate(node_network_receive_bytes_total{\n    instance=~\"k6\",\n    device!~\"lo|docker.*|veth.*|br-.*\"\n  }[1m])\n)",
           "instant": false,
-          "legendFormat": "rx {{device}}",
+          "legendFormat": "rx {{instance}}",
           "range": true,
           "refId": "B"
         }
@@ -418,7 +418,7 @@
         },
         "tooltip": {
           "hideZeros": false,
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
@@ -561,6 +561,6 @@
   "timezone": "browser",
   "title": "k6 Load Generator Overview",
   "uid": "k6-load-generator-v1",
-  "version": 3,
+  "version": 1,
   "weekStart": ""
 }
