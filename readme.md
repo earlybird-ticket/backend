@@ -198,3 +198,7 @@
 - [Redis Sentinel 기반 고가용성 및 데이터 유실 방지 설계](https://github.com/earlybird-ticket/backend/wiki/%5B-%ED%8A%B8%EB%9F%AC%EB%B8%94-%EC%8A%88%ED%8C%85-%5D-Redis-Sentinel-%EA%B8%B0%EB%B0%98-%EA%B3%A0%EA%B0%80%EC%9A%A9%EC%84%B1-%EB%B0%8F-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%9C%A0%EC%8B%A4-%EB%B0%A9%EC%A7%80-%EC%84%A4%EA%B3%84)
 - [Redis를 이용한 좌석 맵 조회 및 예매 처리 속도 개선](https://github.com/earlybird-ticket/backend/wiki/%5B-%ED%8A%B8%EB%9F%AC%EB%B8%94-%EC%8A%88%ED%8C%85-%5D-Redis%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%9C-%EC%A2%8C%EC%84%9D-%EB%A7%B5-%EC%A1%B0%ED%9A%8C-%EB%B0%8F-%EC%98%88%EB%A7%A4-%EC%B2%98%EB%A6%AC-%EC%86%8D%EB%8F%84-%EA%B0%9C%EC%84%A0)
 - [Spring Batch를 이용한 Outbox 테이블 부하 방지](https://github.com/earlybird-ticket/backend/wiki/%5B-%ED%8A%B8%EB%9F%AC%EB%B8%94-%EC%8A%88%ED%8C%85-%5D-Spring-Batch%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%9C-Outbox-%ED%85%8C%EC%9D%B4%EB%B8%94-%EB%B6%80%ED%95%98-%EB%B0%A9%EC%A7%80)
+
+# Loadtest
+
+좌석 조회 경로 최적화(A/B/C-1/C-2A), venue 성능 테스트, 전체 예매 플로우 부하 테스트 관련 정리는 loadtest/README.md와 wiki 문서를 참고.
